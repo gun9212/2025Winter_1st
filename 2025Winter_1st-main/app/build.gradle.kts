@@ -33,6 +33,11 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    
+    // ViewBinding 활성화
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -42,6 +47,28 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    
+    // 이미지 로딩 라이브러리 (Glide)
+    implementation(libs.glide)
+    
+    // JSON 직렬화/역직렬화 (SharedPreferences에 객체 저장 시 사용)
+    implementation(libs.gson)
+    
+    // 카드 스와이프 뷰 (게임 화면에서 음식 선택용)
+    implementation(libs.cardstackview)
+    
+    // 리사이클러뷰 (마이페이지에서 우승 기록 리스트 표시용)
+    implementation(libs.androidx.recyclerview)
+    
+    // Google Maps (지도 표시용)
+    implementation(libs.google.maps)
+    
+    // Google Places API (음식점 검색용)
+    implementation(libs.google.places)
+    
+    // Google Location Services (현재 위치 가져오기용)
+    implementation(libs.google.location)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

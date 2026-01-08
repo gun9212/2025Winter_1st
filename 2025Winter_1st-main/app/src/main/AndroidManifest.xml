@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 인터넷 권한 (지도 API 사용을 위해 필요) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- 위치 권한 (지도에서 현재 위치 표시 및 주변 음식점 검색을 위해 필요) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Molip_1st">
+        
+        <!-- 인트로 화면 (앱 시작 화면) -->
+        <activity
+            android:name="com.example.foodworldcup.ui.IntroActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- 게임 화면 -->
+        <activity
+            android:name="com.example.foodworldcup.ui.GameActivity"
+            android:exported="false" />
+        
+        <!-- 결과 화면 -->
+        <activity
+            android:name="com.example.foodworldcup.ui.ResultActivity"
+            android:exported="false" />
+        
+        <!-- 마이페이지 화면 -->
+        <activity
+            android:name="com.example.foodworldcup.ui.MyPageActivity"
+            android:exported="false" />
+        
+        <!-- 지도 화면 -->
+        <activity
+            android:name="com.example.foodworldcup.ui.MapActivity"
+            android:exported="false" />
+        
+        <!-- 기존 MainActivity (필요시 유지 또는 삭제) -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+    </application>
+
+</manifest>
