@@ -3,6 +3,7 @@ package com.example.foodworldcup.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodworldcup.data.Food
@@ -133,6 +134,18 @@ class FoodListActivity : BaseActivity() {
         
         binding.categoryRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.categoryRecyclerView.adapter = categoryAdapter
+        
+        // RecyclerView가 터치 이벤트를 가로채지 않도록 설정
+        binding.categoryRecyclerView.isNestedScrollingEnabled = false
+        binding.categoryRecyclerView.overScrollMode = View.OVER_SCROLL_NEVER
+        binding.categoryRecyclerView.setHasFixedSize(false)
+        
+        // RecyclerView의 터치 이벤트를 부모 NestedScrollView로 전달하도록 설정
+        binding.categoryRecyclerView.setOnTouchListener { v, event ->
+            // 터치 이벤트를 부모 NestedScrollView로 전달
+            binding.scrollView.requestDisallowInterceptTouchEvent(false)
+            false // 이벤트를 처리하지 않고 부모로 전달
+        }
     }
 
     /**
