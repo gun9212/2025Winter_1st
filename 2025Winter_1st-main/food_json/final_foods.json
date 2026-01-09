@@ -1,0 +1,422 @@
+[
+  {
+    "id": "한식_01",
+    "name": "비빔밥",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": true
+    },
+    "img": "./한식/비빔밥.png"
+  },
+  {
+    "id": "한식_02",
+    "name": "찌개",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": true,
+      "healthy": true,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./한식/찌개.png"
+  },
+  {
+    "id": "한식_03",
+    "name": "불고기",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./한식/불고기.png"
+  },
+  {
+    "id": "한식_04",
+    "name": "제육볶음",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": true,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./한식/제육볶음.png"
+  },
+  {
+    "id": "한식_05",
+    "name": "삼겹살",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./한식/삼겹살.png"
+  },
+  {
+    "id": "한식_06",
+    "name": "김밥",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": true
+    },
+    "img": "./한식/김밥.png"
+  },
+  {
+    "id": "한식_07",
+    "name": "냉면",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./한식/냉면.png"
+  },
+  {
+    "id": "한식_08",
+    "name": "떡볶이",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": true,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./한식/떡볶이.png"
+  },
+  {
+    "id": "한식_09",
+    "name": "보쌈",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./한식/보쌈.png"
+  },
+  {
+    "id": "한식_10",
+    "name": "전",
+    "cuisine": "한식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./한식/전.png"
+  },
+  {
+    "id": "일식_01",
+    "name": "초밥",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": true
+    },
+    "img": "./일식/초밥.png"
+  },
+  {
+    "id": "일식_02",
+    "name": "사시미",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./일식/사시미.png"
+  },
+  {
+    "id": "일식_03",
+    "name": "라멘",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./일식/라멘.png"
+  },
+  {
+    "id": "일식_04",
+    "name": "우동",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./일식/우동.png"
+  },
+  {
+    "id": "일식_05",
+    "name": "덮밥",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": true
+    },
+    "img": "./일식/덮밥.png"
+  },
+  {
+    "id": "일식_06",
+    "name": "돈카츠",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./일식/돈카츠.png"
+  },
+  {
+    "id": "일식_07",
+    "name": "가라아게",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./일식/가라아게.png"
+  },
+  {
+    "id": "일식_08",
+    "name": "나베",
+    "cuisine": "일식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./일식/나베.png"
+  },
+  {
+    "id": "중식_01",
+    "name": "짜장면",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./중식/짜장면.png"
+  },
+  {
+    "id": "중식_02",
+    "name": "짬뽕",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": true,
+      "healthy": false,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./중식/짬뽕.png"
+  },
+  {
+    "id": "중식_03",
+    "name": "탕수육",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./중식/탕수육.png"
+  },
+  {
+    "id": "중식_04",
+    "name": "마파두부",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": true,
+      "healthy": true,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./중식/마파두부.png"
+  },
+  {
+    "id": "중식_05",
+    "name": "볶음밥",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": true
+    },
+    "img": "./중식/볶음밥.png"
+  },
+  {
+    "id": "중식_06",
+    "name": "깐풍기",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": true,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./중식/깐풍기.png"
+  },
+  {
+    "id": "중식_07",
+    "name": "마라탕",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": true,
+      "healthy": false,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./중식/마라탕.png"
+  },
+  {
+    "id": "중식_08",
+    "name": "훠궈",
+    "cuisine": "중식",
+    "attributes": {
+      "spicy": true,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./중식/훠궈.png"
+  },
+  {
+    "id": "양식_01",
+    "name": "파스타",
+    "cuisine": "양식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./양식/파스타.png"
+  },
+  {
+    "id": "양식_02",
+    "name": "스테이크",
+    "cuisine": "양식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./양식/스테이크.png"
+  },
+  {
+    "id": "양식_03",
+    "name": "피자",
+    "cuisine": "양식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./양식/피자.png"
+  },
+  {
+    "id": "양식_04",
+    "name": "햄버거",
+    "cuisine": "양식",
+    "attributes": {
+      "spicy": false,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./양식/햄버거.png"
+  },
+  {
+    "id": "양식_05",
+    "name": "샐러드",
+    "cuisine": "양식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./양식/샐러드.png"
+  },
+  {
+    "id": "양식_06",
+    "name": "스튜",
+    "cuisine": "양식",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./양식/스튜.png"
+  },
+  {
+    "id": "아시안_01",
+    "name": "쌀국수",
+    "cuisine": "아시안",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": true,
+      "rice": false
+    },
+    "img": "./아시안/쌀국수.png"
+  },
+  {
+    "id": "아시안_02",
+    "name": "커리",
+    "cuisine": "아시안",
+    "attributes": {
+      "spicy": true,
+      "healthy": false,
+      "noodles": false,
+      "rice": false
+    },
+    "img": "./아시안/커리.png"
+  },
+  {
+    "id": "아시안_03",
+    "name": "포케",
+    "cuisine": "아시안",
+    "attributes": {
+      "spicy": false,
+      "healthy": true,
+      "noodles": false,
+      "rice": true
+    },
+    "img": "./아시안/포케.png"
+  }
+]
