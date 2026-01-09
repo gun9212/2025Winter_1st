@@ -372,18 +372,6 @@
     "img": "./양식/샐러드.png"
   },
   {
-    "id": "양식_06",
-    "name": "스튜",
-    "cuisine": "양식",
-    "attributes": {
-      "spicy": false,
-      "healthy": true,
-      "noodles": false,
-      "rice": false
-    },
-    "img": "./양식/스튜.png"
-  },
-  {
     "id": "아시안_01",
     "name": "쌀국수",
     "cuisine": "아시안",
