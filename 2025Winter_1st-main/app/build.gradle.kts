@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.molip_1st"
-    compileSdk = 36
+    namespace = "com.example.foodworldcup"
+    compileSdk = 36  // Android 15 (의존성 라이브러리 요구사항)
 
     defaultConfig {
-        applicationId = "com.example.molip_1st"
-        minSdk = 35
-        targetSdk = 36
+        applicationId = "com.example.foodworldcup"
+        minSdk = 26  // Android 8.0 Oreo
+        targetSdk = 36  // Android 15
         versionCode = 1
         versionName = "1.0"
 
@@ -55,7 +55,7 @@ dependencies {
     implementation(libs.gson)
     
     // 카드 스와이프 뷰 (게임 화면에서 음식 선택용)
-    implementation(libs.cardstackview)
+    // implementation(libs.cardstackview)  // TODO: 스와이프 기능 구현 시 주석 해제
     
     // 리사이클러뷰 (마이페이지에서 우승 기록 리스트 표시용)
     implementation(libs.androidx.recyclerview)
