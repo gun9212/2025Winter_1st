@@ -29,7 +29,12 @@
             </intent-filter>
         </activity>
         
-        <!-- 게임 화면 -->
+        <!-- 음식 리스트 선택 화면 -->
+        <activity
+            android:name="com.example.foodworldcup.ui.FoodListActivity"
+            android:exported="false" />
+        
+        <!-- 스와이프 게임 화면 -->
         <activity
             android:name="com.example.foodworldcup.ui.GameActivity"
             android:exported="false" />
@@ -47,11 +52,6 @@
         <!-- 지도 화면 -->
         <activity
             android:name="com.example.foodworldcup.ui.MapActivity"
-            android:exported="false" />
-        
-        <!-- 기존 MainActivity (필요시 유지 또는 삭제) -->
-        <activity
-            android:name=".MainActivity"
             android:exported="false" />
     </application>
 
