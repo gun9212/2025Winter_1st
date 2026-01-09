@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 임시 목록 아이콘 -->
+    <path
+        android:fillColor="@color/navigation_unselected"
+        android:pathData="M3,13H11V11H3V13ZM3,17H11V15H3V17ZM3,9H11V7H3V9ZM13,13H21V11H13V13ZM13,17H21V15H13V17ZM13,9V7H21V9H13Z"/>
+</vector>

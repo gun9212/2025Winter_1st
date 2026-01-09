@@ -1,3 +1,21 @@
 <resources>
-    <string name="app_name">Molip_1st</string>
+    <string name="app_name">음식 메뉴 월드컵</string>
+    
+    <!-- Intro 화면 -->
+    <string name="app_title">Food Tournament</string>
+    <string name="app_subtitle">Pick today\'s meal in minutes\n오늘의 식사를 빠르게 결정하세요</string>
+    <string name="how_it_works_title">How it works</string>
+    <string name="how_it_works_step1">Browse Food List\n음식 카테고리를 탐색하고 선택하세요</string>
+    <string name="how_it_works_step2">Swipe to Choose\n좋아하는 음식에 합격 판정하세요</string>
+    <string name="how_it_works_step3">Find Restaurant\n지도에서 근처 식당을 찾으세요</string>
+    <string name="recent_winner_title">Recent Winner</string>
+    <string name="start_tournament">Start Tournament</string>
+    <string name="my_page">My Page</string>
+    
+    <!-- 하단 네비게이션 -->
+    <string name="nav_home">홈</string>
+    <string name="nav_list">목록</string>
+    <string name="nav_swipe">스와이프</string>
+    <string name="nav_accepted">합격</string>
+    <string name="nav_map">지도</string>
 </resources>

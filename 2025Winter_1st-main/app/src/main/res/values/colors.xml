@@ -2,4 +2,20 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- 음식 테마 색상 -->
+    <color name="primary_orange">#FF6B35</color>
+    <color name="primary_red">#E63946</color>
+    <color name="primary_yellow">#F1C40F</color>
+    <color name="accent_orange">#FF8C42</color>
+    <color name="background_light">#FFF8F5</color>
+    <color name="text_primary">#2C3E50</color>
+    <color name="text_secondary">#7F8C8D</color>
+    
+    <!-- Intro 화면용 색상 -->
+    <color name="card_background_gray">#F5F5F5</color>
+    <color name="recent_winner_yellow_start">#FFF9C4</color>
+    <color name="recent_winner_yellow_end">#FFF59D</color>
+    <color name="navigation_unselected">#9E9E9E</color>
+    <color name="button_border_gray">#E0E0E0</color>
 </resources>
