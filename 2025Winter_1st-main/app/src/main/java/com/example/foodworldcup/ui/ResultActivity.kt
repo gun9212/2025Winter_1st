@@ -10,17 +10,17 @@ import com.example.foodworldcup.utils.PreferenceManager
 import java.util.Date
 
 /**
- * 게임 결과를 표시하는 Activity입니다.
- * 최종 우승 음식을 보여주고, 우승 기록을 저장하며, 다시하기/마이페이지 이동 기능을 제공합니다.
+ * 합격된 음식들을 나열하는 Activity입니다.
+ * 음식 사진과 이름을 나열하고, 다음 화면(지도)으로 넘어가는 버튼을 제공합니다.
  * 
  * 레이아웃 파일: res/layout/activity_result.xml
  */
-class ResultActivity : AppCompatActivity() {
+class ResultActivity : BaseActivity() {
 
     private lateinit var binding: ActivityResultBinding
     
-    // GameActivity로부터 전달받은 우승 음식
-    private var winnerFood: Food? = null
+    // GameActivity로부터 전달받은 합격된 음식 리스트
+    private var passedFoods: List<Food> = emptyList()
     
     // SharedPreferences 관리 객체
     private lateinit var preferenceManager: PreferenceManager
@@ -33,77 +33,45 @@ class ResultActivity : AppCompatActivity() {
         // PreferenceManager 초기화
         preferenceManager = PreferenceManager(this)
 
-        // TODO: GameActivity로부터 전달받은 우승 음식 데이터를 가져옵니다.
-        // 예: winnerFood = intent.getParcelableExtra<Food>("winner_food")
-        // 또는: val foodId = intent.getIntExtra("winner_food_id", -1)
-        //      winnerFood = FoodRepository에서 id로 찾기
+        // 하단 네비게이션 바 설정
+        setupBottomNavigation(BaseActivity.Screen.ACCEPTED)
+
+        // TODO: GameActivity로부터 전달받은 합격된 음식 ID 리스트를 가져옵니다.
+        // val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
+        // TODO: 음식 ID로 FoodRepository에서 음식 리스트를 가져옵니다.
+        // passedFoods = passedFoodIds.mapNotNull { id -> 
+        //     FoodRepository.getFoodList().find { it.id == id } 
+        // }
         
-        // TODO: 우승 기록을 저장합니다.
-        saveWinRecord()
-        
-        // TODO: 화면에 우승 음식 정보를 표시합니다.
-        displayWinner()
+        // TODO: 화면에 합격된 음식 리스트를 표시합니다.
+        displayPassedFoods()
         
         // TODO: 버튼 클릭 이벤트를 설정합니다.
         setupButtons()
     }
 
     /**
-     * 우승 기록을 SharedPreferences에 저장하는 함수입니다.
+     * 화면에 합격된 음식 리스트를 표시하는 함수입니다.
      */
-    private fun saveWinRecord() {
-        // TODO: winnerFood가 null이 아니면 WinRecord를 생성하여 PreferenceManager에 저장합니다.
-        // 예: val record = WinRecord(
-        //     id = System.currentTimeMillis(),
-        //     foodName = winnerFood?.name ?: "",
-        //     winDate = Date()
-        // )
-        // preferenceManager.addWinRecord(record)
-    }
-
-    /**
-     * 화면에 우승 음식 정보를 표시하는 함수입니다.
-     */
-    private fun displayWinner() {
-        // TODO: winnerFood의 이름과 이미지를 화면에 표시합니다.
-        // 예: binding.winnerNameTextView.text = winnerFood?.name
-        //     Glide.with(this).load(winnerFood?.imageResId).into(binding.winnerImageView)
+    private fun displayPassedFoods() {
+        // TODO: RecyclerView 어댑터를 생성하고 합격된 음식 리스트를 표시합니다.
+        // 예: val adapter = PassedFoodAdapter(passedFoods)
+        //     binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        //     binding.recyclerView.adapter = adapter
+        // TODO: 각 항목에는 음식 이미지와 이름이 표시됩니다.
     }
 
     /**
      * 버튼 클릭 이벤트를 설정하는 함수입니다.
      */
     private fun setupButtons() {
-        // TODO: '다시하기' 버튼 클릭 시 GameActivity로 이동합니다.
-        // 예: binding.restartButton.setOnClickListener {
-        //     val intent = Intent(this, GameActivity::class.java)
-        //     startActivity(intent)
-        //     finish()
-        // }
-        
-        // TODO: '마이페이지' 버튼 클릭 시 MyPageActivity로 이동합니다.
-        // 예: binding.myPageButton.setOnClickListener {
-        //     val intent = Intent(this, MyPageActivity::class.java)
-        //     startActivity(intent)
-        // }
-        
-        // TODO: '지도 보기' 버튼 클릭 시 MapActivity로 이동합니다.
-        // 예: binding.mapButton.setOnClickListener {
+        // TODO: '다음' 버튼 클릭 시 MapActivity로 이동합니다.
+        // 예: binding.nextButton.setOnClickListener {
         //     val intent = Intent(this, MapActivity::class.java)
-        //     intent.putExtra("winner_food", winnerFood)
-        //     // 또는: intent.putExtra("food_name", winnerFood?.name)
+        //     val passedFoodIds = passedFoods.map { it.id }
+        //     intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
         //     startActivity(intent)
         // }
-        
-        // TODO: '홈으로' 버튼이 있다면 IntroActivity로 이동하는 로직을 구현합니다.
-    }
-
-    /**
-     * (추후 구현) 지도 API를 연동하여 주변 음식점을 찾아주는 함수입니다.
-     */
-    private fun showNearbyRestaurants() {
-        // TODO: Google Maps API 또는 Kakao Map API를 사용하여
-        // winnerFood의 이름으로 주변 음식점을 검색하고 지도에 표시합니다.
     }
 
     override fun onResume() {

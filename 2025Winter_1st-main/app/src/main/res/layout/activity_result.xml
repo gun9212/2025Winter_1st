@@ -7,13 +7,24 @@
     tools:context=".ui.ResultActivity">
 
     <TextView
+        android:id="@+id/resultContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="결과 화면"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 하단 네비게이션 바 (공통 레이아웃) -->
+    <include
+        android:id="@+id/bottomNavigation"
+        layout="@layout/layout_bottom_navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

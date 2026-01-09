@@ -2,7 +2,7 @@ package com.example.foodworldcup.ui
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.databinding.ActivityFoodListBinding
@@ -15,7 +15,7 @@ import com.example.foodworldcup.utils.PreferenceManager
  * 
  * 레이아웃 파일: res/layout/activity_food_list.xml
  */
-class FoodListActivity : AppCompatActivity() {
+class FoodListActivity : BaseActivity() {
 
     private lateinit var binding: ActivityFoodListBinding
     
@@ -30,23 +30,49 @@ class FoodListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityFoodListBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        
+        try {
+            Log.d("FoodListActivity", "=== onCreate 시작 ===")
+            binding = ActivityFoodListBinding.inflate(layoutInflater)
+            Log.d("FoodListActivity", "바인딩 생성 완료")
+            setContentView(binding.root)
+            Log.d("FoodListActivity", "레이아웃 설정 완료")
 
-        // PreferenceManager 초기화
-        preferenceManager = PreferenceManager(this)
-        
-        // TODO: 저장된 체크 리스트 불러오기
-        loadSelectedFoods()
-        
-        // TODO: 카테고리 토글 버튼 설정 (전체, 한식, 양식, 중식, 일식)
-        setupCategoryToggles()
-        
-        // TODO: 음식 리스트 표시 (RecyclerView 또는 리스트뷰)
-        setupFoodList()
-        
-        // TODO: 버튼 클릭 이벤트 설정
-        setupButtons()
+            // PreferenceManager 초기화
+            preferenceManager = PreferenceManager(this)
+            Log.d("FoodListActivity", "PreferenceManager 초기화 완료")
+            
+            // 하단 네비게이션 바 설정
+            Log.d("FoodListActivity", "하단 네비게이션 바 설정 시작")
+            try {
+                setupBottomNavigation(BaseActivity.Screen.LIST)
+                Log.d("FoodListActivity", "하단 네비게이션 바 설정 완료")
+            } catch (e: Exception) {
+                Log.e("FoodListActivity", "하단 네비게이션 바 설정 실패", e)
+                e.printStackTrace()
+                // 네비게이션 바 설정 실패해도 앱은 계속 실행
+            }
+            
+            // TODO: 저장된 체크 리스트 불러오기
+            loadSelectedFoods()
+            
+            // TODO: 카테고리 토글 버튼 설정 (전체, 한식, 양식, 중식, 일식)
+            setupCategoryToggles()
+            
+            // TODO: 음식 리스트 표시 (RecyclerView 또는 리스트뷰)
+            setupFoodList()
+            
+            // TODO: 버튼 클릭 이벤트 설정
+            setupButtons()
+            
+            Log.d("FoodListActivity", "=== onCreate 완료 ===")
+        } catch (e: Exception) {
+            Log.e("FoodListActivity", "=== onCreate 오류 발생 ===", e)
+            Log.e("FoodListActivity", "오류 타입: ${e.javaClass.simpleName}")
+            Log.e("FoodListActivity", "오류 메시지: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     /**

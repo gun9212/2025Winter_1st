@@ -3,7 +3,6 @@ package com.example.foodworldcup.ui
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.databinding.ActivityIntroBinding
@@ -15,7 +14,7 @@ import com.example.foodworldcup.utils.PreferenceManager
  * 
  * 레이아웃 파일: res/layout/activity_intro.xml
  */
-class IntroActivity : AppCompatActivity() {
+class IntroActivity : BaseActivity() {
 
     // ViewBinding 변수 선언. lateinit으로 나중에 초기화할 것을 약속합니다.
     private lateinit var binding: ActivityIntroBinding
@@ -37,6 +36,9 @@ class IntroActivity : AppCompatActivity() {
         // PreferenceManager 초기화
         preferenceManager = PreferenceManager(this)
 
+        // 하단 네비게이션 바 설정
+        setupBottomNavigation(BaseActivity.Screen.HOME)
+
         // '게임 시작' 버튼 클릭 시 FoodListActivity로 이동
         binding.startButton.setOnClickListener { 
             val intent = Intent(this, FoodListActivity::class.java)
@@ -49,8 +51,7 @@ class IntroActivity : AppCompatActivity() {
             startActivity(intent)
         }
         
-        // 하단 네비게이션 바 클릭 이벤트 설정
-        setupBottomNavigation()
+        // 하단 네비게이션 바는 BaseActivity에서 처리됨
     }
 
     override fun onResume() {
@@ -104,46 +105,6 @@ class IntroActivity : AppCompatActivity() {
         } else {
             // 선택된 음식이 없으면 섹션 숨김
             binding.recentWinnerCard.visibility = View.GONE
-        }
-    }
-
-    /**
-     * 하단 네비게이션 바 클릭 이벤트를 설정하는 함수입니다.
-     */
-    private fun setupBottomNavigation() {
-        // 홈 (현재 화면이므로 아무 동작 없음)
-        binding.navHome.setOnClickListener {
-            // 이미 홈 화면이므로 아무 동작 없음
-        }
-        
-        // 목록 (FoodListActivity로 이동)
-        binding.navList.setOnClickListener {
-            val intent = Intent(this, FoodListActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-        
-        // 스와이프 (GameActivity로 이동)
-        binding.navSwipe.setOnClickListener {
-            val intent = Intent(this, GameActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-        
-        // 합격 (ResultActivity로 이동 - TODO: 최근 결과가 있을 때만 이동하도록 수정 필요)
-        binding.navAccepted.setOnClickListener {
-            // TODO: 최근 결과가 있으면 ResultActivity로 이동
-            // 현재는 MyPageActivity로 이동 (우승 기록 목록 확인)
-            val intent = Intent(this, MyPageActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-        
-        // 지도 (MapActivity로 이동)
-        binding.navMap.setOnClickListener {
-            val intent = Intent(this, MapActivity::class.java)
-            startActivity(intent)
-            finish()
         }
     }
 }
