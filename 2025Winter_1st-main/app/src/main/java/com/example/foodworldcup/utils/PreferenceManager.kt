@@ -119,26 +119,36 @@ class PreferenceManager(context: Context) {
 
     /**
      * 선택된 음식 ID 리스트를 저장하는 함수입니다.
+     * Gson을 사용하여 List<Int>를 JSON 문자열로 변환한 후 SharedPreferences에 저장합니다.
      *
      * @param foodIds 저장할 음식 ID 리스트
      */
     fun saveSelectedFoodIds(foodIds: List<Int>) {
-        // TODO: Gson을 사용하여 foodIds를 JSON 문자열로 변환하고 SharedPreferences에 저장합니다.
-        // 예: val json = gson.toJson(foodIds)
-        //     prefs.edit().putString(KEY_SELECTED_FOOD_IDS, json).apply()
+        try {
+            val json = gson.toJson(foodIds)
+            prefs.edit().putString(KEY_SELECTED_FOOD_IDS, json).apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**
      * 저장된 선택된 음식 ID 리스트를 불러오는 함수입니다.
+     * SharedPreferences에서 JSON 문자열을 읽어와 Gson으로 List<Int>로 변환합니다.
      *
      * @return 저장된 음식 ID 리스트 (저장된 리스트가 없으면 빈 리스트 반환)
      */
     fun getSelectedFoodIds(): List<Int> {
-        // TODO: SharedPreferences에서 JSON 문자열을 읽어와 Gson으로 음식 ID 리스트로 변환합니다.
-        // 예: val json = prefs.getString(KEY_SELECTED_FOOD_IDS, null)
-        //     if (json == null) return emptyList()
-        //     val type = object : TypeToken<List<Int>>() {}.type
-        //     return gson.fromJson(json, type) ?: emptyList()
-        return emptyList()
+        return try {
+            val json = prefs.getString(KEY_SELECTED_FOOD_IDS, null)
+            if (json == null || json.isEmpty()) {
+                return emptyList()
+            }
+            val type = object : TypeToken<List<Int>>() {}.type
+            gson.fromJson<List<Int>>(json, type) ?: emptyList()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 }
