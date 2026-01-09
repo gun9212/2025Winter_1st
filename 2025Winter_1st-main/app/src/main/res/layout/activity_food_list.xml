@@ -4,59 +4,90 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".ui.FoodListActivity">
 
-    <!-- 상단: 카테고리 토글 버튼 영역 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categoryRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- 중앙: 음식 리스트 (RecyclerView) -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/foodRecyclerView"
+    <!-- ScrollView로 스크롤 가능하게 -->
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="16dp"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:spanCount="2"
-        app:layout_constraintBottom_toTopOf="@id/buttonLayout"
+        android:fillViewport="false"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toTopOf="@id/startButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/categoryRecyclerView" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- 하단: 버튼 영역 -->
-    <LinearLayout
-        android:id="@+id/buttonLayout"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- 제목: Food Genres -->
+            <TextView
+                android:id="@+id/titleTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Food Genres"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="8dp" />
+
+            <!-- 안내 문구 -->
+            <TextView
+                android:id="@+id/instructionTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Uncheck foods you dislike • 싫어하는 음식을 체크 해제하세요"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 선택 개수 배지 -->
+            <TextView
+                android:id="@+id/selectedCountTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 selected"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:background="@drawable/shape_pill_orange"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- 카테고리 리스트 (RecyclerView) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoryRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- 하단: Go to Swipe 버튼 -->
+    <Button
+        android:id="@+id/startButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:text="Go to Swipe"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/primary_orange"
         android:padding="16dp"
+        android:drawableEnd="@drawable/ic_arrow_right"
+        android:drawablePadding="8dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/myPageButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:text="마이페이지" />
-
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:text="시작" />
-    </LinearLayout>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- 하단 네비게이션 바 (공통 레이아웃) -->
     <include

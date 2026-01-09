@@ -1,9 +1,11 @@
 package com.example.foodworldcup.ui
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import com.bumptech.glide.Glide
+import com.example.foodworldcup.R
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.databinding.ActivityIntroBinding
 import com.example.foodworldcup.utils.PreferenceManager
@@ -36,18 +38,15 @@ class IntroActivity : BaseActivity() {
         // PreferenceManager 초기화
         preferenceManager = PreferenceManager(this)
 
+        // FoodRepository 초기화 (JSON 파일에서 데이터 로드)
+        FoodRepository.initialize(this)
+
         // 하단 네비게이션 바 설정
         setupBottomNavigation(BaseActivity.Screen.HOME)
 
         // '게임 시작' 버튼 클릭 시 FoodListActivity로 이동
         binding.startButton.setOnClickListener { 
             val intent = Intent(this, FoodListActivity::class.java)
-            startActivity(intent)
-        }
-        
-        // '마이페이지' 버튼 클릭 시 MyPageActivity로 이동
-        binding.myPageButton.setOnClickListener {
-            val intent = Intent(this, MyPageActivity::class.java)
             startActivity(intent)
         }
         
@@ -90,14 +89,30 @@ class IntroActivity : BaseActivity() {
                 binding.recentWinnerCard.visibility = View.VISIBLE
                 binding.recentWinnerNameTextView.text = food.name
                 
-                // 이미지가 있으면 표시 (현재는 imageResId가 0이므로 표시하지 않음)
-                // TODO: 이미지 리소스가 추가되면 아래 코드 활성화
-                // if (food.imageResId != 0) {
-                //     Glide.with(this)
-                //         .load(food.imageResId)
-                //         .placeholder(R.drawable.ic_launcher_background)
-                //         .into(binding.recentWinnerImageView)
-                // }
+                // 이미지 로드 (imagePath 사용)
+                if (!food.imagePath.isNullOrEmpty()) {
+                    try {
+                        val inputStream = assets.open(food.imagePath)
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        inputStream.close()
+                        
+                        if (bitmap != null) {
+                            Glide.with(this)
+                                .load(bitmap)
+                                .placeholder(R.drawable.ic_launcher_background)
+                                .error(R.drawable.ic_launcher_background)
+                                .centerCrop()
+                                .into(binding.recentWinnerImageView)
+                        } else {
+                            binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+                    }
+                } else {
+                    binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+                }
             } else {
                 // 음식을 찾을 수 없으면 섹션 숨김
                 binding.recentWinnerCard.visibility = View.GONE

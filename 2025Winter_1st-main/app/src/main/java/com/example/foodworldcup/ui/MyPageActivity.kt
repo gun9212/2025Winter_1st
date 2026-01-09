@@ -50,8 +50,7 @@ class MyPageActivity : BaseActivity() {
      * SharedPreferences에서 우승 기록을 불러오는 함수입니다.
      */
     private fun loadWinRecords() {
-        // TODO: PreferenceManager.getWinRecords()를 사용하여 저장된 기록을 불러옵니다.
-        // winRecords = preferenceManager.getWinRecords()
+        winRecords = preferenceManager.getWinRecords()
     }
 
     /**

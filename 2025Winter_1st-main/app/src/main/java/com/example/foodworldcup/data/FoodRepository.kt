@@ -1,50 +1,88 @@
 package com.example.foodworldcup.data
 
-import com.example.foodworldcup.R // 이미지 리소스 ID(R.drawable.*)를 사용하기 위해 import
+import android.content.Context
+import com.google.gson.Gson
+import java.io.InputStream
 
 /**
  * 음식 데이터 목록을 관리하고 제공하는 싱글톤(Singleton) 객체입니다.
  * 'object'로 선언하면 앱 전체에서 이 객체는 단 하나만 생성되어,
  * 어디서든 동일한 데이터 소스를 참조할 수 있습니다. (메모리 효율적)
+ * 
+ * final_foods.json 파일에서 음식 데이터를 로드합니다.
  */
 object FoodRepository {
 
-    // 앱에서 사용할 전체 음식 목록을 하드코딩으로 미리 만들어둡니다.
-    // 서버가 없기 때문에 앱 내부에 데이터를 직접 저장하는 방식입니다.
-    // TODO: R.drawable.food_*와 같은 이름의 이미지 파일을 res/drawable 폴더에 추가해야 합니다.
-    private val foodList = listOf(
-        // 한식
-        Food(id = 1, name = "김치찌개", category = "한식", imageResId = 0 /* R.drawable.food_kimchi_stew */),
-        Food(id = 2, name = "육회비빔밥", category = "한식", imageResId = 0 /* R.drawable.food_yukhoe_bibimbap */),
-        Food(id = 3, name = "제육볶음", category = "한식", imageResId = 0 /* R.drawable.food_jeyuk_bokkeum */),
-        Food(id = 4, name = "된장찌개", category = "한식", imageResId = 0 /* R.drawable.food_doenjang_jjigae */),
-        Food(id = 5, name = "불고기", category = "한식", imageResId = 0 /* R.drawable.food_bulgogi */),
-        Food(id = 6, name = "비빔밥", category = "한식", imageResId = 0 /* R.drawable.food_bibimbap */),
-        
-        // 중식
-        Food(id = 7, name = "짜장면", category = "중식", imageResId = 0 /* R.drawable.food_jajangmyeon */),
-        Food(id = 8, name = "짬뽕", category = "중식", imageResId = 0 /* R.drawable.food_jjamppong */),
-        Food(id = 9, name = "탕수육", category = "중식", imageResId = 0 /* R.drawable.food_tangsuyuk */),
-        Food(id = 10, name = "양장피", category = "중식", imageResId = 0 /* R.drawable.food_yangjangpi */),
-        Food(id = 11, name = "마파두부", category = "중식", imageResId = 0 /* R.drawable.food_mapadubu */),
-        Food(id = 12, name = "볶음밥", category = "중식", imageResId = 0 /* R.drawable.food_bokkeumbap */),
-        
-        // 양식
-        Food(id = 13, name = "피자", category = "양식", imageResId = 0 /* R.drawable.food_pizza */),
-        Food(id = 14, name = "파스타", category = "양식", imageResId = 0 /* R.drawable.food_pasta */),
-        Food(id = 15, name = "햄버거", category = "양식", imageResId = 0 /* R.drawable.food_hamburger */),
-        Food(id = 16, name = "스테이크", category = "양식", imageResId = 0 /* R.drawable.food_steak */),
-        Food(id = 17, name = "리조또", category = "양식", imageResId = 0 /* R.drawable.food_risotto */),
-        Food(id = 18, name = "샐러드", category = "양식", imageResId = 0 /* R.drawable.food_salad */),
-        
-        // 일식
-        Food(id = 19, name = "초밥", category = "일식", imageResId = 0 /* R.drawable.food_sushi */),
-        Food(id = 20, name = "라멘", category = "일식", imageResId = 0 /* R.drawable.food_ramen */),
-        Food(id = 21, name = "우동", category = "일식", imageResId = 0 /* R.drawable.food_udon */),
-        Food(id = 22, name = "돈까스", category = "일식", imageResId = 0 /* R.drawable.food_tonkatsu */),
-        Food(id = 23, name = "규동", category = "일식", imageResId = 0 /* R.drawable.food_gyudon */),
-        Food(id = 24, name = "오므라이스", category = "일식", imageResId = 0 /* R.drawable.food_omurice */)
+    /**
+     * JSON 파일의 음식 데이터 구조
+     */
+    private data class FoodJson(
+        val id: String,
+        val name: String,
+        val cuisine: String,
+        val attributes: Map<String, Any>? = null,
+        val img: String? = null
     )
+
+    // 앱에서 사용할 전체 음식 목록
+    private var foodList: List<Food> = emptyList()
+
+    /**
+     * Context를 받아서 JSON 파일에서 음식 데이터를 로드합니다.
+     * 앱 시작 시 한 번만 호출하면 됩니다.
+     */
+    fun initialize(context: Context) {
+        if (foodList.isNotEmpty()) {
+            return // 이미 로드됨
+        }
+
+        try {
+            val inputStream: InputStream = context.assets.open("final_foods.json")
+            val jsonString = inputStream.bufferedReader().use { it.readText() }
+            
+            val gson = Gson()
+            val foodJsonList: List<FoodJson> = gson.fromJson(jsonString, Array<FoodJson>::class.java).toList()
+            
+            // JSON 데이터를 Food 객체로 변환
+            foodList = foodJsonList.mapIndexed { index, foodJson ->
+                // 이미지 경로 생성: JSON의 음식 이름을 사용하여 실제 파일 찾기
+                // 예: "비빔밥" -> "food_images/한식/비빔밥.png"
+                val imagePath = if (foodJson.img != null) {
+                    // JSON의 img 경로에서 파일명 추출 시도
+                    val imgPath = foodJson.img
+                    var path = if (imgPath.startsWith("./")) {
+                        imgPath.substring(2) // "./" 제거
+                    } else {
+                        imgPath
+                    }
+                    
+                    // 확장자 제거 후 .png로 변환
+                    val pathWithoutExt = if (path.contains(".")) {
+                        path.substring(0, path.lastIndexOf("."))
+                    } else {
+                        path
+                    }
+                    
+                    "food_images/$pathWithoutExt.png"
+                } else {
+                    // img가 없으면 음식 이름으로 직접 찾기
+                    "food_images/${foodJson.cuisine}/${foodJson.name}.png"
+                }
+                
+                Food(
+                    id = index + 1, // 순차적인 숫자 ID 부여
+                    name = foodJson.name,
+                    category = foodJson.cuisine,
+                    imageResId = 0,
+                    imagePath = imagePath
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // 오류 발생 시 빈 리스트 반환
+            foodList = emptyList()
+        }
+    }
 
     /**
      * 전체 음식 리스트를 반환하는 함수입니다.

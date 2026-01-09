@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.foodworldcup.data.Food
+import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.data.WinRecord
 import com.example.foodworldcup.databinding.ActivityResultBinding
 import com.example.foodworldcup.utils.PreferenceManager
@@ -36,14 +37,15 @@ class ResultActivity : BaseActivity() {
         // 하단 네비게이션 바 설정
         setupBottomNavigation(BaseActivity.Screen.ACCEPTED)
 
-        // TODO: GameActivity로부터 전달받은 합격된 음식 ID 리스트를 가져옵니다.
-        // val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
-        // TODO: 음식 ID로 FoodRepository에서 음식 리스트를 가져옵니다.
-        // passedFoods = passedFoodIds.mapNotNull { id -> 
-        //     FoodRepository.getFoodList().find { it.id == id } 
-        // }
+        // GameActivity로부터 전달받은 합격된 음식 ID 리스트를 가져옵니다.
+        val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
         
-        // TODO: 화면에 합격된 음식 리스트를 표시합니다.
+        // 음식 ID로 FoodRepository에서 음식 리스트를 가져옵니다.
+        passedFoods = passedFoodIds.mapNotNull { id ->
+            FoodRepository.getFoodById(id)
+        }
+        
+        // 화면에 합격된 음식 리스트를 표시합니다.
         displayPassedFoods()
         
         // TODO: 버튼 클릭 이벤트를 설정합니다.

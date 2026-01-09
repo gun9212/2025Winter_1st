@@ -239,19 +239,6 @@
                 android:drawableEnd="@drawable/ic_arrow_right"
                 android:drawablePadding="8dp"
                 android:layout_marginBottom="16dp" />
-
-            <!-- My Page Button: 흰색 배경, 회색 테두리 -->
-            <Button
-                android:id="@+id/myPageButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/my_page"
-                android:textSize="16sp"
-                android:textColor="@color/text_primary"
-                android:backgroundTint="@color/white"
-                android:padding="16dp"
-                android:background="@drawable/shape_button_outline"
-                android:layout_marginBottom="16dp" />
         </LinearLayout>
     </ScrollView>
 

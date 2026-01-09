@@ -38,10 +38,7 @@ class GameActivity : BaseActivity() {
         // 하단 네비게이션 바 설정
         setupBottomNavigation(BaseActivity.Screen.SWIPE)
 
-        // TODO: FoodListActivity로부터 선택된 음식 ID 리스트를 받아옵니다.
-        // val selectedFoodIds = intent.getIntegerArrayListExtra("selected_food_ids")
-        // TODO: 선택된 음식 ID로 FoodRepository에서 음식 리스트를 가져옵니다.
-        // TODO: 게임 초기화
+        // 게임 초기화
         initializeGame()
     }
 
@@ -49,16 +46,22 @@ class GameActivity : BaseActivity() {
      * 게임을 초기화하는 함수입니다.
      */
     private fun initializeGame() {
-        // TODO: FoodListActivity에서 받은 음식 ID 리스트로 음식 리스트를 구성합니다.
-        // 예: val selectedFoodIds = intent.getIntegerArrayListExtra("selected_food_ids") ?: emptyList()
-        //     currentFoodList = selectedFoodIds.mapNotNull { id -> 
-        //         FoodRepository.getFoodList().find { it.id == id } 
-        //     }
+        // FoodListActivity에서 받은 음식 ID 리스트로 음식 리스트를 구성합니다.
+        val selectedFoodIds = intent.getIntegerArrayListExtra("selected_food_ids") ?: emptyList()
+        currentFoodList = selectedFoodIds.mapNotNull { id ->
+            FoodRepository.getFoodById(id)
+        }
         
-        // TODO: 첫 번째 음식을 표시합니다.
+        // 음식 리스트가 비어있으면 게임 종료
+        if (currentFoodList.isEmpty()) {
+            finish()
+            return
+        }
+        
+        // 첫 번째 음식을 표시합니다.
         displayCurrentFood()
         
-        // TODO: 진행 상황을 업데이트합니다 (예: "1/10")
+        // 진행 상황을 업데이트합니다 (예: "1/10")
         updateProgress()
     }
 

@@ -111,10 +111,14 @@ class PreferenceManager(context: Context) {
 
     /**
      * 모든 우승 기록을 삭제하는 함수입니다.
+     * SharedPreferences에서 KEY_WIN_RECORDS 키를 삭제합니다.
      */
     fun clearWinRecords() {
-        // TODO: SharedPreferences에서 KEY_WIN_RECORDS 키를 삭제합니다.
-        // 예: prefs.edit().remove(KEY_WIN_RECORDS).apply()
+        try {
+            prefs.edit().remove(KEY_WIN_RECORDS).apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**
