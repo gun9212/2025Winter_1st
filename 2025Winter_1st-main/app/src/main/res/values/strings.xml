@@ -10,7 +10,11 @@
     <string name="how_it_works_step3">Find Restaurant\n지도에서 근처 식당을 찾으세요</string>
     <string name="recent_winner_title">Recent Winner</string>
     <string name="start_tournament">Start Tournament</string>
-    <string name="my_page">My Page</string>
+    <string name="my_page">마이페이지</string>
+    
+    <!-- Result 화면 -->
+    <string name="restart_game">다시하기</string>
+    <string name="find_restaurant_on_map">지도 보기</string>
     
     <!-- 하단 네비게이션 -->
     <string name="nav_home">홈</string>
