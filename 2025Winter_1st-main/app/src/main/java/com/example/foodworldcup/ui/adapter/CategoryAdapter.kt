@@ -64,10 +64,17 @@ class CategoryAdapter(
             
             // 해당 카테고리의 음식 리스트 가져오기
             val foods = FoodRepository.getFoodListByCategory(category.categoryName)
+            
+            // LayoutManager가 없으면 설정 (한 번만)
+            if (holder.foodRecyclerView.layoutManager == null) {
+                holder.foodRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
+            }
+            
+            // 어댑터 생성 또는 업데이트
+            // 이미지 로딩 로직이 개선되어 깜빡임이 방지되므로 어댑터를 재생성해도 안전함
             val foodAdapter = FoodAdapter(foods, selectedFoodIds) { foodId, isChecked ->
                 onFoodCheckedChanged(foodId, isChecked)
             }
-            holder.foodRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
             holder.foodRecyclerView.adapter = foodAdapter
         } else {
             holder.expandIcon.setImageResource(android.R.drawable.arrow_down_float)
