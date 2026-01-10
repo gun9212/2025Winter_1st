@@ -20,9 +20,6 @@ class IntroActivity : BaseActivity() {
 
     // ViewBinding 변수 선언. lateinit으로 나중에 초기화할 것을 약속합니다.
     private lateinit var binding: ActivityIntroBinding
-    
-    // SharedPreferences 관리 객체
-    private lateinit var preferenceManager: PreferenceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,9 +31,6 @@ class IntroActivity : BaseActivity() {
         // 2. 생성된 뷰의 최상위(root) 뷰를 화면에 표시합니다.
         // 기존의 setContentView(R.layout.activity_intro)를 대체합니다.
         setContentView(binding.root)
-
-        // PreferenceManager 초기화
-        preferenceManager = PreferenceManager(this)
 
         // FoodRepository 초기화 (JSON 파일에서 데이터 로드)
         FoodRepository.initialize(this)

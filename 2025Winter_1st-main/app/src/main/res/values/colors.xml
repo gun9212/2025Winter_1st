@@ -18,4 +18,12 @@
     <color name="recent_winner_yellow_end">#FFF59D</color>
     <color name="navigation_unselected">#9E9E9E</color>
     <color name="button_border_gray">#E0E0E0</color>
+    
+    <!-- CardStackView 오버레이 색상 -->
+    <color name="like_overlay_color">#4CAF50</color>
+    <color name="nope_overlay_color">#F44336</color>
+    
+    <!-- 버튼 색상 -->
+    <color name="like_button_color">#4CAF50</color>
+    <color name="nope_button_color">#F44336</color>
 </resources>

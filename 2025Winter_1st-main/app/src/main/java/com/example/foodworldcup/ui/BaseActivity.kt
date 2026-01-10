@@ -6,9 +6,11 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.foodworldcup.R
+import com.example.foodworldcup.utils.PreferenceManager
 
 /**
  * 모든 Activity의 기본 클래스입니다.
@@ -43,6 +45,13 @@ abstract class BaseActivity : AppCompatActivity() {
      * 하단 네비게이션 바가 초기화되었는지 확인하는 플래그입니다.
      */
     private var isBottomNavInitialized = false
+    
+    /**
+     * PreferenceManager 인스턴스 (필요시 사용)
+     */
+    protected val preferenceManager: PreferenceManager by lazy {
+        PreferenceManager(this)
+    }
 
     /**
      * 현재 화면을 설정하고 네비게이션 바를 업데이트합니다.
@@ -138,11 +147,24 @@ abstract class BaseActivity : AppCompatActivity() {
                     Log.d("BaseActivity", "스와이프 버튼 클릭")
                     if (currentScreen != Screen.SWIPE) {
                         try {
-                            val intent = Intent(this, GameActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                            // 저장된 선택된 음식 ID를 불러와서 GameActivity로 전달
+                            val selectedFoodIds = preferenceManager.getSelectedFoodIds()
+                            
+                            if (selectedFoodIds.isNotEmpty()) {
+                                val intent = Intent(this, GameActivity::class.java)
+                                intent.putIntegerArrayListExtra("selected_food_ids", ArrayList(selectedFoodIds))
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                // 선택된 음식이 없으면 FoodListActivity로 이동
+                                Toast.makeText(this, "먼저 음식을 선택해주세요", Toast.LENGTH_SHORT).show()
+                                val intent = Intent(this, FoodListActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
                         } catch (e: Exception) {
                             Log.e("BaseActivity", "스와이프로 이동 실패", e)
+                            e.printStackTrace()
                         }
                     }
                 }
