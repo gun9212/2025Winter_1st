@@ -75,6 +75,7 @@ class CardStackAdapter(
     /**
      * 이미지를 로드하고, 실패 시 여러 경로를 시도합니다.
      * 깜빡임 방지를 위해 Bitmap을 직접 ImageView에 설정합니다.
+     * 게임 화면에서는 기존 음식 이미지(imagePath)를 사용합니다.
      */
     private fun loadImageWithFallback(holder: ViewHolder, food: Food) {
         if (food.imagePath.isNullOrEmpty()) {
@@ -112,11 +113,12 @@ class CardStackAdapter(
                         // ImageView에 직접 설정 (동기적, 즉시 표시)
                         holder.foodImageView.setImageBitmap(bitmap)
                         holder.foodImageView.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                        holder.foodImageView.setBackgroundColor(android.graphics.Color.WHITE)
                     } catch (e: Exception) {
                         // Bitmap 직접 설정 실패 시 Glide 사용 (폴백)
                         val requestOptions = RequestOptions()
                             .placeholder(null)
-                            .error(ColorDrawable(Color.WHITE))
+                            .error(ColorDrawable(android.graphics.Color.WHITE))
                             .centerCrop()
                             .dontAnimate()
                         

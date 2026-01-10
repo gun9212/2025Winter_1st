@@ -46,44 +46,19 @@ object FoodRepository {
             
             // JSON 데이터를 Food 객체로 변환
             foodList = foodJsonList.mapIndexed { index, foodJson ->
-                // 이미지 경로 생성: JSON의 음식 이름을 사용하여 실제 파일 찾기
-                // 예: "비빔밥" -> "food_images/한식/비빔밥.png"
-                val imagePath = if (foodJson.img != null) {
-                    // JSON의 img 경로에서 파일명 추출 시도
-                    val imgPath = foodJson.img
-                    var path = if (imgPath.startsWith("./")) {
-                        imgPath.substring(2) // "./" 제거
-                    } else {
-                        imgPath
-                    }
-                    
-                    // 확장자 제거 후 .png로 변환
-                    val pathWithoutExt = if (path.contains(".")) {
-                        path.substring(0, path.lastIndexOf("."))
-                    } else {
-                        path
-                    }
-                    
-                    "food_images/$pathWithoutExt.png"
-                } else {
-                    // img가 없으면 음식 이름으로 직접 찾기
-                    "food_images/${foodJson.cuisine}/${foodJson.name}.png"
-                }
+                // 이미지 경로 생성: JSON의 img 경로를 처리
+                // 예: "./food_images/한식/비빔밥.png" -> "food_images/한식/비빔밥.png"
+                val imagePath = processImagePath(
+                    path = foodJson.img,
+                    defaultPath = "food_images/${foodJson.cuisine}/${foodJson.name}.png"
+                )
                 
-                // 캐릭터 이미지 경로 생성
-                val characterImagePath = if (foodJson.character_img != null) {
-                    // JSON의 character_img 경로에서 파일명 추출
-                    val charImgPath = foodJson.character_img
-                    val path = if (charImgPath.startsWith("./")) {
-                        charImgPath.substring(2) // "./" 제거
-                    } else {
-                        charImgPath
-                    }
-                    path
-                } else {
-                    // character_img가 없으면 음식 이름으로 직접 찾기
-                    "food_character_images/${foodJson.cuisine}/${foodJson.name}_캐릭터누끼.png"
-                }
+                // 캐릭터 이미지 경로 생성: JSON의 character_img 경로를 처리
+                // 예: "./food_character_images/한식/비빔밥_캐릭터누끼.png" -> "food_character_images/한식/비빔밥_캐릭터누끼.png"
+                val characterImagePath = processImagePath(
+                    path = foodJson.character_img,
+                    defaultPath = "food_character_images/${foodJson.cuisine}/${foodJson.name}_캐릭터누끼.png"
+                )
                 
                 Food(
                     id = index + 1, // 순차적인 숫자 ID 부여
@@ -137,5 +112,27 @@ object FoodRepository {
      */
     fun getFoodById(id: Int): Food? {
         return foodList.find { it.id == id }
+    }
+
+    /**
+     * 이미지 경로를 처리하는 공통 함수입니다.
+     * imagePath와 characterImagePath 모두 동일한 방식으로 처리합니다.
+     *
+     * @param path JSON에서 읽은 경로 (null 가능)
+     * @param defaultPath 경로가 없을 때 사용할 기본 경로
+     * @return 처리된 경로
+     */
+    private fun processImagePath(path: String?, defaultPath: String): String {
+        return if (path != null) {
+            // "./" 접두사 제거
+            if (path.startsWith("./")) {
+                path.substring(2)
+            } else {
+                path
+            }
+        } else {
+            // 경로가 없으면 기본 경로 사용
+            defaultPath
+        }
     }
 }

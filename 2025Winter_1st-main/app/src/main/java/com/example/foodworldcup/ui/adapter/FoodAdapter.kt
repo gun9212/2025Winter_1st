@@ -1,6 +1,8 @@
 package com.example.foodworldcup.ui.adapter
 
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +11,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.example.foodworldcup.R
 import com.example.foodworldcup.data.Food
 
@@ -46,11 +50,13 @@ class FoodAdapter(
         holder.foodDescriptionTextView.visibility = View.GONE
 
         // assets 폴더의 이미지 로드
+        // 깜빡임 방지를 위해 이미지 로딩 전에 ImageView를 clear하지 않음
         if (!food.imagePath.isNullOrEmpty()) {
             loadImageWithFallback(holder, food.imagePath, food.name, food.category)
         } else {
             // 이미지 경로가 없으면 기본 이미지 표시
             holder.foodImageView.setImageResource(R.drawable.ic_launcher_background)
+            holder.foodImageView.setBackgroundColor(Color.WHITE)
         }
 
         holder.checkBox.setOnCheckedChangeListener(null) // 기존 리스너 제거
@@ -67,6 +73,7 @@ class FoodAdapter(
     
     /**
      * 이미지를 로드하고, 실패 시 여러 경로를 시도하는 함수
+     * 깜빡임 방지를 위해 Bitmap을 직접 ImageView에 설정합니다.
      */
     private fun loadImageWithFallback(
         holder: FoodViewHolder,
@@ -99,12 +106,26 @@ class FoodAdapter(
                 inputStream.close()
                 
                 if (bitmap != null) {
-                    Glide.with(holder.itemView.context)
-                        .load(bitmap)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .centerCrop()
-                        .into(holder.foodImageView)
+                    try {
+                        // ImageView에 직접 설정 (동기적, 즉시 표시 - 깜빡임 방지)
+                        holder.foodImageView.setImageBitmap(bitmap)
+                        holder.foodImageView.scaleType = ImageView.ScaleType.CENTER_CROP
+                        holder.foodImageView.setBackgroundColor(Color.WHITE)
+                    } catch (e: Exception) {
+                        // Bitmap 직접 설정 실패 시 Glide 사용 (폴백)
+                        val requestOptions = RequestOptions()
+                            .placeholder(null)  // placeholder 제거 (깜빡임 방지)
+                            .error(ColorDrawable(Color.WHITE))
+                            .centerCrop()
+                            .dontAnimate()  // 애니메이션 비활성화 (깜빡임 방지)
+                            .skipMemoryCache(false)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        
+                        Glide.with(holder.itemView.context)
+                            .load(bitmap)
+                            .apply(requestOptions)
+                            .into(holder.foodImageView)
+                    }
                     return // 성공하면 종료
                 }
             } catch (e: Exception) {
@@ -115,6 +136,7 @@ class FoodAdapter(
         
         // 모든 시도 실패 시 기본 이미지 표시
         holder.foodImageView.setImageResource(R.drawable.ic_launcher_background)
+        holder.foodImageView.setBackgroundColor(Color.WHITE)
     }
 
     override fun getItemCount(): Int = foods.size

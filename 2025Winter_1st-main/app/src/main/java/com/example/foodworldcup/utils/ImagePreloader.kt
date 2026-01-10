@@ -2,6 +2,8 @@ package com.example.foodworldcup.utils
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -41,6 +43,7 @@ class ImagePreloader(private val context: Context) {
     /**
      * 단일 음식 이미지를 프리로드합니다.
      * Adapter와 동일한 방식으로 로드하여 캐시를 공유합니다.
+     * 게임 화면에서는 기존 음식 이미지(imagePath)를 프리로드합니다.
      * 
      * @param food 프리로드할 음식
      */
@@ -70,6 +73,10 @@ class ImagePreloader(private val context: Context) {
                     // Adapter와 동일한 RequestOptions 사용하여 캐시 공유
                     // 같은 Bitmap 객체를 사용하면 Glide가 자동으로 메모리 캐시에 저장
                     val requestOptions = RequestOptions()
+                        .placeholder(null)  // placeholder 제거 (깜빡임 방지)
+                        .error(ColorDrawable(Color.WHITE))
+                        .centerCrop()
+                        .dontAnimate()  // 애니메이션 비활성화 (깜빡임 방지)
                         .skipMemoryCache(false) // 메모리 캐시 사용
                         .diskCacheStrategy(DiskCacheStrategy.NONE) // Bitmap은 메모리 캐시만
                     
