@@ -21,7 +21,8 @@ object FoodRepository {
         val name: String,
         val cuisine: String,
         val attributes: Map<String, Any>? = null,
-        val img: String? = null
+        val img: String? = null,
+        val character_img: String? = null
     )
 
     // 앱에서 사용할 전체 음식 목록
@@ -69,12 +70,28 @@ object FoodRepository {
                     "food_images/${foodJson.cuisine}/${foodJson.name}.png"
                 }
                 
+                // 캐릭터 이미지 경로 생성
+                val characterImagePath = if (foodJson.character_img != null) {
+                    // JSON의 character_img 경로에서 파일명 추출
+                    val charImgPath = foodJson.character_img
+                    val path = if (charImgPath.startsWith("./")) {
+                        charImgPath.substring(2) // "./" 제거
+                    } else {
+                        charImgPath
+                    }
+                    path
+                } else {
+                    // character_img가 없으면 음식 이름으로 직접 찾기
+                    "food_character_images/${foodJson.cuisine}/${foodJson.name}_캐릭터누끼.png"
+                }
+                
                 Food(
                     id = index + 1, // 순차적인 숫자 ID 부여
                     name = foodJson.name,
                     category = foodJson.cuisine,
                     imageResId = 0,
-                    imagePath = imagePath
+                    imagePath = imagePath,
+                    characterImagePath = characterImagePath
                 )
             }
         } catch (e: Exception) {

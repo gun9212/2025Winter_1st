@@ -9,7 +9,8 @@
       "noodles": false,
       "rice": true
     },
-    "img": "./한식/비빔밥.jpg"
+    "img": "./food_images/한식/비빔밥.png",
+    "character_img": "./food_character_images/한식/비빔밥_캐릭터누끼.png"
   },
   {
     "id": "한식_02",
@@ -21,7 +22,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./한식/찌개.png"
+    "img": "./food_images/한식/찌개.png",
+    "character_img": "./food_character_images/한식/찌개_캐릭터누끼.png"
   },
   {
     "id": "한식_03",
@@ -33,7 +35,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./한식/불고기.png"
+    "img": "./food_images/한식/불고기.png",
+    "character_img": "./food_character_images/한식/불고기_캐릭터누끼.png"
   },
   {
     "id": "한식_04",
@@ -45,7 +48,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./한식/제육볶음.png"
+    "img": "./food_images/한식/제육볶음.png",
+    "character_img": "./food_character_images/한식/제육볶음_캐릭터누끼.png"
   },
   {
     "id": "한식_05",
@@ -57,7 +61,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./한식/삼겹살.png"
+    "img": "./food_images/한식/삼겹살.png",
+    "character_img": "./food_character_images/한식/삼겹살_캐릭터누끼.png"
   },
   {
     "id": "한식_06",
@@ -69,7 +74,8 @@
       "noodles": false,
       "rice": true
     },
-    "img": "./한식/김밥.png"
+    "img": "./food_images/한식/김밥.png",
+    "character_img": "./food_character_images/한식/김밥_캐릭터누끼.png"
   },
   {
     "id": "한식_07",
@@ -81,7 +87,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./한식/냉면.png"
+    "img": "./food_images/한식/냉면.png",
+    "character_img": "./food_character_images/한식/냉면_캐릭터누끼.png"
   },
   {
     "id": "한식_08",
@@ -93,7 +100,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./한식/떡볶이.png"
+    "img": "./food_images/한식/떡볶이.png",
+    "character_img": "./food_character_images/한식/떡볶이_캐릭터누끼.png"
   },
   {
     "id": "한식_09",
@@ -105,7 +113,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./한식/보쌈.png"
+    "img": "./food_images/한식/보쌈.png",
+    "character_img": "./food_character_images/한식/보쌈_캐릭터누끼.png"
   },
   {
     "id": "한식_10",
@@ -117,7 +126,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./한식/전.png"
+    "img": "./food_images/한식/전.png",
+    "character_img": "./food_character_images/한식/전_캐릭터누끼.png"
   },
   {
     "id": "일식_01",
@@ -129,7 +139,8 @@
       "noodles": false,
       "rice": true
     },
-    "img": "./일식/초밥.png"
+    "img": "./food_images/일식/초밥.png",
+    "character_img": "./food_character_images/일식/초밥_캐릭터누끼.png"
   },
   {
     "id": "일식_02",
@@ -141,7 +152,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./일식/회.png"
+    "img": "./food_images/일식/회.png",
+    "character_img": "./food_character_images/일식/회_캐릭터누끼.png"
   },
   {
     "id": "일식_03",
@@ -153,7 +165,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./일식/라멘.png"
+    "img": "./food_images/일식/라멘.png",
+    "character_img": "./food_character_images/일식/라멘_캐릭터누끼.png"
   },
   {
     "id": "일식_04",
@@ -165,7 +178,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./일식/우동.png"
+    "img": "./food_images/일식/우동.png",
+    "character_img": "./food_character_images/일식/우동_캐릭터누끼.png"
   },
   {
     "id": "일식_05",
@@ -177,7 +191,8 @@
       "noodles": false,
       "rice": true
     },
-    "img": "./일식/덮밥.png"
+    "img": "./food_images/일식/덮밥.png",
+    "character_img": "./food_character_images/일식/덮밥_캐릭터누끼.png"
   },
   {
     "id": "일식_06",
@@ -189,7 +204,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./일식/돈카츠.png"
+    "img": "./food_images/일식/돈카츠.png",
+    "character_img": "./food_character_images/일식/돈카츠_캐릭터누끼.png"
   },
   {
     "id": "일식_07",
@@ -201,7 +217,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./일식/가라아게.png"
+    "img": "./food_images/일식/가라아게.png",
+    "character_img": "./food_character_images/일식/가라아게_캐릭터누끼.png"
   },
   {
     "id": "일식_08",
@@ -213,7 +230,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./일식/나베.png"
+    "img": "./food_images/일식/나베.png",
+    "character_img": "./food_character_images/일식/나베_캐릭터누끼.png"
   },
   {
     "id": "중식_01",
@@ -225,7 +243,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./중식/짜장면.png"
+    "img": "./food_images/중식/짜장면.png",
+    "character_img": "./food_character_images/중식/짜장면_캐릭터누끼.png"
   },
   {
     "id": "중식_02",
@@ -237,7 +256,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./중식/짬뽕.png"
+    "img": "./food_images/중식/짬뽕.png",
+    "character_img": "./food_character_images/중식/짬뽕_캐릭터누끼.png"
   },
   {
     "id": "중식_03",
@@ -249,7 +269,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./중식/탕수육.png"
+    "img": "./food_images/중식/탕수육.png",
+    "character_img": "./food_character_images/중식/탕수육_캐릭터누끼.png"
   },
   {
     "id": "중식_04",
@@ -261,7 +282,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./중식/마파두부.png"
+    "img": "./food_images/중식/마파두부.png",
+    "character_img": "./food_character_images/중식/마파두부_캐릭터누끼.png"
   },
   {
     "id": "중식_05",
@@ -273,7 +295,8 @@
       "noodles": false,
       "rice": true
     },
-    "img": "./중식/볶음밥.png"
+    "img": "./food_images/중식/볶음밥.png",
+    "character_img": "./food_character_images/중식/볶음밥_캐릭터누끼.png"
   },
   {
     "id": "중식_06",
@@ -285,7 +308,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./중식/깐풍기.png"
+    "img": "./food_images/중식/깐풍기.png",
+    "character_img": "./food_character_images/중식/깐풍기_캐릭터누끼.png"
   },
   {
     "id": "중식_07",
@@ -297,7 +321,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./중식/마라탕.png"
+    "img": "./food_images/중식/마라탕.png",
+    "character_img": "./food_character_images/중식/마라탕_캐릭터누끼.png"
   },
   {
     "id": "중식_08",
@@ -309,7 +334,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./중식/훠궈.png"
+    "img": "./food_images/중식/훠궈.png",
+    "character_img": "./food_character_images/중식/훠궈_캐릭터누끼.png"
   },
   {
     "id": "양식_01",
@@ -321,7 +347,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./양식/파스타.png"
+    "img": "./food_images/양식/파스타.png",
+    "character_img": "./food_character_images/양식/파스타_캐릭터누끼.png"
   },
   {
     "id": "양식_02",
@@ -333,7 +360,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./양식/스테이크.png"
+    "img": "./food_images/양식/스테이크.png",
+    "character_img": "./food_character_images/양식/스테이크_캐릭터누끼.png"
   },
   {
     "id": "양식_03",
@@ -345,7 +373,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./양식/피자.png"
+    "img": "./food_images/양식/피자.png",
+    "character_img": "./food_character_images/양식/피자_캐릭터누끼.png"
   },
   {
     "id": "양식_04",
@@ -357,7 +386,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./양식/햄버거.png"
+    "img": "./food_images/양식/햄버거.png",
+    "character_img": "./food_character_images/양식/햄버거_캐릭터누끼.png"
   },
   {
     "id": "양식_05",
@@ -369,7 +399,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./양식/샐러드.png"
+    "img": "./food_images/양식/샐러드.png",
+    "character_img": "./food_character_images/양식/샐러드_캐릭터누끼.png"
   },
   {
     "id": "아시안_01",
@@ -381,7 +412,8 @@
       "noodles": true,
       "rice": false
     },
-    "img": "./아시안/쌀국수.png"
+    "img": "./food_images/아시안/쌀국수.png",
+    "character_img": "./food_character_images/아시안/쌀국수_캐릭터누끼.png"
   },
   {
     "id": "아시안_02",
@@ -393,7 +425,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./아시안/커리.png"
+    "img": "./food_images/아시안/커리.png",
+    "character_img": "./food_character_images/아시안/커리_캐릭터누끼.png"
   },
   {
     "id": "아시안_03",
@@ -405,6 +438,7 @@
       "noodles": false,
       "rice": true
     },
-    "img": "./아시안/포케.png"
+    "img": "./food_images/아시안/포케.png",
+    "character_img": "./food_character_images/아시안/포케_캐릭터누끼.png"
   }
 ]
