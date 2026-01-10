@@ -8,12 +8,14 @@ package com.example.foodworldcup.data
  * @property name 음식 이름 (예: "김치찌개")
  * @property category 음식 카테고리 (예: "한식")
  * @property imageResId res/drawable 폴더에 저장된 음식 이미지 파일의 고유 ID (사용 안 함)
- * @property imagePath assets 폴더 내 이미지 파일 경로 (예: "food_images/한식/비빔밥.jpg")
+ * @property imagePath assets 폴더 내 이미지 파일 경로 (예: "food_images/한식/비빔밥.png")
+ * @property characterImagePath assets 폴더 내 캐릭터 이미지 파일 경로 (예: "food_character_images/한식/비빔밥_캐릭터누끼.png")
  */
 data class Food(
     val id: Int,
     val name: String,
     val category: String,
     val imageResId: Int = 0,
-    val imagePath: String? = null
+    val imagePath: String? = null,
+    val characterImagePath: String? = null
 )
