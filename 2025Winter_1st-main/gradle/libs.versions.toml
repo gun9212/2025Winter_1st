@@ -13,6 +13,7 @@ glide = "4.16.0"
 gson = "2.10.1"
 # cardstackview = "2.3.4"  # TODO: 스와이프 기능 구현 시 주석 해제
 recyclerview = "1.3.2"
+cardview = "1.0.0"
 maps = "18.2.0"
 places = "3.3.0"
 location = "21.0.1"
@@ -31,6 +32,7 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 # cardstackview = { group = "com.github.yuyakaido", name = "card-stack-view", version.ref = "cardstackview" }  # TODO: 스와이프 기능 구현 시 주석 해제
 # cardstackview = { group = "com.yuyakaido.android", name = "card-stack-view", version.ref = "cardstackview" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 google-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "maps" }
 google-places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 google-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "location" }

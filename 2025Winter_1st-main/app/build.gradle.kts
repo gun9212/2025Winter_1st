@@ -1,7 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
+
+// local.properties에서 Kakao API Key 읽기
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+val kakaoRestApiKey = localProperties.getProperty("KAKAO_REST_API_KEY", "")
+val kakaoMapKey = localProperties.getProperty("KAKAO_MAP_KEY", "")
 
 android {
     namespace = "com.example.foodworldcup"
@@ -15,6 +26,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+
+        buildConfigField("String", "KAKAO_REST_API_KEY", "\"$kakaoRestApiKey\"")
+        buildConfigField("String", "KAKAO_MAP_KEY", "\"$kakaoMapKey\"")
     }
 
     buildTypes {
@@ -37,11 +52,13 @@ android {
     // ViewBinding 활성화
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
 dependencies {
-
+    implementation("com.kakao.maps.open:android:2.13.0")
+    implementation("com.kakao.sdk:v2-all:2.11.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -59,6 +76,9 @@ dependencies {
     
     // 리사이클러뷰 (마이페이지에서 우승 기록 리스트 표시용)
     implementation(libs.androidx.recyclerview)
+    
+    // 카드뷰 (검색 결과 리스트 아이템 표시용)
+    implementation(libs.androidx.cardview)
     
     // Google Maps (지도 표시용)
     implementation(libs.google.maps)
