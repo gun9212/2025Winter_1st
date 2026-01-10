@@ -16,9 +16,6 @@ class MyPageActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMypageBinding
     
-    // SharedPreferences 관리 객체
-    private lateinit var preferenceManager: PreferenceManager
-    
     // 우승 기록 리스트
     private var winRecords: List<WinRecord> = emptyList()
     
@@ -29,9 +26,6 @@ class MyPageActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMypageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // PreferenceManager 초기화
-        preferenceManager = PreferenceManager(this)
 
         // 하단 네비게이션 바 설정
         setupBottomNavigation(BaseActivity.Screen.ACCEPTED)

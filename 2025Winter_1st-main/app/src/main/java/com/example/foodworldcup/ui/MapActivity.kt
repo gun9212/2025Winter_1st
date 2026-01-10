@@ -49,30 +49,43 @@ class MapActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMapBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // 하단 네비게이션 바 설정
-        setupBottomNavigation(BaseActivity.Screen.MAP)
-
-        // MapApiHelper 초기화
-        mapApiHelper = MapApiHelper(this)
-
-        // TODO: ResultActivity로부터 전달받은 합격된 음식 ID 리스트를 가져옵니다.
-        // val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
-        // TODO: 음식 ID로 FoodRepository에서 음식 리스트를 가져옵니다.
-        // passedFoods = passedFoodIds.mapNotNull { id -> 
-        //     FoodRepository.getFoodList().find { it.id == id } 
-        // }
         
-        // TODO: 위치 권한을 확인하고 요청합니다.
-        checkLocationPermission()
-        
-        // TODO: 지도를 초기화합니다.
-        initializeMap()
-        
-        // TODO: 버튼 클릭 이벤트를 설정합니다.
-        setupButtons()
+        try {
+            binding = ActivityMapBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+
+            // 하단 네비게이션 바 설정
+            setupBottomNavigation(BaseActivity.Screen.MAP)
+
+            // MapApiHelper 초기화 (예외 처리)
+            try {
+                mapApiHelper = MapApiHelper(this)
+            } catch (e: Exception) {
+                android.util.Log.e("MapActivity", "MapApiHelper 초기화 실패", e)
+                // MapApiHelper 초기화 실패해도 지도는 표시 가능
+            }
+
+            // TODO: ResultActivity로부터 전달받은 합격된 음식 ID 리스트를 가져옵니다.
+            // val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
+            // TODO: 음식 ID로 FoodRepository에서 음식 리스트를 가져옵니다.
+            // passedFoods = passedFoodIds.mapNotNull { id -> 
+            //     FoodRepository.getFoodList().find { it.id == id } 
+            // }
+            
+            // 위치 권한을 확인하고 요청합니다.
+            checkLocationPermission()
+            
+            // 지도를 초기화합니다.
+            initializeMap()
+            
+            // 버튼 클릭 이벤트를 설정합니다.
+            setupButtons()
+        } catch (e: Exception) {
+            android.util.Log.e("MapActivity", "onCreate 오류", e)
+            e.printStackTrace()
+            // 오류 발생 시 이전 화면으로 돌아가기
+            finish()
+        }
     }
 
     /**
@@ -134,12 +147,35 @@ class MapActivity : BaseActivity() {
      * 지도를 초기화하는 함수입니다.
      */
     private fun initializeMap() {
-        // TODO: Google Maps를 초기화합니다.
-        // SupportMapFragment를 가져와서 지도를 초기화합니다.
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as? com.google.android.gms.maps.SupportMapFragment
-        mapFragment?.getMapAsync { googleMap ->
-            // this.googleMap = googleMap
-            // 지도 설정 (마커 클릭 리스너 등)
+        try {
+            // Google Maps를 초기화합니다.
+            // SupportMapFragment를 가져와서 지도를 초기화합니다.
+            val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as? com.google.android.gms.maps.SupportMapFragment
+            mapFragment?.getMapAsync { googleMap ->
+                try {
+                    // 지도 설정 (마커 클릭 리스너 등)
+                    // 기본 지도 설정
+                    googleMap.uiSettings.isZoomControlsEnabled = true
+                    googleMap.uiSettings.isMyLocationButtonEnabled = true
+                    
+                    // 위치 권한이 있으면 현재 위치 표시
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        googleMap.isMyLocationEnabled = true
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("MapActivity", "지도 설정 오류", e)
+                    e.printStackTrace()
+                }
+            } ?: run {
+                android.util.Log.e("MapActivity", "SupportMapFragment를 찾을 수 없습니다")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MapActivity", "지도 초기화 오류", e)
+            e.printStackTrace()
         }
     }
 
@@ -195,12 +231,27 @@ class MapActivity : BaseActivity() {
      * 버튼 클릭 이벤트를 설정하는 함수입니다.
      */
     private fun setupButtons() {
-        // TODO: '다시 검색' 버튼 클릭 시 searchNearbyRestaurants()를 호출합니다.
-        
-        // TODO: '내 위치로' 버튼 클릭 시 지도 중심을 현재 위치로 이동시킵니다.
-        
-        // TODO: '뒤로가기' 버튼 클릭 시 이전 화면으로 돌아갑니다.
-        // 예: binding.backButton.setOnClickListener { finish() }
+        try {
+            // '뒤로가기' 버튼 클릭 시 이전 화면으로 돌아갑니다.
+            binding.backButton?.setOnClickListener {
+                finish()
+            }
+            
+            // TODO: '다시 검색' 버튼 클릭 시 searchNearbyRestaurants()를 호출합니다.
+            // binding.refreshButton?.setOnClickListener {
+            //     searchNearbyRestaurants()
+            // }
+            
+            // TODO: '내 위치로' 버튼 클릭 시 지도 중심을 현재 위치로 이동시킵니다.
+            // binding.myLocationButton?.setOnClickListener {
+            //     currentLocation?.let { location ->
+            //         // 지도 중심을 현재 위치로 이동
+            //     }
+            // }
+        } catch (e: Exception) {
+            android.util.Log.e("MapActivity", "버튼 설정 오류", e)
+            e.printStackTrace()
+        }
     }
 
     override fun onResume() {

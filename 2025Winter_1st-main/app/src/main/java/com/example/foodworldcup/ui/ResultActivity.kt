@@ -2,13 +2,11 @@ package com.example.foodworldcup.ui
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
-import com.example.foodworldcup.data.WinRecord
 import com.example.foodworldcup.databinding.ActivityResultBinding
-import com.example.foodworldcup.utils.PreferenceManager
-import java.util.Date
+import com.example.foodworldcup.ui.adapter.PassedFoodAdapter
 
 /**
  * 합격된 음식들을 나열하는 Activity입니다.
@@ -23,16 +21,13 @@ class ResultActivity : BaseActivity() {
     // GameActivity로부터 전달받은 합격된 음식 리스트
     private var passedFoods: List<Food> = emptyList()
     
-    // SharedPreferences 관리 객체
-    private lateinit var preferenceManager: PreferenceManager
+    // 통과한 음식 어댑터
+    private lateinit var passedFoodAdapter: PassedFoodAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // PreferenceManager 초기화
-        preferenceManager = PreferenceManager(this)
 
         // 하단 네비게이션 바 설정
         setupBottomNavigation(BaseActivity.Screen.ACCEPTED)
@@ -56,24 +51,37 @@ class ResultActivity : BaseActivity() {
      * 화면에 합격된 음식 리스트를 표시하는 함수입니다.
      */
     private fun displayPassedFoods() {
-        // TODO: RecyclerView 어댑터를 생성하고 합격된 음식 리스트를 표시합니다.
-        // 예: val adapter = PassedFoodAdapter(passedFoods)
-        //     binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        //     binding.recyclerView.adapter = adapter
-        // TODO: 각 항목에는 음식 이미지와 이름이 표시됩니다.
+        if (passedFoods.isEmpty()) {
+            // 통과한 음식이 없으면 메시지 표시
+            binding.resultTitleTextView.text = "통과한 음식이 없습니다"
+            return
+        }
+
+        // RecyclerView 어댑터 생성 및 설정
+        passedFoodAdapter = PassedFoodAdapter(passedFoods)
+        binding.passedFoodRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.passedFoodRecyclerView.adapter = passedFoodAdapter
+        
+        // 통과한 음식 개수 표시
+        binding.resultTitleTextView.text = "통과한 음식 (${passedFoods.size}개)"
     }
 
     /**
      * 버튼 클릭 이벤트를 설정하는 함수입니다.
      */
     private fun setupButtons() {
-        // TODO: '다음' 버튼 클릭 시 MapActivity로 이동합니다.
-        // 예: binding.nextButton.setOnClickListener {
-        //     val intent = Intent(this, MapActivity::class.java)
-        //     val passedFoodIds = passedFoods.map { it.id }
-        //     intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
-        //     startActivity(intent)
-        // }
+        // '다음' 버튼 클릭 시 MapActivity로 이동
+        binding.nextButton.setOnClickListener {
+            if (passedFoods.isEmpty()) {
+                android.widget.Toast.makeText(this, "통과한 음식이 없습니다.", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val intent = Intent(this, MapActivity::class.java)
+            val passedFoodIds = passedFoods.map { it.id }
+            intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
+            startActivity(intent)
+        }
     }
 
     override fun onResume() {

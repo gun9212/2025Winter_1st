@@ -22,9 +22,6 @@ class FoodListActivity : BaseActivity() {
 
     private lateinit var binding: ActivityFoodListBinding
     
-    // SharedPreferences 관리 객체
-    private lateinit var preferenceManager: PreferenceManager
-    
     // 현재 선택된 음식 리스트
     private var selectedFoodIds: MutableSet<Int> = mutableSetOf()
     
@@ -52,10 +49,6 @@ class FoodListActivity : BaseActivity() {
             Log.d("FoodListActivity", "바인딩 생성 완료")
             setContentView(binding.root)
             Log.d("FoodListActivity", "레이아웃 설정 완료")
-
-            // PreferenceManager 초기화
-            preferenceManager = PreferenceManager(this)
-            Log.d("FoodListActivity", "PreferenceManager 초기화 완료")
             
             // 하단 네비게이션 바 설정
             Log.d("FoodListActivity", "하단 네비게이션 바 설정 시작")

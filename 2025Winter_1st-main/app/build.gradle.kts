@@ -55,7 +55,7 @@ dependencies {
     implementation(libs.gson)
     
     // 카드 스와이프 뷰 (게임 화면에서 음식 선택용)
-    // implementation(libs.cardstackview)  // TODO: 스와이프 기능 구현 시 주석 해제
+    implementation(libs.cardstackview)
     
     // 리사이클러뷰 (마이페이지에서 우승 기록 리스트 표시용)
     implementation(libs.androidx.recyclerview)
