@@ -3,6 +3,8 @@ package com.example.foodworldcup.utils
 import android.content.Context
 import android.graphics.BitmapFactory
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.example.foodworldcup.data.Food
 
 /**
@@ -12,6 +14,7 @@ import com.example.foodworldcup.data.Food
  * 주요 기능:
  * - 다음 N장의 이미지를 미리 로드하여 스와이프 시 부드러운 전환 제공
  * - assets 폴더의 이미지를 Glide로 프리로드
+ * - 동일한 캐시 키를 사용하여 Adapter와 동일한 캐시 공유
  */
 class ImagePreloader(private val context: Context) {
 
@@ -37,6 +40,7 @@ class ImagePreloader(private val context: Context) {
 
     /**
      * 단일 음식 이미지를 프리로드합니다.
+     * Adapter와 동일한 방식으로 로드하여 캐시를 공유합니다.
      * 
      * @param food 프리로드할 음식
      */
@@ -45,21 +49,43 @@ class ImagePreloader(private val context: Context) {
             return
         }
 
-        try {
-            // assets 폴더에서 이미지를 Bitmap으로 읽어옴
-            val inputStream = context.assets.open(food.imagePath)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream.close()
+        // Adapter와 동일한 경로 순서로 시도
+        val pathsToTry = mutableListOf<String>()
+        pathsToTry.add(food.imagePath)
+        if (food.imagePath.endsWith(".png")) {
+            pathsToTry.add(food.imagePath.replace(".png", ".jpg"))
+        } else if (food.imagePath.endsWith(".jpg")) {
+            pathsToTry.add(food.imagePath.replace(".jpg", ".png"))
+        }
+        pathsToTry.add("food_images/${food.category}/${food.name}.png")
+        pathsToTry.add("food_images/${food.category}/${food.name}.jpg")
 
-            if (bitmap != null) {
-                // Glide로 프리로드
-                Glide.with(context)
-                    .load(bitmap)
-                    .preload()
+        for (path in pathsToTry) {
+            try {
+                val inputStream = context.assets.open(path)
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                inputStream.close()
+
+                if (bitmap != null) {
+                    // Adapter와 동일한 RequestOptions 사용하여 캐시 공유
+                    // 같은 Bitmap 객체를 사용하면 Glide가 자동으로 메모리 캐시에 저장
+                    val requestOptions = RequestOptions()
+                        .skipMemoryCache(false) // 메모리 캐시 사용
+                        .diskCacheStrategy(DiskCacheStrategy.NONE) // Bitmap은 메모리 캐시만
+                    
+                    // Glide로 프리로드 (메모리 캐시에 저장)
+                    // Adapter에서 같은 Bitmap 객체를 로드하면 캐시에서 가져옴
+                    Glide.with(context)
+                        .load(bitmap)
+                        .apply(requestOptions)
+                        .preload()
+                    
+                    return // 성공하면 종료
+                }
+            } catch (e: Exception) {
+                // 다음 경로 시도
+                continue
             }
-        } catch (e: Exception) {
-            // 이미지 로드 실패 시 로그만 출력 (에러 처리)
-            android.util.Log.e("ImagePreloader", "이미지 프리로드 실패: ${food.name}, 경로: ${food.imagePath}", e)
         }
     }
 

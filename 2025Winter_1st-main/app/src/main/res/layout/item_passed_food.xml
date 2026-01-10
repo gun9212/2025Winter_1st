@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
     app:cardCornerRadius="12dp"
@@ -15,66 +15,51 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:gravity="center">
 
         <!-- 음식 이미지 -->
         <ImageView
             android:id="@+id/foodImageView"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
             android:scaleType="centerCrop"
             android:background="@color/card_background_gray"
             android:contentDescription="Food image"
             tools:src="@drawable/ic_launcher_background" />
 
-        <!-- 음식 정보 -->
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- 음식 이름 -->
+        <TextView
+            android:id="@+id/foodNameTextView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="16dp"
-            android:gravity="center_vertical">
+            android:layout_marginTop="8dp"
+            android:text="김치찌개"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:gravity="center"
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:text="김치찌개" />
 
-            <!-- 음식 이름 -->
-            <TextView
-                android:id="@+id/foodNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="김치찌개"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
-                tools:text="김치찌개" />
-
-            <!-- 통과 표시 (선택사항) -->
-            <TextView
-                android:id="@+id/passedLabelTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="통과"
-                android:textSize="12sp"
-                android:textColor="@color/like_button_color"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/shape_button_outline"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
-                tools:text="통과" />
-        </LinearLayout>
-
-        <!-- 통과 아이콘 (선택사항) -->
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_like"
-            android:layout_marginStart="8dp"
-            android:contentDescription="Passed"
-            app:tint="@color/like_button_color"
-            tools:src="@drawable/ic_like" />
+        <!-- 통과 표시 (선택사항 - 숨김 처리 가능) -->
+        <TextView
+            android:id="@+id/passedLabelTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="통과"
+            android:textSize="11sp"
+            android:textColor="@color/like_button_color"
+            android:background="@drawable/shape_button_outline"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:visibility="gone"
+            tools:text="통과" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

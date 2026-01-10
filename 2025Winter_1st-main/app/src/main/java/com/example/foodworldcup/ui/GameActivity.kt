@@ -3,6 +3,8 @@ package com.example.foodworldcup.ui
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -60,6 +62,12 @@ class GameActivity : BaseActivity() {
     
     // 스와이프 전 topPosition 저장 (스와이프된 음식을 찾기 위해)
     private var topPositionBeforeSwipe: Int = 0
+    
+    // Handler for delayed tasks (메모리 누수 방지)
+    private val handler = Handler(Looper.getMainLooper())
+    
+    // Pending runnables for cleanup
+    private val pendingRunnables = mutableListOf<Runnable>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,9 +90,10 @@ class GameActivity : BaseActivity() {
     private fun initializeGame() {
         // FoodListActivity에서 받은 음식 ID 리스트로 음식 리스트를 구성합니다.
         val selectedFoodIds = intent.getIntegerArrayListExtra("selected_food_ids") ?: emptyList()
+        // 음식 리스트를 랜덤 순서로 섞어서 게임의 재미를 높입니다.
         val initialFoodList = selectedFoodIds.mapNotNull { id ->
             FoodRepository.getFoodById(id)
-        }
+        }.shuffled()
         
         // 음식 리스트가 비어있으면 FoodListActivity로 이동
         if (initialFoodList.isEmpty()) {
@@ -323,9 +332,9 @@ class GameActivity : BaseActivity() {
                 
                 if (remainingFoods.isEmpty()) {
                     // 더 이상 남은 음식이 없으면 게임 종료
-                    binding.cardStackView.postDelayed({
-                        finishGame()
-                    }, 500) // 마지막 카드 표시를 위해 지연
+                    val finishRunnable = Runnable { finishGame() }
+                    pendingRunnables.add(finishRunnable)
+                    handler.postDelayed(finishRunnable, 500) // 마지막 카드 표시를 위해 지연
                     return
                 }
                 
@@ -360,9 +369,9 @@ class GameActivity : BaseActivity() {
                 // 게임 종료 확인 (업데이트 전에 확인)
                 if (updatedRemainingFoods.isEmpty() || gameStateManager.isGameFinished()) {
                     // 남은 음식이 없으면 게임 종료 (마지막 카드를 표시하기 위해 약간의 지연)
-                    binding.cardStackView.postDelayed({
-                        finishGame()
-                    }, 500) // 스와이프 애니메이션 완료 후 게임 종료 (마지막 카드 표시)
+                    val finishRunnable = Runnable { finishGame() }
+                    pendingRunnables.add(finishRunnable)
+                    handler.postDelayed(finishRunnable, 500) // 스와이프 애니메이션 완료 후 게임 종료 (마지막 카드 표시)
                     return
                 }
                 
@@ -370,12 +379,14 @@ class GameActivity : BaseActivity() {
                 cardStackAdapter.setFoods(updatedRemainingFoods)
                 
                 // topPosition을 0으로 리셋하여 첫 번째 카드부터 시작
-                binding.cardStackView.postDelayed({
+                val resetPositionRunnable = Runnable {
                     layoutManager.topPosition = 0
                     // 카드가 제대로 표시되도록 강제 새로고침
                     binding.cardStackView.invalidate()
                     binding.cardStackView.requestLayout()
-                }, 50) // 약간의 지연을 두어 어댑터 업데이트 완료 보장
+                }
+                pendingRunnables.add(resetPositionRunnable)
+                handler.postDelayed(resetPositionRunnable, 50) // 약간의 지연을 두어 어댑터 업데이트 완료 보장
                 
                 // 다음 이미지 프리로드
                 preloadNextImages()
@@ -411,17 +422,21 @@ class GameActivity : BaseActivity() {
                 cardStackAdapter.setFoods(remainingFoods)
                 
                 // CardStackView의 rewind() 메서드 호출하여 애니메이션 수행
-                binding.cardStackView.post {
+                val rewindRunnable = Runnable {
                     // rewind() 호출 (CardStackView가 내부적으로 처리)
                     binding.cardStackView.rewind()
                 }
+                pendingRunnables.add(rewindRunnable)
+                handler.post(rewindRunnable)
                 
                 // 약간의 지연 후 topPosition을 0으로 리셋
-                binding.cardStackView.postDelayed({
+                val resetTopPositionRunnable = Runnable {
                     layoutManager.topPosition = 0
                     // 카드가 제대로 표시되도록 강제 새로고침
                     binding.cardStackView.invalidate()
-                }, 100)
+                }
+                pendingRunnables.add(resetTopPositionRunnable)
+                handler.postDelayed(resetTopPositionRunnable, 100)
             }
             
             // 진행 상황 업데이트
@@ -441,7 +456,7 @@ class GameActivity : BaseActivity() {
      */
     private fun onCardRewoundInternal() {
         // Rewind 애니메이션 완료 후 추가 처리
-        binding.cardStackView.post {
+        val rewindCompleteRunnable = Runnable {
             // topPosition을 0으로 확실히 리셋
             layoutManager.topPosition = 0
             
@@ -458,6 +473,8 @@ class GameActivity : BaseActivity() {
                 binding.cardStackView.requestLayout()
             }
         }
+        pendingRunnables.add(rewindCompleteRunnable)
+        handler.post(rewindCompleteRunnable)
     }
 
     /**
@@ -537,13 +554,15 @@ class GameActivity : BaseActivity() {
         }
 
         // 약간의 지연 후 ResultActivity로 이동 (마지막 카드 표시를 위해)
-        binding.cardStackView.postDelayed({
+        val navigateToResultRunnable = Runnable {
             val intent = Intent(this, ResultActivity::class.java)
             val passedFoodIds = passedFoods.map { it.id }
             intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
             startActivity(intent)
             finish()
-        }, 300) // 마지막 카드가 보이도록 약간의 지연
+        }
+        pendingRunnables.add(navigateToResultRunnable)
+        handler.postDelayed(navigateToResultRunnable, 300) // 마지막 카드가 보이도록 약간의 지연
     }
 
     override fun onResume() {
@@ -558,6 +577,8 @@ class GameActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 리소스 정리
+        // 모든 pending 작업 취소 (메모리 누수 방지)
+        pendingRunnables.forEach { handler.removeCallbacks(it) }
+        pendingRunnables.clear()
     }
 }

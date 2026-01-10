@@ -1,6 +1,8 @@
 package com.example.foodworldcup.ui.adapter
 
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.example.foodworldcup.R
 import com.example.foodworldcup.data.Food
 import com.yuyakaido.android.cardstackview.Direction
@@ -71,10 +74,11 @@ class CardStackAdapter(
 
     /**
      * 이미지를 로드하고, 실패 시 여러 경로를 시도합니다.
+     * 깜빡임 방지를 위해 Bitmap을 직접 ImageView에 설정합니다.
      */
     private fun loadImageWithFallback(holder: ViewHolder, food: Food) {
         if (food.imagePath.isNullOrEmpty()) {
-            holder.foodImageView.setImageDrawable(null)
+            holder.foodImageView.setImageResource(R.drawable.ic_launcher_background)
             holder.foodImageView.setBackgroundColor(android.graphics.Color.WHITE)
             return
         }
@@ -104,12 +108,24 @@ class CardStackAdapter(
                 inputStream.close()
                 
                 if (bitmap != null) {
-                    Glide.with(holder.itemView.context)
-                        .load(bitmap)
-                        .placeholder(android.R.color.white)
-                        .error(android.R.color.white)
-                        .centerCrop()
-                        .into(holder.foodImageView)
+                    try {
+                        // ImageView에 직접 설정 (동기적, 즉시 표시)
+                        holder.foodImageView.setImageBitmap(bitmap)
+                        holder.foodImageView.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                    } catch (e: Exception) {
+                        // Bitmap 직접 설정 실패 시 Glide 사용 (폴백)
+                        val requestOptions = RequestOptions()
+                            .placeholder(null)
+                            .error(ColorDrawable(Color.WHITE))
+                            .centerCrop()
+                            .dontAnimate()
+                        
+                        Glide.with(holder.itemView.context)
+                            .load(bitmap)
+                            .apply(requestOptions)
+                            .into(holder.foodImageView)
+                    }
+                    
                     return // 성공하면 종료
                 }
             } catch (e: Exception) {
@@ -118,10 +134,11 @@ class CardStackAdapter(
             }
         }
         
-        // 모든 시도 실패 시 흰색 배경
-        holder.foodImageView.setImageDrawable(null)
+        // 모든 시도 실패 시 기본 이미지 표시
+        holder.foodImageView.setImageResource(R.drawable.ic_launcher_background)
         holder.foodImageView.setBackgroundColor(android.graphics.Color.WHITE)
     }
+    
 
     /**
      * 스와이프 비율에 따라 Overlay 투명도를 조절합니다.
