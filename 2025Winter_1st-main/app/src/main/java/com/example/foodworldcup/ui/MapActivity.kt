@@ -34,6 +34,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
+import androidx.core.graphics.createBitmap
 
 
 // --- [1] 데이터 모델 (Kakao Local API JSON 응답용) ---
@@ -160,7 +161,7 @@ class MapActivity : BaseActivity() {
         setContentView(R.layout.activity_map)
 
         // 하단 네비게이션 바 설정
-        setupBottomNavigation(BaseActivity.Screen.MAP)
+        setupBottomNavigation(Screen.MAP)
 
 
         // Intent에서 음식 이름 리스트 받기
@@ -326,7 +327,7 @@ class MapActivity : BaseActivity() {
                     val height = (24 * density).toInt() // 24dp
                     
                     // 비트맵 생성 및 그리기
-                    val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+                    val bitmap = createBitmap(width, height)
                     val canvas = android.graphics.Canvas(bitmap)
                     drawable.setBounds(0, 0, width, height)
                     drawable.draw(canvas)
@@ -359,7 +360,7 @@ class MapActivity : BaseActivity() {
                     val height = (32 * density).toInt() // 32dp
                     
                     // 비트맵 생성 및 그리기
-                    val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+                    val bitmap = createBitmap(width, height)
                     val canvas = android.graphics.Canvas(bitmap)
                     drawable.setBounds(0, 0, width, height)
                     drawable.draw(canvas)
@@ -390,20 +391,18 @@ class MapActivity : BaseActivity() {
                     val width = (16 * density).toInt() // 16dp (원래 32dp의 50%)
                     val height = (16 * density).toInt() // 16dp
                     
-                    val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+                    val bitmap = createBitmap(width, height)
                     val canvas = android.graphics.Canvas(bitmap)
                     drawable.setBounds(0, 0, width, height)
                     drawable.draw(canvas)
                     
                     android.util.Log.d("MapActivity", "현재 위치 마커 비트맵 생성 완료: ${width}x${height}")
-                    
-                    if (bitmap != null) {
-                        val locationStyle = LabelStyle.from(bitmap)
-                        if (locationStyle != null) {
-                            val styles = LabelStyles.from(locationStyle)
-                            myLocationMarkerStyle = labelManager.addLabelStyles(styles)
-                            android.util.Log.d("MapActivity", "현재 위치 마커 스타일 추가 완료: ${myLocationMarkerStyle != null}")
-                        }
+
+                    val locationStyle = LabelStyle.from(bitmap)
+                    if (locationStyle != null) {
+                        val styles = LabelStyles.from(locationStyle)
+                        myLocationMarkerStyle = labelManager.addLabelStyles(styles)
+                        android.util.Log.d("MapActivity", "현재 위치 마커 스타일 추가 완료: ${myLocationMarkerStyle != null}")
                     }
                 }
             } catch (e: Exception) {
@@ -447,12 +446,12 @@ class MapActivity : BaseActivity() {
         // 같은 아이템을 두 번 클릭하면 선택 해제
         if (selectedPlaceIndex == position) {
             selectedPlaceIndex = -1
-            confirmButton.visibility = android.view.View.GONE
+            confirmButton.visibility = View.GONE
             // 선택 해제 시 모든 항목 원래 색으로 복원
         } else {
             // 다른 아이템 선택
             selectedPlaceIndex = position
-            confirmButton.visibility = android.view.View.VISIBLE
+            confirmButton.visibility = View.VISIBLE
             
             // 지도에서도 선택
             updateSelectedMarker(place)
@@ -487,7 +486,6 @@ class MapActivity : BaseActivity() {
             if (viewHolder is PlaceAdapter.PlaceViewHolder) {
                 val item = placeAdapter.items.getOrNull(i)
                 if (item is PlaceAdapter.AdapterItem.PlaceItem && item.index < placeAdapter.places.size) {
-                    val place = placeAdapter.places[item.index]
                     val isSelected = item.index == selectedPlaceIndex
                     
                     // 선택 상태에 따라 배경색 즉시 변경
@@ -632,15 +630,15 @@ class MapActivity : BaseActivity() {
                         // 배경 표시 여부만 업데이트 (위치는 변경하지 않음 - 완전히 고정)
                         if (dX > 0) {
                             // 오른쪽 스와이프 (길찾기) - 아이템이 오른쪽으로 이동하면 왼쪽에 배경 표시, 왼쪽에 글씨
-                            rightSwipeBackground.visibility = android.view.View.VISIBLE
-                            leftSwipeBackground.visibility = android.view.View.GONE
+                            rightSwipeBackground.visibility = View.VISIBLE
+                            leftSwipeBackground.visibility = View.GONE
                         } else if (dX < 0) {
                             // 왼쪽 스와이프 (상세정보) - 아이템이 왼쪽으로 이동하면 오른쪽에 배경 표시, 오른쪽에 글씨
-                            leftSwipeBackground.visibility = android.view.View.VISIBLE
-                            rightSwipeBackground.visibility = android.view.View.GONE
+                            leftSwipeBackground.visibility = View.VISIBLE
+                            rightSwipeBackground.visibility = View.GONE
                         } else {
-                            leftSwipeBackground.visibility = android.view.View.GONE
-                            rightSwipeBackground.visibility = android.view.View.GONE
+                            leftSwipeBackground.visibility = View.GONE
+                            rightSwipeBackground.visibility = View.GONE
                         }
                         
                         // ItemTouchHelper의 기본 그리기를 dX=0으로 호출하여 itemView가 이동하지 않도록 함
@@ -655,8 +653,8 @@ class MapActivity : BaseActivity() {
                     val leftSwipeBackground = viewHolder.itemView.findViewById<androidx.cardview.widget.CardView>(R.id.leftSwipeBackground)
                     val rightSwipeBackground = viewHolder.itemView.findViewById<androidx.cardview.widget.CardView>(R.id.rightSwipeBackground)
                     val itemCard = viewHolder.itemView.findViewById<androidx.cardview.widget.CardView>(R.id.itemCard)
-                    leftSwipeBackground?.visibility = android.view.View.GONE
-                    rightSwipeBackground?.visibility = android.view.View.GONE
+                    leftSwipeBackground?.visibility = View.GONE
+                    rightSwipeBackground?.visibility = View.GONE
                     leftSwipeBackground?.translationX = 0f
                     rightSwipeBackground?.translationX = 0f
                     itemCard?.translationX = 0f
@@ -673,8 +671,8 @@ class MapActivity : BaseActivity() {
                 val rightSwipeBackground = itemView.findViewById<androidx.cardview.widget.CardView>(R.id.rightSwipeBackground)
                 val itemCard = itemView.findViewById<androidx.cardview.widget.CardView>(R.id.itemCard)
                 
-                leftSwipeBackground?.visibility = android.view.View.GONE
-                rightSwipeBackground?.visibility = android.view.View.GONE
+                leftSwipeBackground?.visibility = View.GONE
+                rightSwipeBackground?.visibility = View.GONE
                 leftSwipeBackground?.translationX = 0f
                 rightSwipeBackground?.translationX = 0f
                 itemCard?.translationX = 0f
@@ -843,8 +841,8 @@ class MapActivity : BaseActivity() {
                         if (headerHeight == 0) {
                             val headerLayout = LayoutInflater.from(this).inflate(R.layout.item_food_type_header, null)
                             headerLayout.measure(
-                                android.view.View.MeasureSpec.makeMeasureSpec(placeRecyclerView.width, android.view.View.MeasureSpec.EXACTLY),
-                                android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED)
+                                View.MeasureSpec.makeMeasureSpec(placeRecyclerView.width, View.MeasureSpec.EXACTLY),
+                                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
                             )
                             headerHeight = headerLayout.measuredHeight
                         }
@@ -1067,61 +1065,14 @@ class MapActivity : BaseActivity() {
         if (!::kakaoMap.isInitialized) return
         
         try {
-            val layer = kakaoMap.labelManager?.layer ?: return
-            
             // Kakao Map SDK v2에서 마커 제거 방법 시도
-            // 방법 1: Label 객체의 remove() 메서드
-            try {
-                val removeMethod = label.javaClass.getMethod("remove")
-                removeMethod.invoke(label)
-                android.util.Log.d("MapActivity", "마커 제거 성공 (Label.remove 메서드)")
-                return
-            } catch (e: NoSuchMethodException) {
-                // 방법 2: Layer의 remove(Label) 메서드
-                try {
-                    val removeMethod = layer.javaClass.getMethod("remove", Label::class.java)
-                    removeMethod.invoke(layer, label)
-                    android.util.Log.d("MapActivity", "마커 제거 성공 (Layer.remove 메서드)")
-                    return
-                } catch (e2: NoSuchMethodException) {
-                    // 방법 3: Layer의 removeLabel(Label) 메서드
-                    try {
-                        val removeLabelMethod = layer.javaClass.getMethod("removeLabel", Label::class.java)
-                        removeLabelMethod.invoke(layer, label)
-                        android.util.Log.d("MapActivity", "마커 제거 성공 (Layer.removeLabel 메서드)")
-                        return
-                    } catch (e3: NoSuchMethodException) {
-                        // 방법 4: Label 객체의 delete() 메서드
-                        try {
-                            val deleteMethod = label.javaClass.getMethod("delete")
-                            deleteMethod.invoke(label)
-                            android.util.Log.d("MapActivity", "마커 제거 성공 (Label.delete 메서드)")
-                            return
-                        } catch (e4: NoSuchMethodException) {
-                            android.util.Log.w("MapActivity", "마커 제거 메서드를 찾을 수 없습니다. 모든 가능한 메서드를 시도했습니다.")
-                            android.util.Log.w("MapActivity", "Label 클래스 메서드: ${label.javaClass.methods.map { it.name }.take(10)}")
-                            android.util.Log.w("MapActivity", "Layer 클래스 메서드: ${layer.javaClass.methods.map { it.name }.filter { it.contains("remove", ignoreCase = true) || it.contains("delete", ignoreCase = true) || it.contains("clear", ignoreCase = true) }}")
-                        }
-                    }
-                }
-            }
+            val removeMethod = label.javaClass.getMethod("remove")
+            removeMethod.invoke(label)
+            android.util.Log.d("MapActivity", "마커 제거 성공 (Label.remove 메서드)")
+            return
         } catch (e: Exception) {
             android.util.Log.e("MapActivity", "마커 제거 실패: ${e.message}", e)
             e.printStackTrace()
-        }
-    }
-
-    /**
-     * 카테고리 이름에서 "음식점>" 제거
-     * 예: "음식점>양식>이탈리안" -> "양식>이탈리안"
-     */
-    private fun parseCategoryName(categoryName: String?): String {
-        if (categoryName.isNullOrBlank()) return "카테고리 정보 없음"
-        
-        return if (categoryName.startsWith("음식점 >")) {
-            categoryName.substring(8) // "음식점>" 제거 (7자)
-        } else {
-            categoryName
         }
     }
 
@@ -1182,6 +1133,7 @@ class MapActivity : BaseActivity() {
                 currentLongitude!!,
                 onComplete = {
                     completedSearches++
+
                     if (completedSearches >= totalSearches) {
                         // 검색 완료 후 음식종류별 그룹화 및 거리순 정렬
                         sortAndGroupPlacesByFoodType()
@@ -1454,8 +1406,6 @@ class MapActivity : BaseActivity() {
         if (!::kakaoMap.isInitialized) return
         
         try {
-            val layer = kakaoMap.labelManager?.layer ?: return
-            
             // 음식점 마커만 제거 (현재 위치 마커는 제외)
             val labelsToRemove = placeMarkers.keys.filter { it != myLocationLabel }.toList()
             labelsToRemove.forEach { label ->
@@ -1561,10 +1511,10 @@ class MapActivity : BaseActivity() {
      */
     private fun showLoading(show: Boolean) {
         if (show) {
-            progressBar.visibility = android.view.View.VISIBLE
-            searchStatusText.visibility = android.view.View.VISIBLE
+            progressBar.visibility = View.VISIBLE
+            searchStatusText.visibility = View.VISIBLE
         } else {
-            progressBar.visibility = android.view.View.GONE
+            progressBar.visibility = View.GONE
         }
     }
 }
@@ -1637,7 +1587,6 @@ class StickyHeaderItemDecoration(private val adapter: PlaceAdapter) : RecyclerVi
                             }
                         }
                     }
-                    if (currentHeaderPosition >= 0) break
                 }
             }
         }
@@ -1921,8 +1870,8 @@ class PlaceAdapter(
                             
                             // 카테고리 이름 파싱 ("음식점>" 제거)
                             val categoryName = place.category_name ?: "카테고리 정보 없음"
-                            val parsedCategory = if (categoryName.startsWith("음식점>")) {
-                                categoryName.substring(7) // "음식점>" 제거
+                            val parsedCategory = if (categoryName.startsWith("음식점 >")) {
+                                categoryName.substring(5) // "음식점 >" 제거
                             } else {
                                 categoryName
                             }
