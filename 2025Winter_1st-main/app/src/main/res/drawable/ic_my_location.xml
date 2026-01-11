@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
+    android:width="30dp"
+    android:height="30dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <!-- 현재 위치 아이콘 - 타겟 디자인 (흰색 원 배경에 검은색 타겟) -->
@@ -31,9 +31,4 @@
     <path
         android:fillColor="#FF000000"
         android:pathData="M16,10 L16,14 L18,14 L18,10 Z"/>
-    
-    <!-- 중앙 사각형 (흰색) -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M11,11 L13,11 L13,13 L11,13 Z"/>
 </vector>
