@@ -530,6 +530,17 @@ class MapActivity : BaseActivity() {
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
             0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
         ) {
+            override fun getSwipeDirs(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int {
+                // Header 아이템은 스와이프 비활성화
+                if (viewHolder.itemViewType == PlaceAdapter.VIEW_TYPE_HEADER) {
+                    return 0
+                }
+                return super.getSwipeDirs(recyclerView, viewHolder)
+            }
+
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
