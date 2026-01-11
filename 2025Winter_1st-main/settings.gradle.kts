@@ -17,6 +17,9 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        // Kakao Maps SDK 저장소
+        maven { url = uri("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/") }
+        maven { url = uri("https://devrepo.kakao.com/nexus/content/groups/public/") }
     }
 }
 

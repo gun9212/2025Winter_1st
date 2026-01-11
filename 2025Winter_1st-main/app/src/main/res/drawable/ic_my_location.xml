@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 현재 위치 아이콘 - 타겟 디자인 (흰색 원 배경에 검은색 타겟) -->
+    <!-- 외곽 원 (검은색) -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2"
+        android:pathData="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2Z"/>
+    
+    <!-- 상단 선 (검은색) -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M10,6 L14,6 L14,8 L10,8 Z"/>
+    
+    <!-- 하단 선 (검은색) -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M10,16 L14,16 L14,18 L10,18 Z"/>
+    
+    <!-- 좌측 선 (검은색) -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M6,10 L6,14 L8,14 L8,10 Z"/>
+    
+    <!-- 우측 선 (검은색) -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M16,10 L16,14 L18,14 L18,10 Z"/>
+    
+    <!-- 중앙 사각형 (흰색) -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M11,11 L13,11 L13,13 L11,13 Z"/>
+</vector>
