@@ -85,10 +85,23 @@ class FoodListActivity : BaseActivity() {
 
     /**
      * 저장된 체크된 음식 리스트를 불러오는 함수입니다.
+     * 저장된 선택이 없으면 모든 음식을 기본 선택으로 설정합니다.
      */
     private fun loadSelectedFoods() {
-        selectedFoodIds = preferenceManager.getSelectedFoodIds().toMutableSet()
-        Log.d("FoodListActivity", "저장된 선택 음식 개수: ${selectedFoodIds.size}")
+        val savedFoodIds = preferenceManager.getSelectedFoodIds().toMutableSet()
+        
+        // 저장된 선택이 없으면 모든 음식을 기본 선택으로 설정
+        if (savedFoodIds.isEmpty()) {
+            val allFoods = FoodRepository.getFoodList()
+            savedFoodIds.addAll(allFoods.map { it.id })
+            // 기본 선택을 저장
+            preferenceManager.saveSelectedFoodIds(savedFoodIds.toList())
+            Log.d("FoodListActivity", "기본 선택으로 모든 음식 선택: ${savedFoodIds.size}개")
+        } else {
+            Log.d("FoodListActivity", "저장된 선택 음식 개수: ${savedFoodIds.size}")
+        }
+        
+        selectedFoodIds = savedFoodIds
     }
 
     /**

@@ -187,9 +187,9 @@ class GameActivity : BaseActivity() {
             .build()
         layoutManager.setSwipeAnimationSetting(swipeSetting)
 
-        // Rewind 애니메이션 설정
+        // Rewind 애니메이션 설정 (Direction.Top으로 설정하여 위로 올라가는 자연스러운 애니메이션)
         val rewindSetting = RewindAnimationSetting.Builder()
-            .setDirection(Direction.Bottom)
+            .setDirection(Direction.Top)
             .setDuration(Duration.Normal.duration)
             .setInterpolator(DecelerateInterpolator())
             .build()
@@ -412,31 +412,23 @@ class GameActivity : BaseActivity() {
             return
         }
 
-        // GameStateManager에서 Rewind (상태 먼저 업데이트)
+        // GameStateManager에서 Rewind (상태 먼저 업데이트하여 이전 카드가 어댑터에 포함되도록)
         val rewindAction = gameStateManager.rewind()
         if (rewindAction != null) {
-            // 어댑터 데이터 업데이트 (Rewind 후 남은 음식 리스트로 업데이트)
+            // 어댑터 데이터 업데이트 (Rewind 후 남은 음식 리스트로 업데이트, 이전 카드가 포함됨)
             val remainingFoods = gameStateManager.getRemainingFoods()
             if (remainingFoods.isNotEmpty()) {
-                // 어댑터 데이터만 업데이트 (새로 생성하지 않음)
+                // 어댑터 데이터 업데이트 (이전 카드가 다시 포함됨)
                 cardStackAdapter.setFoods(remainingFoods)
                 
-                // CardStackView의 rewind() 메서드 호출하여 애니메이션 수행
+                // 약간의 지연 후 rewind() 호출하여 어댑터 업데이트 완료 보장
                 val rewindRunnable = Runnable {
-                    // rewind() 호출 (CardStackView가 내부적으로 처리)
+                    // CardStackView의 rewind() 메서드 호출하여 애니메이션 수행
+                    // rewind()는 topPosition을 감소시켜 이전 카드를 표시합니다
                     binding.cardStackView.rewind()
                 }
                 pendingRunnables.add(rewindRunnable)
-                handler.post(rewindRunnable)
-                
-                // 약간의 지연 후 topPosition을 0으로 리셋
-                val resetTopPositionRunnable = Runnable {
-                    layoutManager.topPosition = 0
-                    // 카드가 제대로 표시되도록 강제 새로고침
-                    binding.cardStackView.invalidate()
-                }
-                pendingRunnables.add(resetTopPositionRunnable)
-                handler.postDelayed(resetTopPositionRunnable, 100)
+                handler.postDelayed(rewindRunnable, 50) // 어댑터 업데이트 완료 보장을 위한 지연
             }
             
             // 진행 상황 업데이트
@@ -455,26 +447,21 @@ class GameActivity : BaseActivity() {
      * Rewind 완료 시 처리
      */
     private fun onCardRewoundInternal() {
-        // Rewind 애니메이션 완료 후 추가 처리
+        // Rewind 애니메이션 완료 후 topPosition을 0으로 설정하여 카드가 똑바로 정리된 상태로 표시
         val rewindCompleteRunnable = Runnable {
-            // topPosition을 0으로 확실히 리셋
+            // topPosition을 0으로 설정하여 첫 번째 카드(되돌려진 카드)가 제대로 표시되도록 함
             layoutManager.topPosition = 0
             
-            // 어댑터가 제대로 업데이트되었는지 확인
-            val remainingFoods = gameStateManager.getRemainingFoods()
-            if (remainingFoods.isNotEmpty()) {
-                // 어댑터 아이템 개수가 맞지 않으면 다시 업데이트
-                if (cardStackAdapter.itemCount != remainingFoods.size) {
-                    cardStackAdapter.setFoods(remainingFoods)
-                }
-                
-                // 카드가 제대로 표시되도록 강제 새로고침
-                binding.cardStackView.invalidate()
-                binding.cardStackView.requestLayout()
-            }
+            // 카드가 똑바로 정리된 상태로 표시되도록 강제 새로고침
+            binding.cardStackView.invalidate()
+            binding.cardStackView.requestLayout()
+            
+            // 다음 이미지 프리로드
+            preloadNextImages()
         }
         pendingRunnables.add(rewindCompleteRunnable)
-        handler.post(rewindCompleteRunnable)
+        // 애니메이션 완료 후 지연을 두어 부드럽게 처리
+        handler.postDelayed(rewindCompleteRunnable, 100)
     }
 
     /**
