@@ -3,12 +3,14 @@ package com.example.foodworldcup.ui
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.bumptech.glide.Glide
 import com.example.foodworldcup.R
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.databinding.ActivityIntroBinding
 import com.example.foodworldcup.utils.PreferenceManager
+import com.kakao.sdk.common.util.Utility
 
 /**
  * 앱의 첫 화면(인트로 화면)을 담당하는 Activity입니다.
@@ -34,6 +36,10 @@ class IntroActivity : BaseActivity() {
 
         // FoodRepository 초기화 (JSON 파일에서 데이터 로드)
         FoodRepository.initialize(this)
+
+        // 해시 키 추출 및 로그 출력
+        val keyHash = Utility.getKeyHash(this)
+        Log.d("KakaoKeyHash", "현재 키 해시값: $keyHash")
 
         // 하단 네비게이션 바 설정
         setupBottomNavigation(BaseActivity.Screen.HOME)
