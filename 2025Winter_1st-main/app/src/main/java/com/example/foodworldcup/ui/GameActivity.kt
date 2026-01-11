@@ -30,8 +30,7 @@ import com.yuyakaido.android.cardstackview.SwipeAnimationSetting
  * 
  * 주요 기능:
  * - 좌우 스와이프로 음식 선택 (Like/Nope)
- * - 아래로 스와이프로 Rewind 기능
- * - Overlay로 Like/Nope 텍스트 표시
+ *  * - Overlay로 Like/Nope 텍스트 표시
  * - 버튼 클릭으로 자동 스와이프
  * - 이미지 프리로딩
  * 
@@ -53,9 +52,6 @@ class GameActivity : BaseActivity() {
     // CardStackLayoutManager
     private lateinit var layoutManager: CardStackLayoutManager
     
-    // 아래로 스와이프 감지를 위한 변수
-    private var isDraggingDown = false
-    private var downSwipeRatio = 0f
     
     // 초기 총 음식 개수 (카운팅 정확성을 위해 저장)
     private var initialTotalCount: Int = 0
@@ -158,8 +154,6 @@ class GameActivity : BaseActivity() {
                         cardStackAdapter.hideOverlay(it)
                     }
                 }
-                isDraggingDown = false
-                downSwipeRatio = 0f
             }
 
             override fun onCardAppeared(view: View?, position: Int) {
@@ -177,7 +171,6 @@ class GameActivity : BaseActivity() {
         layoutManager.setSwipeThreshold(0.3f) // 스와이프 임계값
         layoutManager.setMaxDegree(20.0f) // 카드 회전 최대 각도
         // 좌우 스와이프만 허용 (기본값)
-        // 아래로 스와이프는 수동으로 감지하여 Rewind 처리
 
         // Swipe 애니메이션 설정
         val swipeSetting = SwipeAnimationSetting.Builder()
@@ -201,79 +194,10 @@ class GameActivity : BaseActivity() {
         binding.cardStackView.layoutManager = layoutManager
         binding.cardStackView.adapter = cardStackAdapter
         
-        // 아래로 스와이프 Rewind를 위한 터치 리스너 추가
-        setupSwipeDownListener()
     }
     
     /**
-     * 아래로 스와이프 제스처를 감지하여 Rewind 기능을 처리합니다.
-     */
-    private var touchStartY = 0f
-    private var touchStartX = 0f
-    
-    private fun setupSwipeDownListener() {
-        // dp를 픽셀로 변환하는 함수
-        val dpToPx = { dp: Float ->
-            resources.displayMetrics.density * dp
-        }
-        
-        val swipeThreshold = dpToPx(100f) // 100dp
-        val dragThreshold = dpToPx(50f) // 50dp
-        
-        binding.cardStackView.setOnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    // 터치 시작 위치 저장
-                    touchStartY = event.y
-                    touchStartX = event.x
-                    isDraggingDown = false
-                    downSwipeRatio = 0f
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    // 아래로 드래그하는지 확인
-                    val deltaY = event.y - touchStartY
-                    val deltaX = kotlin.math.abs(event.x - touchStartX)
-                    
-                    // 세로 이동이 가로 이동보다 크고, 아래로 이동한 경우
-                    if (deltaY > dragThreshold && deltaY > deltaX) {
-                        isDraggingDown = true
-                        val maxDrag = dpToPx(300f)
-                        downSwipeRatio = minOf(1f, (deltaY / maxDrag))
-                    } else {
-                        // 좌우로 드래그하거나 위로 드래그하는 경우는 무시
-                        if (deltaY <= 0 || deltaX > deltaY) {
-                            isDraggingDown = false
-                            downSwipeRatio = 0f
-                        }
-                    }
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    // 아래로 스와이프 완료 확인
-                    val deltaY = event.y - touchStartY
-                    val deltaX = kotlin.math.abs(event.x - touchStartX)
-                    
-                    // 아래로 스와이프 임계값 이상이고, 가로 이동보다 세로 이동이 큰 경우
-                    if (isDraggingDown && deltaY > swipeThreshold && deltaY > deltaX) {
-                        // Rewind 처리
-                        if (gameStateManager.canRewind()) {
-                            handleRewindWithAnimation()
-                        } else {
-                            Toast.makeText(this, "되돌릴 수 있는 카드가 없습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                        isDraggingDown = false
-                        downSwipeRatio = 0f
-                        return@setOnTouchListener true
-                    }
-                    isDraggingDown = false
-                    downSwipeRatio = 0f
-                }
-            }
-            false // 다른 터치 이벤트는 CardStackView가 처리하도록
-        }
-    }
-
-    /**
-     * 카드 드래그 중 처리 (Overlay 표시 및 아래로 스와이프 감지)
+     * 카드 드래그 중 처리 (Overlay 표시)
      */
     private fun onCardDraggingInternal(direction: Direction?, ratio: Float) {
         val topPosition = layoutManager.topPosition
@@ -297,32 +221,30 @@ class GameActivity : BaseActivity() {
             Direction.Right -> {
                 // 오른쪽 스와이프: Like Overlay 표시
                 cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Right)
-                isDraggingDown = false
             }
             Direction.Left -> {
                 // 왼쪽 스와이프: Nope Overlay 표시
                 cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Left)
-                isDraggingDown = false
+            }
+            Direction.Top -> {
+                // 위로 스와이프: 처리하지 않음
+                cardStackAdapter.hideOverlay(holder)
             }
             Direction.Bottom -> {
-                // 아래로 스와이프: Rewind 준비
-                isDraggingDown = true
-                downSwipeRatio = ratio
+                // 아래로 스와이프: 처리하지 않음
+                cardStackAdapter.hideOverlay(holder)
             }
-            else -> {
-                // 다른 방향은 처리하지 않음
-                if (!isDraggingDown) {
-                    cardStackAdapter.hideOverlay(holder)
-                }
+            null -> {
+                // null: 처리하지 않음
+                cardStackAdapter.hideOverlay(holder)
             }
         }
-    }
+        }
 
     /**
      * 카드 스와이프 완료 시 처리
      */
     private fun onCardSwipedInternal(direction: Direction?) {
-        // 아래로 스와이프는 별도 터치 리스너에서 처리하므로 여기서는 처리하지 않음
         
         // 좌우 스와이프인 경우만 처리
         when (direction) {
@@ -399,48 +321,6 @@ class GameActivity : BaseActivity() {
             }
         }
 
-        isDraggingDown = false
-        downSwipeRatio = 0f
-    }
-
-    /**
-     * Rewind 처리 (애니메이션 포함)
-     */
-    private fun handleRewindWithAnimation() {
-        if (!gameStateManager.canRewind()) {
-            Toast.makeText(this, "되돌릴 수 있는 카드가 없습니다.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // GameStateManager에서 Rewind (상태 먼저 업데이트하여 이전 카드가 어댑터에 포함되도록)
-        val rewindAction = gameStateManager.rewind()
-        if (rewindAction != null) {
-            // 어댑터 데이터 업데이트 (Rewind 후 남은 음식 리스트로 업데이트, 이전 카드가 포함됨)
-            val remainingFoods = gameStateManager.getRemainingFoods()
-            if (remainingFoods.isNotEmpty()) {
-                // 어댑터 데이터 업데이트 (이전 카드가 다시 포함됨)
-                cardStackAdapter.setFoods(remainingFoods)
-                
-                // 약간의 지연 후 rewind() 호출하여 어댑터 업데이트 완료 보장
-                val rewindRunnable = Runnable {
-                    // CardStackView의 rewind() 메서드 호출하여 애니메이션 수행
-                    // rewind()는 topPosition을 감소시켜 이전 카드를 표시합니다
-                    binding.cardStackView.rewind()
-                }
-                pendingRunnables.add(rewindRunnable)
-                handler.postDelayed(rewindRunnable, 50) // 어댑터 업데이트 완료 보장을 위한 지연
-            }
-            
-            // 진행 상황 업데이트
-            updateProgress()
-        }
-    }
-    
-    /**
-     * Rewind 처리 (기존 메서드, 호환성 유지)
-     */
-    private fun handleRewind() {
-        handleRewindWithAnimation()
     }
 
     /**
@@ -498,6 +378,37 @@ class GameActivity : BaseActivity() {
                 .build()
             layoutManager.setSwipeAnimationSetting(swipeSetting)
             binding.cardStackView.swipe()
+        }
+
+        // Rewind 버튼: 이전 카드로 되돌리기
+        binding.rewindButton.setOnClickListener {
+            if (!gameStateManager.canRewind()) {
+                Toast.makeText(this, "되돌릴 수 있는 카드가 없습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // GameStateManager에서 Rewind (상태 먼저 업데이트하여 이전 카드가 어댑터에 포함되도록)
+            val rewindAction = gameStateManager.rewind()
+            if (rewindAction != null) {
+                // 어댑터 데이터 업데이트 (Rewind 후 남은 음식 리스트로 업데이트, 이전 카드가 포함됨)
+                val remainingFoods = gameStateManager.getRemainingFoods()
+                if (remainingFoods.isNotEmpty()) {
+                    // 어댑터 데이터 업데이트 (이전 카드가 다시 포함됨)
+                    cardStackAdapter.setFoods(remainingFoods)
+                    
+                    // 약간의 지연 후 rewind() 호출하여 어댑터 업데이트 완료 보장
+                    val rewindRunnable = Runnable {
+                        // CardStackView의 rewind() 메서드 호출하여 애니메이션 수행
+                        // rewind()는 topPosition을 감소시켜 이전 카드를 표시합니다
+                        binding.cardStackView.rewind()
+                    }
+                    pendingRunnables.add(rewindRunnable)
+                    handler.postDelayed(rewindRunnable, 50) // 어댑터 업데이트 완료 보장을 위한 지연
+                }
+                
+                // 진행 상황 업데이트
+                updateProgress()
+            }
         }
     }
 
