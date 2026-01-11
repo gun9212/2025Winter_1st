@@ -766,41 +766,47 @@ class MapActivity : BaseActivity() {
      */
     private fun updateMarkerSize(place: Place, isSelected: Boolean) {
         if (!::kakaoMap.isInitialized) return
-        
+    
         try {
             val placeKey = place.id ?: "${place.place_name}_${place.x}_${place.y}"
             val lat = place.y.toDoubleOrNull() ?: return
             val lng = place.x.toDoubleOrNull() ?: return
-            
+    
             val labelManager = kakaoMap.labelManager ?: return
             val layer = labelManager.layer ?: return
-            
+    
             if (isSelected) {
                 // 선택된 경우: 큰 파란 마커 추가
                 val styles = selectedMarkerStyle ?: return
-                
+    
+                // ⭐ [핵심 수정] setRank(1000) 추가
+                // 숫자가 클수록 다른 마커들보다 위에 그려집니다.
                 val options = LabelOptions.from(LatLng.from(lat, lng))
                     .setStyles(styles)
-                
+                    .setRank(1000) 
+    
                 val selectedLabelNew = layer.addLabel(options)
                 if (selectedLabelNew != null) {
                     placeMarkers[selectedLabelNew] = place
                     placeToLabelMap["${placeKey}_selected"] = selectedLabelNew
                     selectedLabel = selectedLabelNew
-                    android.util.Log.d("MapActivity", "큰 마커 추가 성공: ${place.place_name}")
+                    android.util.Log.d("MapActivity", "큰 마커 추가 성공 (Rank 1000): ${place.place_name}")
                 }
             } else {
                 // 비선택 시: 작은 마커 다시 추가
                 val styles = normalMarkerStyle ?: return
-                
+    
+                // ⭐ [핵심 수정] setRank(0) 추가 (기본값)
+                // 선택되지 않은 마커는 낮은 순위를 줍니다.
                 val options = LabelOptions.from(LatLng.from(lat, lng))
                     .setStyles(styles)
-                
+                    .setRank(0) 
+    
                 val normalLabel = layer.addLabel(options)
                 if (normalLabel != null) {
                     placeMarkers[normalLabel] = place
                     placeToLabelMap[placeKey] = normalLabel
-                    android.util.Log.d("MapActivity", "작은 마커 다시 추가 성공: ${place.place_name}")
+                    android.util.Log.d("MapActivity", "작은 마커 다시 추가 성공 (Rank 0): ${place.place_name}")
                 }
             }
         } catch (e: Exception) {
@@ -1005,7 +1011,7 @@ class MapActivity : BaseActivity() {
                 LatLng.from(currentLatitude!!, currentLongitude!!)
             )
             kakaoMap.moveCamera(cameraUpdate)
-            Toast.makeText(this, "현재 위치로 이동했습니다.", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(this, "현재 위치로 이동했습니다.", Toast.LENGTH_SHORT).show()
         } else {
             // 위치 정보가 없으면 다시 권한 확인 및 위치 가져오기
             checkLocationPermissionAndSearch()
@@ -1112,8 +1118,8 @@ class MapActivity : BaseActivity() {
     private fun parseCategoryName(categoryName: String?): String {
         if (categoryName.isNullOrBlank()) return "카테고리 정보 없음"
         
-        return if (categoryName.startsWith("음식점>")) {
-            categoryName.substring(7) // "음식점>" 제거 (7자)
+        return if (categoryName.startsWith("음식점 >")) {
+            categoryName.substring(8) // "음식점>" 제거 (7자)
         } else {
             categoryName
         }
@@ -1523,20 +1529,30 @@ class MapActivity : BaseActivity() {
     private fun openNavigation(latitude: Double, longitude: Double, placeName: String) {
         // 카카오맵 앱으로 길찾기
         val kakaoMapUri = "kakaomap://route?ep=$latitude,$longitude&by=CAR"
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
+        val kakaoIntent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
         
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            // 카카오맵이 없으면 네이버 지도 시도
-            val naverMapUri = "nmap://route/car?dlat=$latitude&dlng=$longitude&dname=${Uri.encode(placeName)}"
-            val naverIntent = Intent(Intent.ACTION_VIEW, Uri.parse(naverMapUri))
-            
-            if (naverIntent.resolveActivity(packageManager) != null) {
-                startActivity(naverIntent)
-            } else {
-                Toast.makeText(this, "길찾기 앱을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
+        if (kakaoIntent.resolveActivity(packageManager) != null) {
+            startActivity(kakaoIntent)
+            return
+        }
+        
+        // 카카오맵이 없으면 네이버 지도 앱 시도
+        val naverMapUri = "nmap://route/car?dlat=$latitude&dlng=$longitude&dname=${Uri.encode(placeName)}"
+        val naverIntent = Intent(Intent.ACTION_VIEW, Uri.parse(naverMapUri))
+        
+        if (naverIntent.resolveActivity(packageManager) != null) {
+            startActivity(naverIntent)
+            return
+        }
+        
+        // 길찾기 앱이 없으면 웹 브라우저로 카카오맵 길찾기 페이지 열기
+        try {
+            val webUrl = "https://map.kakao.com/link/to/${Uri.encode(placeName)},$latitude,$longitude"
+            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+            startActivity(webIntent)
+        } catch (e: Exception) {
+            android.util.Log.e("MapActivity", "웹 브라우저로 길찾기 열기 실패: ${e.message}")
+            Toast.makeText(this, "길찾기를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -1560,11 +1576,22 @@ class StickyHeaderItemDecoration(private val adapter: PlaceAdapter) : RecyclerVi
     
     private var cachedHeaderView: View? = null
     private var cachedHeaderPosition = -1
-    private var headerAlpha: Float = 1f // 초기값 1f로 시작하여 순간적인 나타남 방지
-    private val alphaAnimationDuration = 400L // 400ms 애니메이션 (더 부드럽게)
-    private var lastAnimationTime = 0L
-    private val paint = android.graphics.Paint().apply {
-        isAntiAlias = true
+    private var headerAlpha: Float = 1f
+    
+    override fun getItemOffsets(
+        outRect: android.graphics.Rect,
+        view: android.view.View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        val position = parent.getChildAdapterPosition(view)
+        if (position != RecyclerView.NO_POSITION && position < adapter.items.size) {
+            // 헤더 아이템에 대해서만 RecyclerView의 paddingStart만큼 음수 마진을 주어 x=0부터 시작하도록 함
+            if (adapter.items[position] is PlaceAdapter.AdapterItem.Header) {
+                outRect.left = -parent.paddingStart
+                outRect.right = -parent.paddingEnd
+            }
+        }
     }
     
     override fun onDrawOver(c: android.graphics.Canvas, parent: RecyclerView, state: RecyclerView.State) {
@@ -1637,9 +1664,9 @@ class StickyHeaderItemDecoration(private val adapter: PlaceAdapter) : RecyclerVi
                 adapter.onBindViewHolder(headerHolder, headerPosition)
                 headerView = headerHolder.itemView
                 
-                // 헤더 크기 측정 및 레이아웃 (RecyclerView의 padding을 고려하여 실제 위치에 맞춤)
+                // 헤더 크기 측정 및 레이아웃 (좌우로 꽉 차도록)
                 val widthSpec = android.view.View.MeasureSpec.makeMeasureSpec(
-                    parent.width - parent.paddingLeft - parent.paddingRight, 
+                    parent.width, 
                     android.view.View.MeasureSpec.EXACTLY
                 )
                 val heightSpec = android.view.View.MeasureSpec.makeMeasureSpec(
@@ -1650,64 +1677,10 @@ class StickyHeaderItemDecoration(private val adapter: PlaceAdapter) : RecyclerVi
                 
                 cachedHeaderView = headerView
                 cachedHeaderPosition = headerPosition
-                lastAnimationTime = System.currentTimeMillis()
-                
-                // 실제 헤더가 아직 보이면 점진적으로 전환 (부드러운 fade-in)
-                // 실제 헤더가 화면 위로 사라질 때 sticky header로 자연스럽게 전환
-                // paddingTop이 0이므로 headerTop을 그대로 사용
-                if (actualHeaderView != null && headerTop >= 0 && headerTop < headerView.height) {
-                    // 실제 헤더의 상단 위치를 기반으로 alpha 계산 (더 부드러운 전환)
-                    // headerTop이 0에 가까울수록 alpha가 1에 가까워짐
-                    // 실제 헤더가 화면 위로 사라질수록 sticky header의 alpha를 점진적으로 증가
-                    val progress = 1f - (headerTop.toFloat() / headerView.height.toFloat()).coerceIn(0f, 1f)
-                    headerAlpha = progress.coerceIn(0.5f, 1f) // 최소 50% 투명도로 시작 (더 부드러운 전환, 순간적인 나타남 방지)
-                    lastAnimationTime = System.currentTimeMillis()
-                } else if (actualHeaderView != null && headerTop < 0 && headerTop > -headerView.height) {
-                    // 실제 헤더가 화면 위로 사라지고 있지만 아직 일부가 보임 (음수지만 절대값이 높이보다 작음)
-                    // headerTop이 음수면 이미 위로 사라진 상태이므로 alpha를 높게 설정
-                    val progress = 1f - ((-headerTop).toFloat() / headerView.height.toFloat()).coerceIn(0f, 1f)
-                    headerAlpha = progress.coerceIn(0.7f, 1f) // 더 높은 alpha로 시작
-                    lastAnimationTime = System.currentTimeMillis()
-                } else {
-                    // 실제 헤더가 완전히 사라졌으면 점진적으로 페이드인
-                    headerAlpha = 0.8f // 처음부터 어느 정도 보이도록 시작 (순간적인 나타남 방지)
-                    lastAnimationTime = System.currentTimeMillis()
-                }
-            } else {
-                // 기존 헤더가 있고 실제 헤더 뷰가 보이는 경우 부드러운 전환
-                // paddingTop이 0이므로 headerTop을 그대로 사용
-                if (actualHeaderView != null && headerTop >= 0 && headerTop < headerView.height) {
-                    // 실제 헤더가 아직 보이면 alpha를 점진적으로 조정 (더 부드러운 전환)
-                    val progress = 1f - (headerTop.toFloat() / headerView.height.toFloat()).coerceIn(0f, 1f)
-                    headerAlpha = progress.coerceIn(headerAlpha, 1f) // 증가만 허용 (감소 방지하여 깜빡임 방지)
-                    lastAnimationTime = System.currentTimeMillis()
-                } else if (actualHeaderView != null && headerTop < 0 && headerTop > -headerView.height) {
-                    // 실제 헤더가 화면 위로 사라지고 있지만 아직 일부가 보임
-                    val progress = 1f - ((-headerTop).toFloat() / headerView.height.toFloat()).coerceIn(0f, 1f)
-                    headerAlpha = progress.coerceIn(headerAlpha, 1f) // 증가만 허용
-                    lastAnimationTime = System.currentTimeMillis()
-                } else if (actualHeaderView == null || headerTop <= -headerView.height) {
-                    // 실제 헤더가 완전히 사라졌으면 페이드인 애니메이션 (부드럽게)
-                    val currentTime = System.currentTimeMillis()
-                    if (lastAnimationTime == 0L) {
-                        lastAnimationTime = currentTime
-                    }
-                    val elapsed = currentTime - lastAnimationTime
-                    if (headerAlpha < 1f) {
-                        if (elapsed < alphaAnimationDuration) {
-                            // 부드러운 페이드인 (점진적으로 alpha 증가)
-                            val progress = (elapsed / alphaAnimationDuration.toFloat()).coerceIn(0f, 1f)
-                            headerAlpha = (headerAlpha + (1f - headerAlpha) * progress).coerceAtMost(1f)
-                        } else {
-                            headerAlpha = 1f
-                        }
-                        lastAnimationTime = currentTime
-                        parent.postInvalidateDelayed(16) // 다음 프레임 그리기
-                    }
-                }
+                headerAlpha = 1f
             }
             
-            if (headerView != null) {
+            headerView?.let { view ->
                 // 다음 헤더가 올라오면서 스택 효과 적용
                 var nextHeaderPosition = -1
                 for (i in (headerPosition + 1) until adapter.items.size) {
@@ -1723,91 +1696,25 @@ class StickyHeaderItemDecoration(private val adapter: PlaceAdapter) : RecyclerVi
                     if (nextHeaderView != null) {
                         // paddingTop이 0이므로 nextHeaderView.top을 그대로 사용
                         // 다음 헤더가 올라오고 있으면 스택 효과로 현재 헤더를 위로 밀어냄
-                        if (nextHeaderView.top < headerView.height) {
-                            topOffset = nextHeaderView.top - headerView.height
+                        if (nextHeaderView.top < view.height) {
+                            topOffset = nextHeaderView.top - view.height
                         }
                     }
                 }
                 
-                // 헤더를 상단에 부드럽게 그리기 (fade-in 효과로 순간적으로 나타나지 않도록)
-                // RecyclerView의 padding을 고려하여 실제 헤더 위치에 맞춤 (상단 padding은 0이므로 붙임)
-                val alphaValue = (255 * headerAlpha).toInt().coerceIn(0, 255)
-                if (alphaValue > 0) {
-                    c.save()
-                    // RecyclerView의 좌우 padding만 고려 (상단 padding은 0이므로 지도와 딱 붙음)
-                    val xOffset = parent.paddingLeft.toFloat()
-                    val yOffset = topOffset.toFloat() // paddingTop이 0이므로 topOffset만 사용
-                    c.translate(xOffset, yOffset)
-                    
-                    // Paint를 사용하여 알파 값 적용 (부드러운 fade-in, deprecated된 saveLayerAlpha 대신)
-                    paint.alpha = alphaValue
-                    
-                    // 레이어를 저장하고 Paint로 alpha 적용 (deprecated된 saveLayerAlpha 대신)
-                    val layerId = c.saveLayer(
-                        0f, 0f,
-                        headerView.width.toFloat(),
-                        headerView.height.toFloat(),
-                        paint
-                    )
-                    parent.drawChild(c, headerView, parent.drawingTime)
-                    c.restoreToCount(layerId)
-                    c.restore()
-                }
-                
-                // 다음 프레임을 위해 다시 그리기 요청 (애니메이션 중일 때만, 60fps로 부드럽게)
-                if (headerAlpha < 1f) {
-                    parent.postInvalidateDelayed(16) // 약 60fps
-                }
+                // 헤더를 상단에 그리기 (실제 헤더와 같은 위치, x=0부터 시작)
+                c.save()
+                val xOffset = 0f // getItemOffsets로 padding을 상쇄했으므로 x=0부터 시작
+                val yOffset = topOffset.toFloat()
+                c.translate(xOffset, yOffset)
+                parent.drawChild(c, view, parent.drawingTime)
+                c.restore()
             }
         } else {
-            // 실제 헤더가 화면에 보이면 sticky header는 페이드아웃
-            if (cachedHeaderView != null && headerAlpha > 0f) {
-                val currentTime = System.currentTimeMillis()
-                val elapsed = currentTime - lastAnimationTime
-                if (elapsed < alphaAnimationDuration) {
-                    headerAlpha = (headerAlpha * (1f - elapsed / alphaAnimationDuration.toFloat())).coerceAtLeast(0f)
-                    lastAnimationTime = currentTime
-                    
-                    // 페이드아웃 중이면 그리기 (RecyclerView의 padding을 고려)
-                    if (headerAlpha > 0.01f) {
-                        val headerView = cachedHeaderView
-                        if (headerView != null) {
-                            val alphaValue = (255 * headerAlpha).toInt().coerceIn(0, 255)
-                            c.save()
-                            
-                            // RecyclerView의 좌우 padding만 고려 (상단 padding은 0이므로 지도와 딱 붙음)
-                            val xOffset = parent.paddingLeft.toFloat()
-                            val yOffset = 0f // paddingTop이 0이므로 yOffset은 0
-                            c.translate(xOffset, yOffset)
-                            
-                            // Paint를 사용하여 알파 값 적용 (deprecated된 saveLayerAlpha 대신 saveLayer 사용)
-                            paint.alpha = alphaValue
-                            val layerId = c.saveLayer(
-                                0f, 0f,
-                                headerView.width.toFloat(),
-                                headerView.height.toFloat(),
-                                paint
-                            )
-                            parent.drawChild(c, headerView, parent.drawingTime)
-                            c.restoreToCount(layerId)
-                            c.restore()
-                            parent.postInvalidateDelayed(16)
-                        }
-                    } else {
-                        cachedHeaderView = null
-                        cachedHeaderPosition = -1
-                        headerAlpha = 0f
-                    }
-                } else {
-                    cachedHeaderView = null
-                    cachedHeaderPosition = -1
-                    headerAlpha = 0f
-                }
-            } else {
-                cachedHeaderView = null
-                cachedHeaderPosition = -1
-                headerAlpha = 0f
-            }
+            // 실제 헤더가 화면에 보이면 sticky header는 표시하지 않음
+            cachedHeaderView = null
+            cachedHeaderPosition = -1
+            headerAlpha = 0f
         }
     }
 }
