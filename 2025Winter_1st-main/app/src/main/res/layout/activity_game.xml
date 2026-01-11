@@ -34,7 +34,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 하단: 원형 버튼 2개 (중앙 배치) -->
+    <!-- 하단: 원형 버튼 3개 (중앙 배치: Nope, Rewind, Like) -->
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="wrap_content"
@@ -51,7 +51,7 @@
             android:id="@+id/nopeButton"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginEnd="32dp"
+            android:layout_marginEnd="16dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
@@ -69,10 +69,35 @@
                 android:contentDescription="Nope 버튼" />
         </androidx.cardview.widget.CardView>
 
+        <!-- Rewind 버튼 (가운데) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/rewindButton"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/card_background_gray">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_revert"
+                android:scaleType="fitCenter"
+                android:contentDescription="Rewind 버튼" />
+        </androidx.cardview.widget.CardView>
+
         <!-- Like 버튼 (오른쪽) -->
         <androidx.cardview.widget.CardView
             android:id="@+id/likeButton"
             android:layout_width="64dp"
+            android:layout_marginStart="16dp"
             android:layout_height="64dp"
             android:clickable="true"
             android:focusable="true"
