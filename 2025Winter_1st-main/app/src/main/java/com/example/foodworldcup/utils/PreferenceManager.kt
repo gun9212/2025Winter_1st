@@ -190,6 +190,9 @@ class PreferenceManager(context: Context) {
                             selectedDate = System.currentTimeMillis(),
                             placeName = "",
                             placeAddress = "",
+                            placeId = null, // 레거시 데이터에는 없음
+                            latitude = null, // 레거시 데이터에는 없음
+                            longitude = null, // 레거시 데이터에는 없음
                             memo = ""
                         )
                     }

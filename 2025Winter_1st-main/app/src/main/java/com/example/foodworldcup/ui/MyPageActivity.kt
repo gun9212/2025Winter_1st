@@ -1,5 +1,7 @@
 package com.example.foodworldcup.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -120,6 +122,11 @@ class MyPageActivity : BaseActivity() {
             imm?.showSoftInput(bottomSheetBinding.memoEditText, InputMethodManager.SHOW_IMPLICIT)
         }
 
+        // 식당 이름 클릭 시 카카오맵 상세페이지로 이동
+        bottomSheetBinding.placeNameTextView.setOnClickListener {
+            openKakaoMapDetail(selectedFood)
+        }
+
         // 저장 버튼 클릭
         bottomSheetBinding.saveButton.setOnClickListener {
             val memo = bottomSheetBinding.memoEditText.text.toString()
@@ -146,6 +153,71 @@ class MyPageActivity : BaseActivity() {
 
         bottomSheetDialog.show()
     }
+
+    /**
+     * 카카오맵에서 상세 정보 보기 (리뷰, 사진 등 확인 가능)
+     * MapActivity의 openKakaoMapDetail과 동일한 로직을 사용합니다.
+     */
+    private fun openKakaoMapDetail(selectedFood: MapSelectedFood) {
+        // 1. placeId가 있으면 카카오맵 앱으로 직접 열기 (가장 정확)
+        if (!selectedFood.placeId.isNullOrBlank()) {
+            try {
+                val kakaoMapUri = "kakaomap://place?id=${selectedFood.placeId}"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
+                
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return
+                }
+            } catch (e: Exception) {
+                Log.e("MyPageActivity", "카카오맵 앱 열기 실패: ${e.message}", e)
+            }
+        }
+        
+        // 2. 좌표가 있으면 좌표로 카카오맵 앱 열기
+        if (selectedFood.latitude != null && selectedFood.longitude != null) {
+            try {
+                // 카카오맵 앱으로 좌표 기반 장소 열기
+                val kakaoMapUri = "kakaomap://place?lat=${selectedFood.latitude}&lng=${selectedFood.longitude}"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
+                
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return
+                }
+            } catch (e: Exception) {
+                Log.e("MyPageActivity", "카카오맵 앱 좌표 열기 실패: ${e.message}", e)
+            }
+            
+            // 앱이 없으면 검색으로 시도
+            try {
+                val kakaoMapUri = "kakaomap://search?q=${Uri.encode(selectedFood.placeName)}"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
+                
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return
+                }
+            } catch (e: Exception) {
+                Log.e("MyPageActivity", "카카오맵 앱 검색 열기 실패: ${e.message}", e)
+            }
+        }
+        
+        // 3. 최종 폴백: 웹 검색
+        if (selectedFood.placeName.isNotEmpty() && selectedFood.placeName != "정보 없음") {
+            try {
+                val webUrl = "https://map.kakao.com/link/search/${Uri.encode(selectedFood.placeName)}"
+                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+                startActivity(webIntent)
+            } catch (e: Exception) {
+                Log.e("MyPageActivity", "카카오맵 웹 검색 열기 실패: ${e.message}", e)
+                Toast.makeText(this, "카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "식당 정보가 없어 카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         // 마이페이지가 다시 보일 때 최신 선택된 음식을 다시 불러옵니다.

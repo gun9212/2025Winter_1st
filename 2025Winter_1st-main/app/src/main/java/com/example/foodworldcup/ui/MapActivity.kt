@@ -1033,6 +1033,9 @@ class MapActivity : BaseActivity() {
                         selectedDate = System.currentTimeMillis(),
                         placeName = selectedPlace.place_name.ifEmpty { "가게 정보 없음" },
                         placeAddress = placeAddress,
+                        placeId = selectedPlace.id, // 카카오맵 장소 ID
+                        latitude = selectedPlace.y.toDoubleOrNull(), // 위도
+                        longitude = selectedPlace.x.toDoubleOrNull(), // 경도
                         memo = ""
                     )
                     
@@ -1748,32 +1751,72 @@ class MapActivity : BaseActivity() {
 
     /** 카카오맵에서 상세 정보 보기 (리뷰, 사진 등 확인 가능) */
     private fun openKakaoMapDetail(place: Place) {
-        // place_url이 있으면 사용
+        // 1. place.id가 있으면 카카오맵 앱으로 직접 열기 (가장 정확)
+        if (!place.id.isNullOrBlank()) {
+            try {
+                val kakaoMapUri = "kakaomap://place?id=${place.id}"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
+                
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MapActivity", "카카오맵 앱 열기 실패: ${e.message}")
+            }
+        }
+        
+        // 2. 좌표가 있으면 좌표로 카카오맵 앱 열기
+        val lat = place.y.toDoubleOrNull()
+        val lng = place.x.toDoubleOrNull()
+        if (lat != null && lng != null) {
+            try {
+                // 카카오맵 앱으로 좌표 기반 장소 열기
+                val kakaoMapUri = "kakaomap://place?lat=$lat&lng=$lng"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
+                
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MapActivity", "카카오맵 앱 좌표 열기 실패: ${e.message}")
+            }
+            
+            // 앱이 없으면 검색으로 시도
+            try {
+                val kakaoMapUri = "kakaomap://search?q=${Uri.encode(place.place_name)}"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
+                
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MapActivity", "카카오맵 앱 검색 열기 실패: ${e.message}")
+            }
+        }
+        
+        // 3. 모든 앱 열기 시도가 실패하면 웹 브라우저로 폴백
         if (!place.place_url.isNullOrBlank()) {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(place.place_url))
                 startActivity(intent)
                 return
             } catch (e: Exception) {
-                android.util.Log.e("MapActivity", "카카오맵 URL 열기 실패: ${e.message}")
+                android.util.Log.e("MapActivity", "카카오맵 웹 URL 열기 실패: ${e.message}")
             }
         }
-
-        // place_url이 없거나 실패하면 좌표 기반으로 카카오맵 열기
-        val lat = place.y.toDoubleOrNull()
-        val lng = place.x.toDoubleOrNull()
-        if (lat != null && lng != null) {
-            // 카카오맵 앱으로 장소 검색하여 열기
-            val kakaoMapUri = "kakaomap://search?q=${Uri.encode(place.place_name)}"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
-
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-            } else {
-                // 카카오맵 앱이 없으면 웹 브라우저로 열기
+        
+        // 4. 최종 폴백: 웹 검색
+        if (!place.place_name.isNullOrBlank()) {
+            try {
                 val webUrl = "https://map.kakao.com/link/search/${Uri.encode(place.place_name)}"
                 val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
                 startActivity(webIntent)
+            } catch (e: Exception) {
+                android.util.Log.e("MapActivity", "카카오맵 웹 검색 열기 실패: ${e.message}")
+                Toast.makeText(this, "카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         } else {
             Toast.makeText(this, "위치 정보가 없어 카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
