@@ -20,9 +20,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodworldcup.R
 import com.example.foodworldcup.api.*
-import com.example.foodworldcup.ui.adapter.*
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.data.MapSelectedFood
+import com.example.foodworldcup.ui.adapter.*
 import com.example.foodworldcup.utils.BitmapUtils
 import com.example.foodworldcup.utils.KakaoMapHelper
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -98,9 +98,9 @@ class MapActivity : BaseActivity() {
             val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
             if (lastSearchFoodIds.isNotEmpty()) {
                 foodNames =
-                    lastSearchFoodIds.mapNotNull { id ->
-                        com.example.foodworldcup.data.FoodRepository.getFoodById(id)?.name
-                    }
+                        lastSearchFoodIds.mapNotNull { id ->
+                            com.example.foodworldcup.data.FoodRepository.getFoodById(id)?.name
+                        }
                 Toast.makeText(this, "이전 검색 기록을 불러왔습니다.", Toast.LENGTH_SHORT).show()
             } else {
                 // 3. 저장된 검색어도 없으면 FoodListActivity로 이동 (새 게임 시작)
@@ -359,8 +359,8 @@ class MapActivity : BaseActivity() {
                     if (characterBitmap != null) {
                         characterDrawn = true
 
-                               // ⭐ 이미지의 실질적 내용(누끼 부분)의 크기를 구함
-                               val contentBounds = BitmapUtils.getContentBounds(characterBitmap)
+                        // ⭐ 이미지의 실질적 내용(누끼 부분)의 크기를 구함
+                        val contentBounds = BitmapUtils.getContentBounds(characterBitmap)
                         val contentWidth = contentBounds.width()
                         val contentHeight = contentBounds.height()
 
@@ -454,7 +454,6 @@ class MapActivity : BaseActivity() {
             return null
         }
     }
-
 
     /** Assets에서 음식 종류에 맞는 이미지 경로 찾기 */
     private fun findAssetPath(foodType: String): String? {
@@ -976,7 +975,7 @@ class MapActivity : BaseActivity() {
     private fun navigateToAchievement() {
         if (selectedPlaceIndex >= 0 && selectedPlaceIndex < searchResults.size) {
             val selectedPlace = searchResults[selectedPlaceIndex]
-            
+
             // 선택된 음식점의 foodType에 해당하는 음식 ID 찾기
             val foodType = selectedPlace.foodType
             if (foodType != null) {
@@ -984,41 +983,54 @@ class MapActivity : BaseActivity() {
                 val food = FoodRepository.getFoodList().find { it.name == foodType }
                 if (food != null) {
                     // 가게 정보 추출 (도로명 주소 우선, 없으면 지번 주소)
-                    val placeAddress = selectedPlace.road_address_name 
-                        ?: selectedPlace.address_name 
-                        ?: "주소 정보 없음"
-                    
+                    val placeAddress =
+                            selectedPlace.road_address_name
+                                    ?: selectedPlace.address_name ?: "주소 정보 없음"
+
                     // 디버깅 로그 추가
                     android.util.Log.d("MapActivity", "=== 음식 선택 저장 ===")
                     android.util.Log.d("MapActivity", "음식 이름: ${food.name} (ID: ${food.id})")
                     android.util.Log.d("MapActivity", "가게 이름: ${selectedPlace.place_name}")
-                    android.util.Log.d("MapActivity", "도로명 주소: ${selectedPlace.road_address_name ?: "없음"}")
-                    android.util.Log.d("MapActivity", "지번 주소: ${selectedPlace.address_name ?: "없음"}")
-                    android.util.Log.d("MapActivity", "최종 주소: $placeAddress")
-                    
-                    // MapSelectedFood 객체 생성 (고유 ID는 타임스탬프 사용)
-                    val mapSelectedFood = MapSelectedFood(
-                        id = System.currentTimeMillis(), // 고유 ID (타임스탬프 사용)
-                        foodId = food.id,
-                        selectedDate = System.currentTimeMillis(),
-                        placeName = selectedPlace.place_name.ifEmpty { "가게 정보 없음" },
-                        placeAddress = placeAddress,
-                        placeId = selectedPlace.id, // 카카오맵 장소 ID
-                        latitude = selectedPlace.y.toDoubleOrNull(), // 위도
-                        longitude = selectedPlace.x.toDoubleOrNull(), // 경도
-                        memo = ""
+                    android.util.Log.d(
+                            "MapActivity",
+                            "도로명 주소: ${selectedPlace.road_address_name ?: "없음"}"
                     )
-                    
+                    android.util.Log.d(
+                            "MapActivity",
+                            "지번 주소: ${selectedPlace.address_name ?: "없음"}"
+                    )
+                    android.util.Log.d("MapActivity", "최종 주소: $placeAddress")
+
+                    // MapSelectedFood 객체 생성 (고유 ID는 타임스탬프 사용)
+                    val mapSelectedFood =
+                            MapSelectedFood(
+                                    id = System.currentTimeMillis(), // 고유 ID (타임스탬프 사용)
+                                    foodId = food.id,
+                                    selectedDate = System.currentTimeMillis(),
+                                    placeName = selectedPlace.place_name.ifEmpty { "가게 정보 없음" },
+                                    placeAddress = placeAddress,
+                                    placeId = selectedPlace.id, // 카카오맵 장소 ID
+                                    latitude = selectedPlace.y.toDoubleOrNull(), // 위도
+                                    longitude = selectedPlace.x.toDoubleOrNull(), // 경도
+                                    memo = ""
+                            )
+
                     // BaseActivity에서 상속받은 preferenceManager를 통해 선택된 음식 정보 저장
                     preferenceManager.addMapSelectedFood(mapSelectedFood)
-                    android.util.Log.d("MapActivity", "저장 완료: ${mapSelectedFood.placeName}, ${mapSelectedFood.placeAddress}")
+                    android.util.Log.d(
+                            "MapActivity",
+                            "저장 완료: ${mapSelectedFood.placeName}, ${mapSelectedFood.placeAddress}"
+                    )
                 } else {
                     android.util.Log.w("MapActivity", "음식을 찾을 수 없음: $foodType")
                 }
             } else {
-                android.util.Log.w("MapActivity", "foodType이 null입니다. selectedPlace: ${selectedPlace.place_name}")
+                android.util.Log.w(
+                        "MapActivity",
+                        "foodType이 null입니다. selectedPlace: ${selectedPlace.place_name}"
+                )
             }
-            
+
             val intent = Intent(this, MyPageActivity::class.java)
             startActivity(intent)
         }
@@ -1724,7 +1736,7 @@ class MapActivity : BaseActivity() {
         // KakaoMapHelper 유틸리티 사용
         val lat = place.y.toDoubleOrNull()
         val lng = place.x.toDoubleOrNull()
-        
+
         // place_url이 있으면 먼저 시도
         if (!place.place_url.isNullOrBlank()) {
             try {
@@ -1737,14 +1749,14 @@ class MapActivity : BaseActivity() {
                 android.util.Log.e("MapActivity", "카카오맵 웹 URL 열기 실패: ${e.message}")
             }
         }
-        
+
         // KakaoMapHelper 사용
         KakaoMapHelper.openKakaoMapDetail(
-            context = this,
-            placeId = place.id,
-            latitude = lat,
-            longitude = lng,
-            placeName = place.place_name
+                context = this,
+                placeId = place.id,
+                latitude = lat,
+                longitude = lng,
+                placeName = place.place_name
         )
     }
 
