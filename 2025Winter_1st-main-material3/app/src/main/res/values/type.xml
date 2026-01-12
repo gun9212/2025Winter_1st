@@ -46,48 +46,56 @@
         <item name="android:fontFamily">sans-serif</item>
     </style>
     
-    <!-- Title 스타일 (부제목) -->
+    <!-- Title 스타일 (부제목) - 굵기와 크기 대비 명확히 -->
     <style name="TextAppearance.Molip_1st.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:textSize">22sp</item>
         <item name="android:lineHeight">28sp</item>
         <item name="android:letterSpacing">0</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
     
     <style name="TextAppearance.Molip_1st.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textSize">16sp</item>
         <item name="android:lineHeight">24sp</item>
-        <item name="android:letterSpacing">0.15</item>
+        <item name="android:letterSpacing">0.1</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
     
     <style name="TextAppearance.Molip_1st.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
-        <item name="android:letterSpacing">0.1</item>
+        <item name="android:letterSpacing">0.05</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
     
-    <!-- Body 스타일 (본문) -->
+    <!-- Body 스타일 (본문) - 가독성 향상 -->
     <style name="TextAppearance.Molip_1st.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
         <item name="android:textSize">16sp</item>
         <item name="android:lineHeight">24sp</item>
-        <item name="android:letterSpacing">0.5</item>
+        <item name="android:letterSpacing">0.15</item>
         <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_secondary</item>
     </style>
     
     <style name="TextAppearance.Molip_1st.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
-        <item name="android:letterSpacing">0.25</item>
+        <item name="android:letterSpacing">0.1</item>
         <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_secondary</item>
     </style>
     
     <style name="TextAppearance.Molip_1st.BodySmall" parent="TextAppearance.Material3.BodySmall">
         <item name="android:textSize">12sp</item>
         <item name="android:lineHeight">16sp</item>
-        <item name="android:letterSpacing">0.4</item>
+        <item name="android:letterSpacing">0.1</item>
         <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_secondary</item>
     </style>
     
     <!-- Label 스타일 (라벨, 버튼 텍스트) -->
