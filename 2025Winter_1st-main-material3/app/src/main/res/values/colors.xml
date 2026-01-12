@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- ============================================ -->
+    <!-- Material Design 3 색상 토큰 (Light Theme) -->
+    <!-- ============================================ -->
+    
+    <!-- Primary 색상 (오렌지) -->
+    <color name="md3_color_primary">#FF6B35</color>
+    <color name="md3_color_on_primary">#FFFFFF</color>
+    <color name="md3_color_primary_container">#FFE0D6</color>
+    <color name="md3_color_on_primary_container">#3D1A0A</color>
+    
+    <!-- Secondary 색상 (노란색) -->
+    <color name="md3_color_secondary">#F1C40F</color>
+    <color name="md3_color_on_secondary">#000000</color>
+    <color name="md3_color_secondary_container">#FFF9C4</color>
+    <color name="md3_color_on_secondary_container">#3D2F00</color>
+    
+    <!-- Tertiary 색상 (빨간색) -->
+    <color name="md3_color_tertiary">#E63946</color>
+    <color name="md3_color_on_tertiary">#FFFFFF</color>
+    <color name="md3_color_tertiary_container">#FFE0E3</color>
+    <color name="md3_color_on_tertiary_container">#3D0A0F</color>
+    
+    <!-- Error 색상 -->
+    <color name="md3_color_error">#BA1A1A</color>
+    <color name="md3_color_on_error">#FFFFFF</color>
+    <color name="md3_color_error_container">#FFDAD6</color>
+    <color name="md3_color_on_error_container">#410002</color>
+    
+    <!-- Surface 색상 -->
+    <color name="md3_color_surface">#FFF8F5</color>
+    <color name="md3_color_on_surface">#2C3E50</color>
+    <color name="md3_color_surface_variant">#F5F5F5</color>
+    <color name="md3_color_on_surface_variant">#7F8C8D</color>
+    <color name="md3_color_surface_inverse">#1A1A1A</color>
+    <color name="md3_color_on_surface_inverse">#FFFFFF</color>
+    
+    <!-- Outline 색상 -->
+    <color name="md3_color_outline">#E0E0E0</color>
+    <color name="md3_color_outline_variant">#C0C0C0</color>
+    
+    <!-- Background 색상 -->
+    <color name="md3_color_background">#FFF8F5</color>
+    <color name="md3_color_on_background">#2C3E50</color>
+    
+    <!-- ============================================ -->
+    <!-- 기존 색상 (호환성 유지) -->
+    <!-- ============================================ -->
+    
+    <!-- 음식 테마 색상 -->
+    <color name="primary_orange">#FF6B35</color>
+    <color name="primary_red">#E63946</color>
+    <color name="primary_yellow">#F1C40F</color>
+    <color name="accent_orange">#FF8C42</color>
+    <color name="background_light">#FFF8F5</color>
+    <color name="text_primary">#2C3E50</color>
+    <color name="text_secondary">#7F8C8D</color>
+    
+    <!-- Intro 화면용 색상 -->
+    <color name="card_background_gray">#F5F5F5</color>
+    <color name="recent_winner_yellow_start">#FFF9C4</color>
+    <color name="recent_winner_yellow_end">#FFF59D</color>
+    <color name="navigation_unselected">#9E9E9E</color>
+    <color name="button_border_gray">#E0E0E0</color>
+    
+    <!-- CardStackView 오버레이 색상 -->
+    <color name="like_overlay_color">#4CAF50</color>
+    <color name="nope_overlay_color">#F44336</color>
+    
+    <!-- 버튼 색상 -->
+    <color name="like_button_color">#4CAF50</color>
+    <color name="nope_button_color">#F44336</color>
+</resources>
