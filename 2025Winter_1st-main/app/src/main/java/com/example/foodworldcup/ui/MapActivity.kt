@@ -278,18 +278,60 @@ class MapActivity : BaseActivity() {
             isSelected: Boolean
     ): android.graphics.Bitmap? {
         try {
-            // 1. 기본 마커 Drawable 로드
-            val drawable = ContextCompat.getDrawable(context, iconResId) ?: return null
-
-            // 크기 설정 (기존 로직 유지: 50% 축소)
+            // 크기 설정 (기존 로직 유지)
             val density = context.resources.displayMetrics.density
-            val baseSizeDp = if (isSelected) 32 else 24 // selected: 64->32, normal: 48->24
-            val width = (baseSizeDp * density).toInt()
-            val height = (baseSizeDp * density).toInt()
+            val baseSizeDp = if (isSelected) 32 else 24
+            var width = (baseSizeDp * density).toInt()
+            var height = (baseSizeDp * density).toInt()
 
-            // 2. 비트맵 생성
+            var customMarkerBitmap: android.graphics.Bitmap? = null
+
+            // 1. 선택된 경우 커스텀 마커 이미지 로드 ("marker/마커_누끼.png")
+            if (isSelected) {
+                try {
+                    val markerStream = context.assets.open("marker/마커_누끼.png")
+                    val rawMarkerBitmap = android.graphics.BitmapFactory.decodeStream(markerStream)
+                    markerStream.close()
+
+                    if (rawMarkerBitmap != null) {
+                        // width는 32dp로 고정하고, aspectRatio에 맞춰 height 계산
+                        val aspectRatio =
+                                rawMarkerBitmap.height.toFloat() / rawMarkerBitmap.width.toFloat()
+                        height = (width * aspectRatio).toInt()
+
+                        // 커스텀 마커 스케일링
+                        customMarkerBitmap =
+                                android.graphics.Bitmap.createScaledBitmap(
+                                        rawMarkerBitmap,
+                                        width,
+                                        height,
+                                        true
+                                )
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("MapActivity", "커스텀 마커 로드 실패: ${e.message}")
+                }
+            }
+
+            // 1-2. 기본 Drawable 로드 (커스텀 마커 로드 실패 시 또는 선택 안된 경우 fallback용)
+            // 비트맵 생성 (Canvas 크기는 위에서 결정됨)
             val markerBitmap = createBitmap(width, height)
             val canvas = android.graphics.Canvas(markerBitmap)
+
+            // 커스텀 마커가 있으면 그거 그리고, 없으면 기본 drawable 사용
+            val drawable = ContextCompat.getDrawable(context, iconResId)
+
+            if (isSelected && customMarkerBitmap != null) {
+                canvas.drawBitmap(customMarkerBitmap, 0f, 0f, null)
+            } else if (drawable != null) {
+                // 선택 안된 경우 혹은 로드 실패 시: vector drawable 사용
+                // 선택 안된 경우는 width=height (24dp)
+                drawable.setBounds(0, 0, width, height)
+                if (!isSelected) { // 선택 안된 경우만 배경을 그림 (선택된 곳은 위에서 그렸음, or fallback)
+                    // 하지만 "선택 안된 경우: 핀 배경 없이 음식만" 로직이 아래 있으므로
+                    // 여기서는 "음식이 없을 때"를 위한 준비만 함.
+                }
+            }
 
             // 3. 음식 캐릭터 이미지 로드 및 그리기 시도
             var characterDrawn = false
@@ -303,53 +345,43 @@ class MapActivity : BaseActivity() {
                     if (characterBitmap != null) {
                         characterDrawn = true
 
-                        // ⭐ [핵심 수정] 이미지의 실질적 내용(누끼 부분)의 크기를 구함
+                        // ⭐ 이미지의 실질적 내용(누끼 부분)의 크기를 구함
                         val contentBounds = getContentBounds(characterBitmap)
                         val contentWidth = contentBounds.width()
                         val contentHeight = contentBounds.height()
 
                         if (isSelected) {
-                            // 선택된 경우: 파란색 핀 배경 + 그 위에 캐릭터
-                            drawable.setBounds(0, 0, width, height)
-                            drawable.draw(canvas)
-
-                            // 타겟 영역: 핀 머리 부분 (상단 70% 영역)
+                            // 커스텀 마커 위에 그리기
+                            // 타겟 영역: 마커의 상단 부분.
+                            // 핀 끝이 바닥이므로, 머리는 위쪽에 있음.
+                            // 이미지 비율에 따라 다르겠지만, 대략 상단 65-70% 영역 사용
                             val targetAreaWidth = (width * 0.7f)
                             val targetAreaHeight = (width * 0.7f) // 정사각형 가정
 
-                            // 스케일 계산 (실질적 크기 기준)
                             val scale =
                                     Math.min(
                                             targetAreaWidth / contentWidth,
                                             targetAreaHeight / contentHeight
                                     )
 
-                            // 매트릭스 설정: 이동 -> 스케일 -> 중앙 배치
                             val matrix = android.graphics.Matrix()
-
-                            // 1. 내용의 좌상단을 (0,0)으로 이동
                             matrix.postTranslate(
                                     -contentBounds.left.toFloat(),
                                     -contentBounds.top.toFloat()
                             )
-
-                            // 2. 스케일 적용
                             matrix.postScale(scale, scale)
 
-                            // 3. 타겟 영역의 중앙으로 이동
-                            // 타겟 영역의 중심 좌표
+                            // 중앙 상단 정렬
                             val targetCenterX = width / 2f
-                            // 핀의 머리 부분 중앙 (대략 상단 10% + 핀머리/2)
-                            val headerTopOffset = height * 0.1f
+                            // 상단 여백 (전체 높이의 5~10%) + 영역의 절반
+                            val headerTopOffset = height * 0.12f
                             val targetCenterY = headerTopOffset + targetAreaHeight / 2f
 
-                            // 현재 비트맵(내용)의 중심이 (0,0)이 아니므로, 스케일된 내용의 절반 크기만큼 빼줌
                             val tx = targetCenterX - (contentWidth * scale / 2f)
                             val ty = targetCenterY - (contentHeight * scale / 2f)
 
                             matrix.postTranslate(tx, ty)
 
-                            // 보간법 적용을 위해 Paint 사용 (ANTI_ALIAS)
                             val paint = android.graphics.Paint()
                             paint.isAntiAlias = true
                             paint.isFilterBitmap = true
@@ -357,11 +389,9 @@ class MapActivity : BaseActivity() {
                             canvas.drawBitmap(characterBitmap, matrix, paint)
                         } else {
                             // 선택 안된 경우: 핀 배경 없이 음식 캐릭터만
-                            // 타겟 영역: 마커 전체의 90%
                             val targetAreaWidth = (width * 0.9f)
                             val targetAreaHeight = (height * 0.9f)
 
-                            // 스케일 계산
                             val scale =
                                     Math.min(
                                             targetAreaWidth / contentWidth,
@@ -375,7 +405,6 @@ class MapActivity : BaseActivity() {
                             )
                             matrix.postScale(scale, scale)
 
-                            // 중앙 정렬
                             val targetCenterX = width / 2f
                             val targetCenterY = height / 2f
 
@@ -396,8 +425,13 @@ class MapActivity : BaseActivity() {
 
             // 4. 캐릭터를 그리지 못했으면 핀(기본 마커) 그리기 - fallback
             if (!characterDrawn) {
-                drawable.setBounds(0, 0, width, height)
-                drawable.draw(canvas)
+                // 선택된 경우인데 커스텀 마커는 그렸다면 OK
+                if (isSelected && customMarkerBitmap != null) {
+                    // 이미 배경 그렸으므로 패스
+                } else if (drawable != null) {
+                    drawable.setBounds(0, 0, width, height)
+                    drawable.draw(canvas)
+                }
             }
 
             return markerBitmap
