@@ -7,22 +7,22 @@
     <!-- Material Design 3 색상 토큰 (Light Theme) -->
     <!-- ============================================ -->
     
-    <!-- Primary 색상 (오렌지) -->
-    <color name="md3_color_primary">#FF6B35</color>
+    <!-- Primary 색상 (세련된 주황색 - 식욕을 돋우는 웜톤) -->
+    <color name="md3_color_primary">#FF8A3D</color>
     <color name="md3_color_on_primary">#FFFFFF</color>
-    <color name="md3_color_primary_container">#FFE0D6</color>
+    <color name="md3_color_primary_container">#FFE8D6</color>
     <color name="md3_color_on_primary_container">#3D1A0A</color>
     
-    <!-- Secondary 색상 (노란색) -->
-    <color name="md3_color_secondary">#F1C40F</color>
+    <!-- Secondary 색상 (딥 옐로우 - 부드러운 노란색) -->
+    <color name="md3_color_secondary">#FFB84D</color>
     <color name="md3_color_on_secondary">#000000</color>
-    <color name="md3_color_secondary_container">#FFF9C4</color>
+    <color name="md3_color_secondary_container">#FFF5E6</color>
     <color name="md3_color_on_secondary_container">#3D2F00</color>
     
-    <!-- Tertiary 색상 (빨간색) -->
-    <color name="md3_color_tertiary">#E63946</color>
+    <!-- Tertiary 색상 (소프트 레드 - 따뜻한 빨간색) -->
+    <color name="md3_color_tertiary">#FF6B6B</color>
     <color name="md3_color_on_tertiary">#FFFFFF</color>
-    <color name="md3_color_tertiary_container">#FFE0E3</color>
+    <color name="md3_color_tertiary_container">#FFE8E8</color>
     <color name="md3_color_on_tertiary_container">#3D0A0F</color>
     
     <!-- Error 색상 -->
@@ -31,41 +31,41 @@
     <color name="md3_color_error_container">#FFDAD6</color>
     <color name="md3_color_on_error_container">#410002</color>
     
-    <!-- Surface 색상 -->
-    <color name="md3_color_surface">#FFF8F5</color>
-    <color name="md3_color_on_surface">#2C3E50</color>
-    <color name="md3_color_surface_variant">#F5F5F5</color>
-    <color name="md3_color_on_surface_variant">#7F8C8D</color>
+    <!-- Surface 색상 (웜톤이 섞인 아이보리/연회색) -->
+    <color name="md3_color_surface">#F9F9F9</color>
+    <color name="md3_color_on_surface">#1A1A1A</color>
+    <color name="md3_color_surface_variant">#F2F4F6</color>
+    <color name="md3_color_on_surface_variant">#4E5968</color>
     <color name="md3_color_surface_inverse">#1A1A1A</color>
     <color name="md3_color_on_surface_inverse">#FFFFFF</color>
     
     <!-- Outline 색상 -->
-    <color name="md3_color_outline">#E0E0E0</color>
-    <color name="md3_color_outline_variant">#C0C0C0</color>
+    <color name="md3_color_outline">#E5E8EB</color>
+    <color name="md3_color_outline_variant">#D1D9E0</color>
     
-    <!-- Background 색상 -->
-    <color name="md3_color_background">#FFF8F5</color>
-    <color name="md3_color_on_background">#2C3E50</color>
+    <!-- Background 색상 (웜톤 배경) -->
+    <color name="md3_color_background">#F9F9F9</color>
+    <color name="md3_color_on_background">#1A1A1A</color>
     
     <!-- ============================================ -->
     <!-- 기존 색상 (호환성 유지) -->
     <!-- ============================================ -->
     
-    <!-- 음식 테마 색상 -->
-    <color name="primary_orange">#FF6B35</color>
-    <color name="primary_red">#E63946</color>
-    <color name="primary_yellow">#F1C40F</color>
-    <color name="accent_orange">#FF8C42</color>
-    <color name="background_light">#FFF8F5</color>
-    <color name="text_primary">#2C3E50</color>
-    <color name="text_secondary">#7F8C8D</color>
+    <!-- 음식 테마 색상 (세련된 웜톤) -->
+    <color name="primary_orange">#FF8A3D</color>
+    <color name="primary_red">#FF6B6B</color>
+    <color name="primary_yellow">#FFB84D</color>
+    <color name="accent_orange">#FF6B6B</color>
+    <color name="background_light">#F9F9F9</color>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#4E5968</color>
     
-    <!-- Intro 화면용 색상 -->
-    <color name="card_background_gray">#F5F5F5</color>
-    <color name="recent_winner_yellow_start">#FFF9C4</color>
-    <color name="recent_winner_yellow_end">#FFF59D</color>
-    <color name="navigation_unselected">#9E9E9E</color>
-    <color name="button_border_gray">#E0E0E0</color>
+    <!-- Intro 화면용 색상 (웜톤 조정) -->
+    <color name="card_background_gray">#F2F4F6</color>
+    <color name="recent_winner_yellow_start">#FFF5E6</color>
+    <color name="recent_winner_yellow_end">#FFE8D6</color>
+    <color name="navigation_unselected">#8B95A1</color>
+    <color name="button_border_gray">#E5E8EB</color>
     
     <!-- CardStackView 오버레이 색상 -->
     <color name="like_overlay_color">#4CAF50</color>
