@@ -124,33 +124,40 @@ class FoodListActivity : BaseActivity() {
             )
         }
         
-        categoryAdapter = CategoryAdapter(
-            categories = categoryItems,
-            selectedFoodIds = selectedFoodIds,
-            onCategoryCheckedChanged = { categoryName, isChecked ->
-                onCategoryCheckedChanged(categoryName, isChecked)
-            },
-            onFoodCheckedChanged = { foodId, isChecked ->
-                onFoodCheckedChanged(foodId, isChecked)
-            },
-            onCategoryExpanded = { position ->
-                onCategoryExpanded(position)
+        if (!::categoryAdapter.isInitialized) {
+            // 처음 생성 시에만 어댑터 생성
+            categoryAdapter = CategoryAdapter(
+                categories = categoryItems.toMutableList(),
+                selectedFoodIds = selectedFoodIds,
+                onCategoryCheckedChanged = { categoryName, isChecked ->
+                    onCategoryCheckedChanged(categoryName, isChecked)
+                },
+                onFoodCheckedChanged = { foodId, isChecked ->
+                    onFoodCheckedChanged(foodId, isChecked)
+                },
+                onCategoryExpanded = { position ->
+                    onCategoryExpanded(position)
+                }
+            )
+            
+            binding.categoryRecyclerView.layoutManager = LinearLayoutManager(this)
+            binding.categoryRecyclerView.adapter = categoryAdapter
+            
+            // RecyclerView가 터치 이벤트를 가로채지 않도록 설정
+            binding.categoryRecyclerView.isNestedScrollingEnabled = false
+            binding.categoryRecyclerView.overScrollMode = View.OVER_SCROLL_NEVER
+            binding.categoryRecyclerView.setHasFixedSize(false)
+            
+            // RecyclerView의 터치 이벤트를 부모 NestedScrollView로 전달하도록 설정
+            binding.categoryRecyclerView.setOnTouchListener { v, event ->
+                // 터치 이벤트를 부모 NestedScrollView로 전달
+                binding.scrollView.requestDisallowInterceptTouchEvent(false)
+                false // 이벤트를 처리하지 않고 부모로 전달
             }
-        )
-        
-        binding.categoryRecyclerView.layoutManager = LinearLayoutManager(this)
-        binding.categoryRecyclerView.adapter = categoryAdapter
-        
-        // RecyclerView가 터치 이벤트를 가로채지 않도록 설정
-        binding.categoryRecyclerView.isNestedScrollingEnabled = false
-        binding.categoryRecyclerView.overScrollMode = View.OVER_SCROLL_NEVER
-        binding.categoryRecyclerView.setHasFixedSize(false)
-        
-        // RecyclerView의 터치 이벤트를 부모 NestedScrollView로 전달하도록 설정
-        binding.categoryRecyclerView.setOnTouchListener { v, event ->
-            // 터치 이벤트를 부모 NestedScrollView로 전달
-            binding.scrollView.requestDisallowInterceptTouchEvent(false)
-            false // 이벤트를 처리하지 않고 부모로 전달
+        } else {
+            // 기존 어댑터가 있으면 데이터만 업데이트
+            categoryAdapter.updateCategories(categoryItems)
+            categoryAdapter.updateSelectedFoodIds(selectedFoodIds)
         }
     }
 
@@ -178,8 +185,13 @@ class FoodListActivity : BaseActivity() {
         // 저장
         saveSelectedFoods()
         
-        // 어댑터 업데이트 (다른 카테고리의 체크 상태도 업데이트)
-        setupCategoryList()
+        // 부분 업데이트: 변경된 카테고리와 영향받는 카테고리만 업데이트
+        // RecyclerView를 전달하여 레이아웃 계산 중일 때 post로 처리
+        updateCategoryItem(categoryName)
+        // 선택된 음식 ID 목록도 업데이트
+        if (::categoryAdapter.isInitialized) {
+            categoryAdapter.updateSelectedFoodIds(selectedFoodIds, binding.categoryRecyclerView)
+        }
     }
 
     /**
@@ -198,25 +210,95 @@ class FoodListActivity : BaseActivity() {
         // 저장
         saveSelectedFoods()
         
-        // 어댑터 업데이트 (카테고리 체크 상태도 업데이트)
-        setupCategoryList()
+        // 부분 업데이트: 해당 음식이 속한 카테고리만 업데이트
+        val food = FoodRepository.getFoodById(foodId)
+        if (food != null) {
+            updateCategoryItem(food.category)
+            // 선택된 음식 ID 목록도 업데이트
+            if (::categoryAdapter.isInitialized) {
+                categoryAdapter.updateSelectedFoodIds(selectedFoodIds, binding.categoryRecyclerView)
+            }
+        }
     }
 
     /**
      * 카테고리 펼쳐지기/접히기 토글 함수입니다.
      */
     private fun onCategoryExpanded(position: Int) {
+        val categories = FoodRepository.getAllCategories()
+        if (position !in categories.indices) return
+        
+        val categoryName = categories[position]
+        
         // 같은 카테고리를 클릭하면 접히기, 다른 카테고리를 클릭하면 펼쳐지기
+        val previousExpandedIndex = expandedCategoryIndex
         expandedCategoryIndex = if (expandedCategoryIndex == position) {
             null
         } else {
             position
         }
         
-        // 어댑터 업데이트
-        setupCategoryList()
+        // 부분 업데이트: 이전에 펼쳐진 카테고리와 새로 펼쳐진 카테고리만 업데이트
+        if (previousExpandedIndex != null && previousExpandedIndex != expandedCategoryIndex) {
+            updateCategoryExpandedState(previousExpandedIndex, false)
+        }
+        if (expandedCategoryIndex != null) {
+            updateCategoryExpandedState(expandedCategoryIndex!!, true)
+        }
     }
 
+    /**
+     * 특정 카테고리 아이템을 업데이트하는 함수입니다.
+     * 성능 최적화를 위해 전체 리스트를 재생성하지 않고 특정 카테고리만 업데이트합니다.
+     * RecyclerView가 레이아웃 계산 중일 때를 대비해 post를 사용합니다.
+     */
+    private fun updateCategoryItem(categoryName: String) {
+        if (!::categoryAdapter.isInitialized) return
+        
+        val categories = FoodRepository.getAllCategories()
+        val position = categories.indexOf(categoryName)
+        if (position == -1) return
+        
+        val foodsInCategory = FoodRepository.getFoodListByCategory(categoryName)
+        val allSelected = foodsInCategory.isNotEmpty() && 
+            foodsInCategory.all { it.id in selectedFoodIds }
+        
+        val categoryItem = CategoryAdapter.CategoryItem(
+            categoryName = categoryName,
+            categoryNameEn = categoryNameMap[categoryName] ?: categoryName,
+            isChecked = allSelected,
+            isExpanded = expandedCategoryIndex == position
+        )
+        
+        // RecyclerView를 전달하여 레이아웃 계산 중일 때 post로 처리
+        categoryAdapter.updateCategoryItem(position, categoryItem, binding.categoryRecyclerView)
+    }
+    
+    /**
+     * 카테고리의 펼쳐짐 상태를 업데이트하는 함수입니다.
+     */
+    private fun updateCategoryExpandedState(position: Int, isExpanded: Boolean) {
+        if (!::categoryAdapter.isInitialized) return
+        
+        val categories = FoodRepository.getAllCategories()
+        if (position !in categories.indices) return
+        
+        val categoryName = categories[position]
+        val foodsInCategory = FoodRepository.getFoodListByCategory(categoryName)
+        val allSelected = foodsInCategory.isNotEmpty() && 
+            foodsInCategory.all { it.id in selectedFoodIds }
+        
+        val categoryItem = CategoryAdapter.CategoryItem(
+            categoryName = categoryName,
+            categoryNameEn = categoryNameMap[categoryName] ?: categoryName,
+            isChecked = allSelected,
+            isExpanded = isExpanded
+        )
+        
+        // RecyclerView를 전달하여 레이아웃 계산 중일 때 post로 처리
+        categoryAdapter.updateCategoryItem(position, categoryItem, binding.categoryRecyclerView)
+    }
+    
     /**
      * 선택된 음식 개수를 업데이트하는 함수입니다.
      */

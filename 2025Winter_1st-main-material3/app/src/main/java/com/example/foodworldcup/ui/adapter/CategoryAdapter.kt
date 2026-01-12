@@ -18,8 +18,8 @@ import com.example.foodworldcup.data.FoodRepository
  * 카테고리를 클릭하면 해당 카테고리의 음식 리스트가 펼쳐집니다.
  */
 class CategoryAdapter(
-    private val categories: List<CategoryItem>,
-    private val selectedFoodIds: Set<Int>,
+    private var categories: MutableList<CategoryItem>,
+    private var selectedFoodIds: Set<Int>,
     private val onCategoryCheckedChanged: (String, Boolean) -> Unit,
     private val onFoodCheckedChanged: (Int, Boolean) -> Unit,
     private val onCategoryExpanded: (Int) -> Unit
@@ -55,6 +55,9 @@ class CategoryAdapter(
         
         holder.categoryNameTextView.text = category.categoryName
         holder.categoryNameEnTextView.text = category.categoryNameEn
+        
+        // 체크박스 리스너를 먼저 제거하여 onBindViewHolder 중 리스너가 트리거되지 않도록 함
+        holder.checkBox.setOnCheckedChangeListener(null)
         holder.checkBox.isChecked = category.isChecked
         
         // 펼쳐짐 상태에 따라 화살표 아이콘과 음식 리스트 표시
@@ -81,7 +84,7 @@ class CategoryAdapter(
             holder.foodRecyclerView.visibility = View.GONE
         }
         
-        // 체크박스 클릭 시 카테고리 전체 선택/해제
+        // 체크박스 리스너를 마지막에 설정 (onBindViewHolder 완료 후)
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             onCategoryCheckedChanged(category.categoryName, isChecked)
         }
@@ -93,4 +96,58 @@ class CategoryAdapter(
     }
 
     override fun getItemCount(): Int = categories.size
+    
+    /**
+     * 특정 카테고리 아이템을 업데이트하는 메서드입니다.
+     * 성능 최적화를 위해 전체 리스트를 재생성하지 않고 특정 아이템만 업데이트합니다.
+     */
+    fun updateCategoryItem(position: Int, categoryItem: CategoryItem, recyclerView: RecyclerView? = null) {
+        if (position in 0 until categories.size) {
+            categories[position] = categoryItem
+            // RecyclerView가 레이아웃 계산 중이 아닐 때만 업데이트
+            if (recyclerView != null) {
+                recyclerView.post {
+                    if (position in 0 until categories.size) {
+                        notifyItemChanged(position)
+                    }
+                }
+            } else {
+                notifyItemChanged(position)
+            }
+        }
+    }
+    
+    /**
+     * 선택된 음식 ID 목록을 업데이트하고, 펼쳐진 카테고리의 FoodAdapter를 업데이트합니다.
+     */
+    fun updateSelectedFoodIds(newSelectedFoodIds: Set<Int>, recyclerView: RecyclerView? = null) {
+        selectedFoodIds = newSelectedFoodIds
+        // 펼쳐진 카테고리의 FoodAdapter만 업데이트
+        val expandedIndices = categories.mapIndexedNotNull { index, category ->
+            if (category.isExpanded) index else null
+        }
+        
+        if (recyclerView != null && expandedIndices.isNotEmpty()) {
+            recyclerView.post {
+                expandedIndices.forEach { index ->
+                    if (index in 0 until categories.size) {
+                        notifyItemChanged(index)
+                    }
+                }
+            }
+        } else if (expandedIndices.isNotEmpty()) {
+            expandedIndices.forEach { index ->
+                notifyItemChanged(index)
+            }
+        }
+    }
+    
+    /**
+     * 카테고리 아이템 리스트를 업데이트합니다.
+     */
+    fun updateCategories(newCategories: List<CategoryItem>) {
+        categories.clear()
+        categories.addAll(newCategories)
+        notifyDataSetChanged()
+    }
 }

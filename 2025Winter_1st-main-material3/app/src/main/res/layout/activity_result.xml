@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/md3_color_background"
     tools:context=".ui.ResultActivity">
 
     <!-- 상단 타이틀 -->
@@ -60,7 +60,7 @@
             android:text="@string/restart_game"
             android:textSize="14sp"
             app:backgroundTint="@color/card_background_gray"
-            app:cornerRadius="8dp"
+            app:cornerRadius="16dp"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <!-- 마이페이지 버튼 -->
@@ -74,7 +74,7 @@
             android:text="@string/my_page"
             android:textSize="14sp"
             app:backgroundTint="@color/card_background_gray"
-            app:cornerRadius="8dp"
+            app:cornerRadius="16dp"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <!-- 지도 보기 버튼 -->
@@ -87,7 +87,7 @@
             android:text="@string/find_restaurant_on_map"
             android:textSize="14sp"
             app:backgroundTint="@color/primary_orange"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="16dp" />
     </LinearLayout>
 
     <!-- 하단 네비게이션 바 (공통 레이아웃) -->
