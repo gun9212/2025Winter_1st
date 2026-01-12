@@ -146,10 +146,10 @@ class GameActivity : BaseActivity() {
             }
 
             override fun onCardCanceled() {
-                // 스와이프 취소 시 Overlay 숨김
+                // 스와이프 취소 시 모든 카드의 Overlay 숨김
                 val childCount = binding.cardStackView.childCount
-                if (childCount > 0) {
-                    val view = binding.cardStackView.getChildAt(0)
+                for (i in 0 until childCount) {
+                    val view = binding.cardStackView.getChildAt(i)
                     val holder = binding.cardStackView.getChildViewHolder(view) as? CardStackAdapter.ViewHolder
                     holder?.let {
                         cardStackAdapter.hideOverlay(it)
@@ -158,7 +158,17 @@ class GameActivity : BaseActivity() {
             }
 
             override fun onCardAppeared(view: View?, position: Int) {
-                // 카드 등장 시 처리 (필요시)
+                // 카드 등장 시 뒤쪽 카드의 오버레이 숨김
+                view?.let {
+                    val holder = binding.cardStackView.getChildViewHolder(it) as? CardStackAdapter.ViewHolder
+                    holder?.let { h ->
+                        // 첫 번째 카드가 아니면 오버레이 숨김
+                        val topPosition = layoutManager.topPosition
+                        if (position != topPosition) {
+                            cardStackAdapter.hideOverlay(h)
+                        }
+                    }
+                }
             }
 
             override fun onCardDisappeared(view: View?, position: Int) {
@@ -170,7 +180,7 @@ class GameActivity : BaseActivity() {
         layoutManager.setTranslationInterval(8.0f) // 카드 간 간격
         layoutManager.setScaleInterval(0.95f) // 뒤 카드 크기 비율
         layoutManager.setSwipeThreshold(0.3f) // 스와이프 임계값
-        layoutManager.setMaxDegree(20.0f) // 카드 회전 최대 각도
+        layoutManager.setMaxDegree(25.0f) // 카드 회전 최대 각도 (더 자연스러운 기울기)
         // 좌우 스와이프만 허용 (기본값)
 
         // Swipe 애니메이션 설정
@@ -199,6 +209,7 @@ class GameActivity : BaseActivity() {
     
     /**
      * 카드 드래그 중 처리 (Overlay 표시)
+     * 첫 번째 카드에만 오버레이를 표시하여 뒤쪽 카드에서 오버레이가 보이지 않도록 합니다.
      */
     private fun onCardDraggingInternal(direction: Direction?, ratio: Float) {
         val topPosition = layoutManager.topPosition
@@ -206,41 +217,44 @@ class GameActivity : BaseActivity() {
             return
         }
 
-        // CardStackView에서 현재 표시 중인 첫 번째 카드의 뷰를 가져옴
+        // CardStackView에서 현재 표시 중인 첫 번째 카드(드래그 중인 카드)의 뷰를 가져옴
         val childCount = binding.cardStackView.childCount
         if (childCount == 0) {
             return
         }
 
+        // 첫 번째 카드만 가져오기 (뒤쪽 카드의 오버레이는 숨김)
         val view = binding.cardStackView.getChildAt(0)
         val holder = binding.cardStackView.getChildViewHolder(view) as? CardStackAdapter.ViewHolder
         if (holder == null) {
             return
         }
 
+        // 뒤쪽 카드들의 오버레이는 모두 숨김
+        for (i in 1 until childCount) {
+            val backView = binding.cardStackView.getChildAt(i)
+            val backHolder = binding.cardStackView.getChildViewHolder(backView) as? CardStackAdapter.ViewHolder
+            backHolder?.let {
+                cardStackAdapter.hideOverlay(it)
+            }
+        }
+
+        // 첫 번째 카드에만 오버레이 표시
         when (direction) {
             Direction.Right -> {
-                // 오른쪽 스와이프: Like Overlay 표시
+                // 오른쪽 스와이프: Like Overlay 표시 (초록색)
                 cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Right)
             }
             Direction.Left -> {
-                // 왼쪽 스와이프: Nope Overlay 표시
+                // 왼쪽 스와이프: Nope Overlay 표시 (빨간색)
                 cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Left)
             }
-            Direction.Top -> {
-                // 위로 스와이프: 처리하지 않음
-                cardStackAdapter.hideOverlay(holder)
-            }
-            Direction.Bottom -> {
-                // 아래로 스와이프: 처리하지 않음
-                cardStackAdapter.hideOverlay(holder)
-            }
-            null -> {
-                // null: 처리하지 않음
+            Direction.Top, Direction.Bottom, null -> {
+                // 다른 방향 또는 null: 오버레이 숨김
                 cardStackAdapter.hideOverlay(holder)
             }
         }
-        }
+    }
 
     /**
      * 카드 스와이프 완료 시 처리
