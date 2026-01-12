@@ -1,122 +1,142 @@
 package com.example.foodworldcup.api
 
-import android.content.Context
-import android.location.Location
-import com.example.foodworldcup.data.Restaurant
-import com.google.android.gms.maps.model.LatLng
+import com.example.foodworldcup.BuildConfig
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Query
 
-/**
- * 지도 API를 사용하여 음식점을 검색하는 헬퍼 클래스입니다.
- * Google Maps Places API를 사용하여 주변 음식점을 검색합니다.
- * 
- * 주요 기능:
- * - 음식 이름으로 주변 음식점 검색
- * - 검색 결과를 Restaurant 객체 리스트로 변환
- * - 위치 기반 검색 (현재 위치 기준 반경 내 검색)
- */
-class MapApiHelper(private val context: Context) {
+// --- [1] 데이터 모델 (Kakao Local API JSON 응답용) ---
+data class KakaoSearchResponse(val documents: List<Place>, val meta: Meta)
 
-    // Google Places API 키 (나중에 strings.xml 또는 BuildConfig로 관리)
-    private val apiKey: String = "YOUR_GOOGLE_PLACES_API_KEY"
-    
-    // 검색 반경 (미터 단위)
-    private val searchRadius: Int = 5000 // 5km
+data class Meta(val total_count: Int, val pageable_count: Int, val is_end: Boolean)
 
-    /**
-     * 주변 음식점을 검색하는 함수입니다.
-     * 
-     * @param foodName 검색할 음식 이름 (예: "김치찌개")
-     * @param latitude 현재 위치의 위도
-     * @param longitude 현재 위치의 경도
-     * @param onSuccess 검색 성공 시 호출되는 콜백 (Restaurant 리스트 전달)
-     * @param onError 검색 실패 시 호출되는 콜백 (에러 메시지 전달)
-     */
-    fun searchRestaurants(
-        foodName: String,
-        latitude: Double,
-        longitude: Double,
-        onSuccess: (List<Restaurant>) -> Unit,
-        onError: (String) -> Unit
+data class Place(
+        val id: String? = null, // place_id (상세 정보 조회용)
+        val place_name: String,
+        val category_name: String? = null,
+        val category_group_code: String? = null,
+        val phone: String? = null,
+        val address_name: String? = null,
+        val road_address_name: String? = null,
+        val x: String, // 경도 (Longitude)
+        val y: String, // 위도 (Latitude)
+        val place_url: String? = null,
+        val distance: String? = null,
+        val foodType: String? = null // 음식 종류 (검색 시 설정)
+)
+
+// 상세 정보 응답 모델
+data class PlaceDetailResponse(val documents: List<PlaceDetail>)
+
+data class PlaceDetail(
+        val id: String? = null,
+        val place_name: String? = null,
+        val category_name: String? = null,
+        val phone: String? = null,
+        val address_name: String? = null,
+        val road_address_name: String? = null,
+        val x: String? = null,
+        val y: String? = null,
+        val place_url: String? = null,
+        val home_page: String? = null,
+        val bcode: String? = null,
+        val hcode: String? = null
+)
+
+// --- [2] API 인터페이스 (Retrofit) ---
+interface KakaoApiService {
+    @GET("v2/local/search/keyword.json")
+    fun searchPlace(
+            @Header("Authorization") apiKey: String,
+            @Query("query") query: String,
+            @Query("x") longitude: String? = null,
+            @Query("y") latitude: String? = null,
+            @Query("radius") radius: Int? = null, // 미터 단위
+            @Query("page") page: Int = 1,
+            @Query("size") size: Int = 15
+    ): Call<KakaoSearchResponse>
+
+    // 상세 정보 조회 (place_id 사용)
+    @GET("v2/local/search/detail.json")
+    fun getPlaceDetail(
+            @Header("Authorization") apiKey: String,
+            @Query("id") placeId: String
+    ): Call<PlaceDetailResponse>
+}
+
+class MapApiHelper {
+
+    companion object {
+        private const val SEARCH_RADIUS = 4000 // 4000m (4km)
+        private const val BASE_URL = "https://dapi.kakao.com/"
+    }
+
+    private val retrofit =
+            Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+
+    private val apiService = retrofit.create(KakaoApiService::class.java)
+
+    // API 키는 BuildConfig에서 가져옴
+    private val restApiKey: String = "KakaoAK ${BuildConfig.KAKAO_REST_API_KEY}"
+
+    /** Kakao Local API로 음식점 검색 latitude, longitude가 null이면 위치 정보 없이 검색합니다. */
+    fun searchPlaces(
+            query: String,
+            foodType: String,
+            latitude: Double? = null,
+            longitude: Double? = null,
+            onSuccess: (List<Place>) -> Unit,
+            onError: (String) -> Unit
     ) {
-        // TODO: Google Places API를 사용하여 음식점을 검색합니다.
-        // 
-        // 구현 방법:
-        // 1. Places API의 Nearby Search 또는 Text Search를 사용합니다.
-        // 2. 검색 쿼리: foodName + "음식점" 또는 foodName + "restaurant"
-        // 3. location 파라미터에 latitude, longitude를 전달합니다.
-        // 4. radius 파라미터에 searchRadius를 전달합니다.
-        // 5. API 응답을 파싱하여 Restaurant 객체 리스트로 변환합니다.
-        // 6. onSuccess 콜백을 호출하여 결과를 전달합니다.
-        // 7. 에러 발생 시 onError 콜백을 호출합니다.
-        //
-        // 예시 코드 구조:
-        // val placesClient = Places.createClient(context)
-        // val request = FindCurrentPlaceRequest.newInstance(...)
-        // 또는
-        // val request = FindNearbySearchRequest.newInstance(...)
-        // placesClient.findNearbySearch(request).addOnSuccessListener { response ->
-        //     val restaurants = parsePlacesResponse(response)
-        //     onSuccess(restaurants)
-        // }.addOnFailureListener { exception ->
-        //     onError(exception.message ?: "검색 실패")
-        // }
-    }
+        // 위치 정보가 있으면 radius 설정
+        val radius = if (latitude != null && longitude != null) SEARCH_RADIUS else null
 
-    /**
-     * Places API 응답을 Restaurant 객체 리스트로 변환하는 함수입니다.
-     * 
-     * @param placesResponse Places API 응답 객체
-     * @return Restaurant 객체 리스트
-     */
-    private fun parsePlacesResponse(placesResponse: Any): List<Restaurant> {
-        // TODO: Places API 응답을 파싱하여 Restaurant 객체 리스트로 변환합니다.
-        // 
-        // 예시 구조:
-        // return placesResponse.places.map { place ->
-        //     Restaurant(
-        //         id = place.id,
-        //         name = place.name,
-        //         address = place.address,
-        //         latitude = place.latLng.latitude,
-        //         longitude = place.latLng.longitude,
-        //         phoneNumber = place.phoneNumber,
-        //         rating = place.rating,
-        //         distance = calculateDistance(currentLocation, place.latLng)
-        //     )
-        // }
-        return emptyList()
-    }
+        apiService
+                .searchPlace(
+                        apiKey = restApiKey,
+                        query = query,
+                        longitude = longitude?.toString(),
+                        latitude = latitude?.toString(),
+                        radius = radius,
+                        page = 1,
+                        size = 15
+                )
+                .enqueue(
+                        object : Callback<KakaoSearchResponse> {
+                            override fun onResponse(
+                                    call: Call<KakaoSearchResponse>,
+                                    response: Response<KakaoSearchResponse>
+                            ) {
+                                if (response.isSuccessful) {
+                                    val places = response.body()?.documents ?: emptyList()
+                                    // 음식 종류를 Place에 추가
+                                    val placesWithFoodType =
+                                            places.map { it.copy(foodType = foodType) }
+                                    onSuccess(placesWithFoodType)
+                                } else {
+                                    val errorMsg = "검색 실패: ${response.code()} ${response.message()}"
+                                    if (response.code() == 401) {
+                                        onError(
+                                                "API 키가 유효하지 않습니다. local.properties의 KAKAO_REST_API_KEY를 확인해주세요."
+                                        )
+                                    } else {
+                                        onError(errorMsg)
+                                    }
+                                }
+                            }
 
-    /**
-     * 두 위치 간의 거리를 계산하는 함수입니다.
-     * 
-     * @param location1 첫 번째 위치
-     * @param location2 두 번째 위치
-     * @return 거리 (미터 단위)
-     */
-    private fun calculateDistance(location1: LatLng, location2: LatLng): Int {
-        // TODO: 두 위치 간의 거리를 계산합니다.
-        // Location.distanceBetween() 메서드를 사용할 수 있습니다.
-        val results = FloatArray(1)
-        Location.distanceBetween(
-            location1.latitude,
-            location1.longitude,
-            location2.latitude,
-            location2.longitude,
-            results
-        )
-        return results[0].toInt()
-    }
-
-    /**
-     * 음식 이름을 검색 쿼리로 변환하는 함수입니다.
-     * 예: "김치찌개" -> "김치찌개 음식점" 또는 "김치찌개 restaurant"
-     * 
-     * @param foodName 음식 이름
-     * @return 검색 쿼리 문자열
-     */
-    private fun buildSearchQuery(foodName: String): String {
-        // TODO: 음식 이름에 "음식점" 또는 "restaurant"를 추가하여 검색 쿼리를 만듭니다.
-        return "$foodName 음식점"
+                            override fun onFailure(call: Call<KakaoSearchResponse>, t: Throwable) {
+                                onError("네트워크 오류: ${t.message}")
+                            }
+                        }
+                )
     }
 }

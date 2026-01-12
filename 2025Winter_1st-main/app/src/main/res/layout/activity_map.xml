@@ -46,12 +46,13 @@
     <!-- 현재 위치 버튼 (지도 우측 하단) -->
     <ImageButton
         android:id="@+id/myLocationButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_margin="16dp"
         android:background="@drawable/bg_location_button"
         android:contentDescription="현재 위치로 이동"
-        android:padding="12dp"
+        android:tooltipText="@null"
+        android:padding="4dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_my_location"
         android:elevation="4dp"
