@@ -108,7 +108,14 @@ class MyPageActivity : BaseActivity() {
         bottomSheetBinding.dateTextView.text = dateFormat.format(selectedFood.getDate())
         bottomSheetBinding.placeNameTextView.text = selectedFood.placeName.ifEmpty { "정보 없음" }
         bottomSheetBinding.placeAddressTextView.text = selectedFood.placeAddress.ifEmpty { "주소 정보 없음" }
-        bottomSheetBinding.memoEditText.setText(selectedFood.memo)
+        
+        // placeName 기준으로 메모 조회 (같은 가게의 모든 음식에 공유된 메모)
+        val placeMemo = if (selectedFood.placeName.isNotEmpty() && selectedFood.placeName != "정보 없음") {
+            preferenceManager.getPlaceMemo(selectedFood.placeName) ?: ""
+        } else {
+            ""
+        }
+        bottomSheetBinding.memoEditText.setText(placeMemo)
         
         // EditText가 자동으로 포커스를 받지 않도록 설정
         bottomSheetBinding.memoEditText.clearFocus()

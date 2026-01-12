@@ -24,6 +24,7 @@ class PreferenceManager(context: Context) {
         private const val KEY_FINAL_FOOD_IDS = "final_food_ids" // 최종 선택된 음식 ID (지도 검색용)
         private const val KEY_MAP_SELECTED_FOOD_IDS = "map_selected_food_ids" // 지도에서 선택한 음식용 (레거시)
         private const val KEY_MAP_SELECTED_FOODS = "map_selected_foods" // 지도에서 선택한 음식 상세 정보
+        private const val KEY_PLACE_MEMOS = "place_memos" // 가게 이름별 메모 (placeName -> memo 매핑)
     }
 
     /**
@@ -264,8 +265,55 @@ class PreferenceManager(context: Context) {
     }
 
     /**
+     * 가게 이름별 메모를 저장하는 함수입니다.
+     * 같은 가게(placeName)에서 먹은 모든 음식에 동일한 메모가 적용됩니다.
+     *
+     * @param placeName 가게 이름
+     * @param memo 메모 내용
+     */
+    private fun savePlaceMemo(placeName: String, memo: String) {
+        try {
+            val placeMemosJson = prefs.getString(KEY_PLACE_MEMOS, null)
+            val placeMemos = if (placeMemosJson.isNullOrEmpty()) {
+                mutableMapOf<String, String>()
+            } else {
+                val type = object : TypeToken<Map<String, String>>() {}.type
+                gson.fromJson<Map<String, String>>(placeMemosJson, type)?.toMutableMap()
+                    ?: mutableMapOf()
+            }
+            
+            placeMemos[placeName] = memo
+            val json = gson.toJson(placeMemos)
+            prefs.edit().putString(KEY_PLACE_MEMOS, json).apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * 가게 이름별 메모를 조회하는 함수입니다.
+     *
+     * @param placeName 가게 이름
+     * @return 메모 내용 (없으면 null)
+     */
+    fun getPlaceMemo(placeName: String): String? {
+        return try {
+            val placeMemosJson = prefs.getString(KEY_PLACE_MEMOS, null)
+            if (placeMemosJson.isNullOrEmpty()) {
+                return null
+            }
+            val type = object : TypeToken<Map<String, String>>() {}.type
+            val placeMemos = gson.fromJson<Map<String, String>>(placeMemosJson, type)
+            placeMemos?.get(placeName)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    /**
      * 지도에서 선택한 음식 상세 정보의 메모를 업데이트하는 함수입니다.
-     * 고유 ID로 해당 항목을 찾아 메모를 업데이트합니다.
+     * placeName 기준으로 같은 가게의 모든 음식에 동일한 메모를 적용합니다.
      *
      * @param id 업데이트할 MapSelectedFood의 고유 ID
      * @param memo 새로운 메모 내용
@@ -276,7 +324,20 @@ class PreferenceManager(context: Context) {
             val index = existingFoods.indexOfFirst { it.id == id }
             if (index >= 0) {
                 val food = existingFoods[index]
-                existingFoods[index] = food.copy(memo = memo)
+                val placeName = food.placeName
+                
+                // placeName 기준으로 메모 저장
+                if (placeName.isNotEmpty() && placeName != "정보 없음") {
+                    savePlaceMemo(placeName, memo)
+                }
+                
+                // 같은 placeName을 가진 모든 항목의 메모 업데이트
+                existingFoods.forEachIndexed { idx, selectedFood ->
+                    if (selectedFood.placeName == placeName) {
+                        existingFoods[idx] = selectedFood.copy(memo = memo)
+                    }
+                }
+                
                 saveMapSelectedFoods(existingFoods)
             }
         } catch (e: Exception) {
