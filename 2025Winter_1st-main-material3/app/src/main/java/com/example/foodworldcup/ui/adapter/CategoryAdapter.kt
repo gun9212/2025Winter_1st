@@ -70,15 +70,26 @@ class CategoryAdapter(
             
             // LayoutManager가 없으면 설정 (한 번만)
             if (holder.foodRecyclerView.layoutManager == null) {
-                holder.foodRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
+                val layoutManager = LinearLayoutManager(holder.itemView.context)
+                holder.foodRecyclerView.layoutManager = layoutManager
+                // 성능 최적화 설정
+                holder.foodRecyclerView.setHasFixedSize(true)
+                holder.foodRecyclerView.itemAnimator = null // 애니메이션 비활성화
+                holder.foodRecyclerView.setItemViewCacheSize(15) // 뷰 캐시 크기 증가
             }
             
-            // 어댑터 생성 또는 업데이트
-            // 이미지 로딩 로직이 개선되어 깜빡임이 방지되므로 어댑터를 재생성해도 안전함
-            val foodAdapter = FoodAdapter(foods, selectedFoodIds) { foodId, isChecked ->
-                onFoodCheckedChanged(foodId, isChecked)
+            // 기존 어댑터 재사용 (성능 최적화)
+            val existingAdapter = holder.foodRecyclerView.adapter as? FoodAdapter
+            if (existingAdapter != null) {
+                // 기존 어댑터가 있으면 데이터만 업데이트 (재생성 방지)
+                existingAdapter.updateData(foods, selectedFoodIds)
+            } else {
+                // 어댑터가 없으면 새로 생성
+                val foodAdapter = FoodAdapter(foods, selectedFoodIds) { foodId, isChecked ->
+                    onFoodCheckedChanged(foodId, isChecked)
+                }
+                holder.foodRecyclerView.adapter = foodAdapter
             }
-            holder.foodRecyclerView.adapter = foodAdapter
         } else {
             holder.expandIcon.setImageResource(android.R.drawable.arrow_down_float)
             holder.foodRecyclerView.visibility = View.GONE
@@ -118,26 +129,40 @@ class CategoryAdapter(
     }
     
     /**
-     * 선택된 음식 ID 목록을 업데이트하고, 펼쳐진 카테고리의 FoodAdapter를 업데이트합니다.
+     * 선택된 음식 ID 목록을 업데이트하고, 펼쳐진 카테고리의 FoodAdapter를 직접 업데이트합니다.
+     * 성능 최적화를 위해 CategoryAdapter를 다시 바인딩하지 않고 FoodAdapter만 업데이트합니다.
      */
     fun updateSelectedFoodIds(newSelectedFoodIds: Set<Int>, recyclerView: RecyclerView? = null) {
         selectedFoodIds = newSelectedFoodIds
-        // 펼쳐진 카테고리의 FoodAdapter만 업데이트
-        val expandedIndices = categories.mapIndexedNotNull { index, category ->
-            if (category.isExpanded) index else null
-        }
         
-        if (recyclerView != null && expandedIndices.isNotEmpty()) {
+        // RecyclerView가 있으면 직접 FoodAdapter를 업데이트 (더 효율적)
+        if (recyclerView != null) {
             recyclerView.post {
-                expandedIndices.forEach { index ->
-                    if (index in 0 until categories.size) {
-                        notifyItemChanged(index)
+                // 현재 화면에 보이는 ViewHolder들을 순회하며 FoodAdapter 업데이트
+                for (i in 0 until recyclerView.childCount) {
+                    val childView = recyclerView.getChildAt(i)
+                    val viewHolder = recyclerView.getChildViewHolder(childView) as? CategoryViewHolder
+                    viewHolder?.let { holder ->
+                        val position = holder.adapterPosition
+                        if (position != RecyclerView.NO_POSITION && 
+                            position < categories.size && 
+                            categories[position].isExpanded) {
+                            // FoodAdapter 직접 업데이트 (CategoryAdapter 재바인딩 방지)
+                            val foodAdapter = holder.foodRecyclerView.adapter as? FoodAdapter
+                            foodAdapter?.updateSelectedFoodIds(newSelectedFoodIds)
+                        }
                     }
                 }
             }
-        } else if (expandedIndices.isNotEmpty()) {
-            expandedIndices.forEach { index ->
-                notifyItemChanged(index)
+        } else {
+            // RecyclerView가 없으면 기존 방식 사용 (초기화 시)
+            val expandedIndices = categories.mapIndexedNotNull { index, category ->
+                if (category.isExpanded) index else null
+            }
+            if (expandedIndices.isNotEmpty()) {
+                expandedIndices.forEach { index ->
+                    notifyItemChanged(index)
+                }
             }
         }
     }

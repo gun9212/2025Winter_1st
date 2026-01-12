@@ -67,11 +67,11 @@
     <color name="navigation_unselected">#8B95A1</color>
     <color name="button_border_gray">#E5E8EB</color>
     
-    <!-- CardStackView 오버레이 색상 -->
-    <color name="like_overlay_color">#4CAF50</color>
-    <color name="nope_overlay_color">#F44336</color>
+    <!-- CardStackView 오버레이 색상 (웜톤 조정) -->
+    <color name="like_overlay_color">#66BB6A</color>
+    <color name="nope_overlay_color">#EF5350</color>
     
-    <!-- 버튼 색상 -->
-    <color name="like_button_color">#4CAF50</color>
-    <color name="nope_button_color">#F44336</color>
+    <!-- 버튼 색상 (웜톤 조정) -->
+    <color name="like_button_color">#66BB6A</color>
+    <color name="nope_button_color">#EF5350</color>
 </resources>
