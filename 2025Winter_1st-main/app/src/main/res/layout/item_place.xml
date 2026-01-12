@@ -105,7 +105,7 @@
                 android:layout_marginTop="4dp"
                 android:text="카테고리"
                 android:textSize="12sp"
-                android:textColor="@android:color/darker_gray" />
+                android:textColor="#646464" />
 
             <!-- 주소 -->
             <TextView
@@ -115,7 +115,7 @@
                 android:layout_marginTop="4dp"
                 android:text="주소"
                 android:textSize="14sp"
-                android:textColor="@android:color/black"
+                android:textColor="@color/black"
                 android:maxLines="2"
                 android:ellipsize="end" />
 
@@ -134,7 +134,7 @@
                     android:layout_weight="1"
                     android:text="전화번호"
                     android:textSize="12sp"
-                    android:textColor="@android:color/darker_gray"
+                    android:textColor="#646464"
                     android:maxLines="1"
                     android:ellipsize="end" />
 
