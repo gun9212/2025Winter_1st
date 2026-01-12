@@ -122,7 +122,7 @@ class MyPageActivity : BaseActivity() {
 
         // 식당 이름 클릭 시 카카오맵 상세페이지로 이동
         bottomSheetBinding.placeNameTextView.setOnClickListener {
-            openKakaoMapDetail(selectedFood)
+            openPlaceDetail(selectedFood)
         }
 
         // 저장 버튼 클릭
@@ -152,11 +152,8 @@ class MyPageActivity : BaseActivity() {
         bottomSheetDialog.show()
     }
 
-    /**
-     * 카카오맵에서 상세 정보 보기 (리뷰, 사진 등 확인 가능)
-     * KakaoMapHelper 유틸리티를 사용합니다.
-     */
-    private fun openKakaoMapDetail(selectedFood: MapSelectedFood) {
+    /** 카카오맵에서 상세 정보 보기 (리뷰, 사진 등 확인 가능) KakaoMapHelper 유틸리티를 사용합니다. */
+    private fun openPlaceDetail(selectedFood: MapSelectedFood) {
         KakaoMapHelper.openKakaoMapDetail(this, selectedFood)
     }
 
