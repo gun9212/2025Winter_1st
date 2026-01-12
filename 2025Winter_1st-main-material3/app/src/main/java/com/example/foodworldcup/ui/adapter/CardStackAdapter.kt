@@ -50,8 +50,12 @@ class CardStackAdapter(
         // 이미지 로드
         loadImageWithFallback(holder, food)
         
-        // Overlay 초기 상태로 설정 (숨김, 투명)
+        // Overlay 초기 상태로 설정 (항상 숨김, 뒤쪽 카드에서 보이지 않도록)
         hideOverlay(holder)
+        
+        // 추가로 visibility를 GONE으로 명시적으로 설정
+        holder.likeOverlay.visibility = View.GONE
+        holder.nopeOverlay.visibility = View.GONE
     }
 
     override fun getItemCount(): Int = foods.size
