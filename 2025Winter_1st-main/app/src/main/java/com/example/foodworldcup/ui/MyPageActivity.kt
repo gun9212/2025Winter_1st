@@ -92,7 +92,7 @@ class MyPageActivity : BaseActivity() {
         bottomSheetDialog.setContentView(bottomSheetBinding.root)
         
         // 키보드가 올라올 때 BottomSheetDialog가 조정되도록 설정
-        bottomSheetDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        // bottomSheetDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         // 정보 표시
         bottomSheetBinding.foodNameTextView.text = food.name
