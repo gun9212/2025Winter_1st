@@ -10,6 +10,7 @@ import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.databinding.ActivityGameBinding
@@ -410,6 +411,11 @@ class GameActivity : BaseActivity() {
                 updateProgress()
             }
         }
+
+        // 스킵 버튼: 현재까지 합격된 음식만 가지고 게임 종료
+        binding.skipButton.setOnClickListener {
+            skipGame()
+        }
     }
 
     /**
@@ -433,6 +439,54 @@ class GameActivity : BaseActivity() {
         val remaining = gameStateManager.getRemainingCount()
         val completed = total - remaining
         binding.progressTextView.text = "$completed/$total"
+    }
+
+    /**
+     * 스킵 기능: 현재까지 합격된 음식만 가지고 게임을 종료합니다.
+     */
+    private fun skipGame() {
+        val passedFoods = gameStateManager.getPassedFoods()
+        
+        if (passedFoods.isEmpty()) {
+            Toast.makeText(this, "합격된 음식이 없습니다. 최소 하나 이상 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // 확인 다이얼로그 표시
+        AlertDialog.Builder(this)
+            .setTitle("게임 스킵")
+            .setMessage("현재까지 합격된 ${passedFoods.size}개의 음식만 가지고 진행하시겠습니까?")
+            .setPositiveButton("스킵") { _, _ ->
+                // 현재까지 합격된 음식만 가지고 게임 종료
+                finishGameWithPassedFoods(passedFoods)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    /**
+     * 합격된 음식 리스트를 가지고 게임을 종료합니다.
+     */
+    private fun finishGameWithPassedFoods(passedFoods: List<Food>) {
+        // 진행 상황을 최종 상태로 업데이트
+        updateProgress()
+        
+        if (passedFoods.isEmpty()) {
+            Toast.makeText(this, "합격된 음식이 없습니다. 다시 시작하세요.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        // 약간의 지연 후 ResultActivity로 이동
+        val navigateToResultRunnable = Runnable {
+            val intent = Intent(this, ResultActivity::class.java)
+            val passedFoodIds = passedFoods.map { it.id }
+            intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
+            startActivity(intent)
+            finish()
+        }
+        pendingRunnables.add(navigateToResultRunnable)
+        handler.postDelayed(navigateToResultRunnable, 300)
     }
 
     /**
