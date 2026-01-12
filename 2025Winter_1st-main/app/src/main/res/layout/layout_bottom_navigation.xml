@@ -26,7 +26,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_home_unselected"
+            app:srcCompat="@drawable/ic_home"
             android:contentDescription="@string/nav_home" />
 
         <TextView
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:text="@string/nav_home"
             android:textSize="12sp"
-            android:textColor="@color/primary_orange"
+            android:textColor="@color/navigation_unselected"
             android:layout_marginTop="4dp" />
     </LinearLayout>
 
@@ -54,7 +54,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_list"
+            app:srcCompat="@drawable/ic_list"
             android:contentDescription="@string/nav_list" />
 
         <TextView
@@ -82,7 +82,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_swipe"
+            app:srcCompat="@drawable/ic_swipe"
             android:contentDescription="@string/nav_swipe" />
 
         <TextView
@@ -110,7 +110,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_trophy"
+            app:srcCompat="@drawable/ic_trophy"
             android:contentDescription="@string/nav_accepted" />
 
         <TextView
@@ -138,7 +138,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_map"
+            app:srcCompat="@drawable/ic_map"
             android:contentDescription="@string/nav_map" />
 
         <TextView

@@ -1,14 +1,27 @@
 package com.example.foodworldcup.ui
 
 import android.os.Bundle
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.foodworldcup.data.WinRecord
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.GridLayoutManager
+import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.data.MapSelectedFood
 import com.example.foodworldcup.databinding.ActivityMypageBinding
-import com.example.foodworldcup.utils.PreferenceManager
+import com.example.foodworldcup.databinding.BottomSheetFoodDetailBinding
+import com.example.foodworldcup.ui.adapter.PlateAdapter
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /**
  * 마이페이지를 담당하는 Activity입니다.
- * 우승한 음식들을 갤러리 형식으로 보여주고, 날짜+시간, 메모, 그릇 기능을 제공합니다.
+ * 지도에서 선택한 음식들을 접시 위에 표시합니다.
  * 
  * 레이아웃 파일: res/layout/activity_mypage.xml
  */
@@ -16,11 +29,8 @@ class MyPageActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMypageBinding
     
-    // 우승 기록 리스트
-    private var winRecords: List<WinRecord> = emptyList()
-    
-    // RecyclerView 어댑터 (갤러리 형식)
-    // private lateinit var adapter: WinRecordGalleryAdapter
+    // RecyclerView 어댑터 (접시 그리드)
+    private lateinit var adapter: PlateAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,132 +40,101 @@ class MyPageActivity : BaseActivity() {
         // 하단 네비게이션 바 설정
         setupBottomNavigation(BaseActivity.Screen.ACCEPTED)
 
-        // TODO: 저장된 우승 기록을 불러옵니다.
-        loadWinRecords()
-        
-        // TODO: RecyclerView를 설정하고 기록 리스트를 표시합니다.
+        // RecyclerView를 설정하고 접시 그리드를 표시합니다.
         setupRecyclerView()
-        
-        // TODO: 버튼 클릭 이벤트를 설정합니다 (기록 삭제, 홈으로 등)
-        setupButtons()
     }
 
     /**
-     * SharedPreferences에서 우승 기록을 불러오는 함수입니다.
-     */
-    private fun loadWinRecords() {
-        winRecords = preferenceManager.getWinRecords()
-    }
-
-    /**
-     * RecyclerView를 설정하는 함수입니다. (갤러리 형식)
+     * RecyclerView를 설정하는 함수입니다. (접시 그리드 형식)
      */
     private fun setupRecyclerView() {
-        // TODO: RecyclerView에 GridLayoutManager를 설정합니다 (갤러리 형식).
-        // 예: binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
+        // 지도에서 선택한 음식 상세 정보 리스트 불러오기
+        // 최신순으로 정렬 (날짜 기준 내림차순)
+        val selectedFoods = preferenceManager.getMapSelectedFoods()
+            .sortedByDescending { it.selectedDate }
+
+        // 접시 리스트 생성 (foodId만 추출)
+        // 선택된 음식이 있으면 해당 ID를, 없으면 null을 넣어서 빈 접시 표시
+        val plateList = mutableListOf<Int?>()
         
-        // TODO: WinRecordGalleryAdapter를 생성하고 RecyclerView에 연결합니다.
-        // 예: adapter = WinRecordGalleryAdapter(winRecords) { record ->
-        //     // 갤러리 아이템 클릭 시: 메모 편집 또는 상세 보기
-        //     showMemoDialog(record)
-        // }
-        // binding.recyclerView.adapter = adapter
+        // 선택된 음식 ID 추가 (최신순으로 정렬된 상태)
+        plateList.addAll(selectedFoods.map { it.foodId })
         
-        // TODO: 기록이 없을 때 보여줄 빈 화면 메시지를 설정합니다.
-        // 예: if (winRecords.isEmpty()) {
-        //     binding.emptyTextView.visibility = View.VISIBLE
-        //     binding.recyclerView.visibility = View.GONE
-        //     binding.bowlView.visibility = View.GONE
-        // } else {
-        //     binding.emptyTextView.visibility = View.GONE
-        //     binding.recyclerView.visibility = View.VISIBLE
-        //     binding.bowlView.visibility = View.VISIBLE
-        //     updateBowlView() // 그릇에 음식들 올려두기
-        // }
-    }
-    
-    /**
-     * 그릇에 음식들을 올려두는 뷰를 업데이트하는 함수입니다.
-     */
-    private fun updateBowlView() {
-        // TODO: 모든 우승 기록의 음식들을 그릇 뷰에 표시합니다.
-        // 예: val allFoodImages = winRecords.flatMap { record ->
-        //     record.selectedFoods.map { foodId ->
-        //         FoodRepository.getFoodList().find { it.id == foodId }?.imageResId
-        //     }.filterNotNull()
-        // }
-        // 그릇 이미지 위에 음식 이미지들을 오버레이로 표시
-    }
-    
-    /**
-     * 메모 편집 다이얼로그를 보여주는 함수입니다.
-     */
-    private fun showMemoDialog(record: WinRecord) {
-        // TODO: AlertDialog 또는 BottomSheetDialog를 사용하여 메모 편집 다이얼로그를 표시합니다.
-        // 예: val dialog = AlertDialog.Builder(this)
-        //     .setTitle("메모 편집")
-        //     .setView(EditText(this).apply { setText(record.memo) })
-        //     .setPositiveButton("저장") { _, _ ->
-        //         // 메모 저장 로직
-        //         updateMemo(record.id, memoText)
-        //     }
-        //     .setNegativeButton("취소", null)
-        //     .create()
-        // dialog.show()
-    }
-    
-    /**
-     * 기록의 메모를 업데이트하는 함수입니다.
-     */
-    private fun updateMemo(recordId: Long, memo: String) {
-        // TODO: PreferenceManager를 통해 해당 기록의 메모를 업데이트합니다.
-        // 예: val updatedRecords = winRecords.map { record ->
-        //     if (record.id == recordId) record.copy(memo = memo) else record
-        // }
-        // preferenceManager.saveWinRecords(updatedRecords)
-        // loadWinRecords()
-        // setupRecyclerView()
+        // 최소 12개 접시를 보장 (빈 접시는 null로 표시)
+        // 12개 이상이면 그대로 유지 (동적으로 추가됨)
+        while (plateList.size < 12) {
+            plateList.add(null)
+        }
+
+        // RecyclerView에 GridLayoutManager 설정 (2열)
+        if (binding.plateRecyclerView.layoutManager == null) {
+            binding.plateRecyclerView.layoutManager = GridLayoutManager(this, 2)
+        }
+
+        // PlateAdapter 생성 및 연결 (클릭 리스너 추가)
+        adapter = PlateAdapter(plateList) { foodId ->
+            showFoodDetailDialog(foodId)
+        }
+        binding.plateRecyclerView.adapter = adapter
     }
 
     /**
-     * 버튼 클릭 이벤트를 설정하는 함수입니다.
+     * 음식 상세 정보를 표시하는 BottomSheetDialog를 보여주는 함수입니다.
      */
-    private fun setupButtons() {
-        // TODO: 갤러리 아이템의 삭제 버튼 클릭 시 해당 기록을 삭제합니다.
-        // (WinRecordGalleryAdapter 내부에서 구현)
-        // 예: adapter.onDeleteClick = { record ->
-        //     deleteRecord(record.id)
-        // }
+    private fun showFoodDetailDialog(foodId: Int) {
+        val selectedFoods = preferenceManager.getMapSelectedFoods()
+        val selectedFood = selectedFoods.find { it.foodId == foodId } ?: return
         
-        // TODO: '홈으로' 버튼 클릭 시 IntroActivity로 이동하는 로직을 구현합니다.
-        // 예: binding.homeButton.setOnClickListener {
-        //     val intent = Intent(this, IntroActivity::class.java)
-        //     startActivity(intent)
-        //     finish()
-        // }
-    }
-    
-    /**
-     * 기록을 삭제하는 함수입니다.
-     */
-    private fun deleteRecord(recordId: Long) {
-        // TODO: PreferenceManager를 통해 해당 기록을 삭제합니다.
-        // 예: val updatedRecords = winRecords.filter { it.id != recordId }
-        // preferenceManager.saveWinRecords(updatedRecords)
-        // loadWinRecords()
-        // setupRecyclerView()
-    }
+        val food = FoodRepository.getFoodById(foodId) ?: return
 
+        // BottomSheetDialog 생성
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val bottomSheetBinding = BottomSheetFoodDetailBinding.inflate(LayoutInflater.from(this))
+        bottomSheetDialog.setContentView(bottomSheetBinding.root)
+        
+        // 키보드가 올라올 때 BottomSheetDialog가 조정되도록 설정
+        bottomSheetDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
+        // 날짜 포맷터
+        val dateFormat = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREAN)
+
+        // 정보 표시
+        bottomSheetBinding.foodNameTextView.text = food.name
+        bottomSheetBinding.dateTextView.text = dateFormat.format(selectedFood.getDate())
+        bottomSheetBinding.placeNameTextView.text = selectedFood.placeName.ifEmpty { "정보 없음" }
+        bottomSheetBinding.placeAddressTextView.text = selectedFood.placeAddress.ifEmpty { "주소 정보 없음" }
+        bottomSheetBinding.memoEditText.setText(selectedFood.memo)
+
+        // 저장 버튼 클릭
+        bottomSheetBinding.saveButton.setOnClickListener {
+            val memo = bottomSheetBinding.memoEditText.text.toString()
+            preferenceManager.updateMapSelectedFoodMemo(foodId, memo)
+            Toast.makeText(this, "메모가 저장되었습니다.", Toast.LENGTH_SHORT).show()
+            bottomSheetDialog.dismiss()
+            setupRecyclerView() // 리스트 새로고침
+        }
+
+        // 삭제 버튼 클릭
+        bottomSheetBinding.deleteButton.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("삭제 확인")
+                .setMessage("정말 이 기록을 삭제하시겠습니까?")
+                .setPositiveButton("삭제") { _, _ ->
+                    preferenceManager.removeMapSelectedFood(foodId)
+                    Toast.makeText(this, "기록이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    bottomSheetDialog.dismiss()
+                    setupRecyclerView() // 리스트 새로고침 (삭제 후 다음 음식이 자동으로 채워짐)
+                }
+                .setNegativeButton("취소", null)
+                .show()
+        }
+
+        bottomSheetDialog.show()
+    }
     override fun onResume() {
         super.onResume()
-        // TODO: 마이페이지가 다시 보일 때 최신 기록을 다시 불러옵니다.
-        // (다른 화면에서 새로운 기록이 추가되었을 수 있으므로)
-        loadWinRecords()
+        // 마이페이지가 다시 보일 때 최신 선택된 음식을 다시 불러옵니다.
+        // (지도에서 새로운 음식이 선택되었을 수 있으므로)
         setupRecyclerView()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // TODO: 필요시 마이페이지가 가려질 때 실행할 로직을 여기에 추가합니다.
     }
 }

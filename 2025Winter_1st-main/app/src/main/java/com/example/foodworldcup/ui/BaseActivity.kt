@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.example.foodworldcup.R
 import com.example.foodworldcup.utils.PreferenceManager
 
@@ -273,23 +274,43 @@ abstract class BaseActivity : AppCompatActivity() {
      */
     private fun setNavigationItemSelected(item: View, isSelected: Boolean) {
         try {
-            // TextView 찾기 (LinearLayout의 두 번째 자식)
             val linearLayout = item as? android.widget.LinearLayout
             if (linearLayout != null && linearLayout.childCount > 1) {
-                val textView = linearLayout.getChildAt(1) as? android.widget.TextView
+                // ImageView 찾기 (LinearLayout의 첫 번째 자식)
+                val imageView = linearLayout.getChildAt(0) as? ImageView
+                // TextView 찾기 (LinearLayout의 두 번째 자식)
+                val textView = linearLayout.getChildAt(1) as? TextView
                 
-                if (textView != null) {
-                    if (isSelected) {
-                        // 선택된 상태: 오렌지색
-                        textView.setTextColor(ContextCompat.getColor(this, R.color.primary_orange))
-                    } else {
-                        // 선택되지 않은 상태: 회색
-                        textView.setTextColor(ContextCompat.getColor(this, R.color.navigation_unselected))
+                val selectedColor = ContextCompat.getColor(this, R.color.primary_orange)
+                val unselectedColor = ContextCompat.getColor(this, R.color.navigation_unselected)
+                
+                if (isSelected) {
+                    // 선택된 상태: 주황색
+                    imageView?.let { imgView ->
+                        val drawable = imgView.drawable
+                        if (drawable != null) {
+                            val wrappedDrawable = DrawableCompat.wrap(drawable.mutate())
+                            DrawableCompat.setTint(wrappedDrawable, selectedColor)
+                            imgView.setImageDrawable(wrappedDrawable)
+                        }
                     }
+                    textView?.setTextColor(selectedColor)
+                } else {
+                    // 선택되지 않은 상태: 회색
+                    imageView?.let { imgView ->
+                        val drawable = imgView.drawable
+                        if (drawable != null) {
+                            val wrappedDrawable = DrawableCompat.wrap(drawable.mutate())
+                            DrawableCompat.setTint(wrappedDrawable, unselectedColor)
+                            imgView.setImageDrawable(wrappedDrawable)
+                        }
+                    }
+                    textView?.setTextColor(unselectedColor)
                 }
             }
         } catch (e: Exception) {
             Log.e("BaseActivity", "setNavigationItemSelected 오류", e)
+            e.printStackTrace()
         }
     }
 }

@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.foodworldcup.R
 import com.example.foodworldcup.api.*
 import com.example.foodworldcup.ui.adapter.*
+import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.data.MapSelectedFood
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.kakao.vectormap.*
@@ -959,6 +961,46 @@ class MapActivity : BaseActivity() {
     /** 업적 페이지로 이동 */
     private fun navigateToAchievement() {
         if (selectedPlaceIndex >= 0 && selectedPlaceIndex < searchResults.size) {
+            val selectedPlace = searchResults[selectedPlaceIndex]
+            
+            // 선택된 음식점의 foodType에 해당하는 음식 ID 찾기
+            val foodType = selectedPlace.foodType
+            if (foodType != null) {
+                // FoodRepository에서 foodType과 일치하는 음식 찾기
+                val food = FoodRepository.getFoodList().find { it.name == foodType }
+                if (food != null) {
+                    // 가게 정보 추출 (도로명 주소 우선, 없으면 지번 주소)
+                    val placeAddress = selectedPlace.road_address_name 
+                        ?: selectedPlace.address_name 
+                        ?: "주소 정보 없음"
+                    
+                    // 디버깅 로그 추가
+                    android.util.Log.d("MapActivity", "=== 음식 선택 저장 ===")
+                    android.util.Log.d("MapActivity", "음식 이름: ${food.name} (ID: ${food.id})")
+                    android.util.Log.d("MapActivity", "가게 이름: ${selectedPlace.place_name}")
+                    android.util.Log.d("MapActivity", "도로명 주소: ${selectedPlace.road_address_name ?: "없음"}")
+                    android.util.Log.d("MapActivity", "지번 주소: ${selectedPlace.address_name ?: "없음"}")
+                    android.util.Log.d("MapActivity", "최종 주소: $placeAddress")
+                    
+                    // MapSelectedFood 객체 생성
+                    val mapSelectedFood = MapSelectedFood(
+                        foodId = food.id,
+                        selectedDate = System.currentTimeMillis(),
+                        placeName = selectedPlace.place_name.ifEmpty { "가게 정보 없음" },
+                        placeAddress = placeAddress,
+                        memo = ""
+                    )
+                    
+                    // BaseActivity에서 상속받은 preferenceManager를 통해 선택된 음식 정보 저장
+                    preferenceManager.addMapSelectedFood(mapSelectedFood)
+                    android.util.Log.d("MapActivity", "저장 완료: ${mapSelectedFood.placeName}, ${mapSelectedFood.placeAddress}")
+                } else {
+                    android.util.Log.w("MapActivity", "음식을 찾을 수 없음: $foodType")
+                }
+            } else {
+                android.util.Log.w("MapActivity", "foodType이 null입니다. selectedPlace: ${selectedPlace.place_name}")
+            }
+            
             val intent = Intent(this, MyPageActivity::class.java)
             startActivity(intent)
         }
