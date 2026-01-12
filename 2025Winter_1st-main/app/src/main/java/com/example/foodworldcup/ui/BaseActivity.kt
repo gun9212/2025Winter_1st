@@ -88,6 +88,36 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     /**
+     * 스와이프 애니메이션과 함께 Activity를 전환하는 헬퍼 함수입니다.
+     * 현재 화면과 목적지 화면의 순서에 따라 애니메이션 방향을 결정합니다.
+     * 
+     * @param intent 전환할 Activity의 Intent
+     * @param targetScreen 목적지 화면
+     */
+    private fun navigateWithSwipeAnimation(intent: Intent, targetScreen: Screen) {
+        startActivity(intent)
+        
+        // 현재 화면과 목적지 화면의 순서 비교
+        val currentOrder = currentScreen.ordinal
+        val targetOrder = targetScreen.ordinal
+        
+        // 오른쪽으로 이동 (다음 화면)
+        if (targetOrder > currentOrder) {
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        } 
+        // 왼쪽으로 이동 (이전 화면)
+        else if (targetOrder < currentOrder) {
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+        }
+        // 같은 화면이면 애니메이션 없음
+        else {
+            overridePendingTransition(0, 0)
+        }
+        
+        finish()
+    }
+
+    /**
      * 하단 네비게이션 바의 클릭 이벤트를 설정합니다.
      */
     private fun setupBottomNavigationClickListeners() {
@@ -106,8 +136,7 @@ abstract class BaseActivity : AppCompatActivity() {
                     if (currentScreen != Screen.HOME) {
                         try {
                             val intent = Intent(this, IntroActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                            navigateWithSwipeAnimation(intent, Screen.HOME)
                         } catch (e: Exception) {
                             Log.e("BaseActivity", "홈으로 이동 실패", e)
                         }
@@ -126,9 +155,8 @@ abstract class BaseActivity : AppCompatActivity() {
                         try {
                             Log.d("BaseActivity", "FoodListActivity로 이동 시도")
                             val intent = Intent(this, FoodListActivity::class.java)
-                            startActivity(intent)
+                            navigateWithSwipeAnimation(intent, Screen.LIST)
                             Log.d("BaseActivity", "FoodListActivity로 이동 완료")
-                            finish()
                         } catch (e: Exception) {
                             Log.e("BaseActivity", "목록으로 이동 실패", e)
                             Log.e("BaseActivity", "오류 타입: ${e.javaClass.simpleName}")
@@ -154,14 +182,12 @@ abstract class BaseActivity : AppCompatActivity() {
                             if (selectedFoodIds.isNotEmpty()) {
                                 val intent = Intent(this, GameActivity::class.java)
                                 intent.putIntegerArrayListExtra("selected_food_ids", ArrayList(selectedFoodIds))
-                                startActivity(intent)
-                                finish()
+                                navigateWithSwipeAnimation(intent, Screen.SWIPE)
                             } else {
                                 // 선택된 음식이 없으면 FoodListActivity로 이동
                                 Toast.makeText(this, "먼저 음식을 선택해주세요", Toast.LENGTH_SHORT).show()
                                 val intent = Intent(this, FoodListActivity::class.java)
-                                startActivity(intent)
-                                finish()
+                                navigateWithSwipeAnimation(intent, Screen.LIST)
                             }
                         } catch (e: Exception) {
                             Log.e("BaseActivity", "스와이프로 이동 실패", e)
@@ -181,8 +207,7 @@ abstract class BaseActivity : AppCompatActivity() {
                     if (currentScreen != Screen.ACCEPTED) {
                         try {
                             val intent = Intent(this, MyPageActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                            navigateWithSwipeAnimation(intent, Screen.ACCEPTED)
                         } catch (e: Exception) {
                             Log.e("BaseActivity", "합격으로 이동 실패", e)
                         }
@@ -200,8 +225,7 @@ abstract class BaseActivity : AppCompatActivity() {
                     if (currentScreen != Screen.MAP) {
                         try {
                             val intent = Intent(this, MapActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                            navigateWithSwipeAnimation(intent, Screen.MAP)
                         } catch (e: Exception) {
                             Log.e("BaseActivity", "지도로 이동 실패", e)
                         }
