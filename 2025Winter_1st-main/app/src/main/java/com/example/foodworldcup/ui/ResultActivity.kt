@@ -47,6 +47,8 @@ class ResultActivity : BaseActivity() {
         // 우승 기록 저장 (통과한 음식이 있을 때만)
         if (passedFoods.isNotEmpty()) {
             saveWinRecord(passedFoodIds)
+            // 지도 검색을 위해 최종 선택된 음식 ID 저장
+            preferenceManager.saveFinalFoodIds(passedFoodIds)
         }
         
         // 화면에 합격된 음식 리스트를 표시합니다.

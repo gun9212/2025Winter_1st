@@ -8,6 +8,7 @@ import android.view.View
 import com.bumptech.glide.Glide
 import com.example.foodworldcup.R
 import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.data.MapSelectedFood
 import com.example.foodworldcup.databinding.ActivityIntroBinding
 import com.example.foodworldcup.utils.PreferenceManager
 import com.kakao.sdk.common.util.Utility
@@ -64,35 +65,53 @@ class IntroActivity : BaseActivity() {
     }
 
     /**
-     * PreferenceManager에서 최근 우승 기록을 불러와서 Recent Winner 섹션에 표시하는 함수입니다.
+     * PreferenceManager에서 최근 선택된 음식을 불러와서 Recent Winner 섹션에 표시하는 함수입니다.
      * 기록이 없으면 Recent Winner 섹션을 숨깁니다.
      */
     private fun loadRecentWinner() {
-        val winRecords = preferenceManager.getWinRecords()
+        val mapSelectedFoods = preferenceManager.getMapSelectedFoods()
         
-        if (winRecords.isEmpty()) {
+        if (mapSelectedFoods.isEmpty()) {
             // 기록이 없으면 Recent Winner 섹션 숨김
             binding.recentWinnerCard.visibility = View.GONE
             return
         }
         
         // 가장 최근 기록 가져오기 (날짜 기준 내림차순 정렬)
-        val recentRecord = winRecords.sortedByDescending { it.winDate }.first()
+        val recentFood = mapSelectedFoods.sortedByDescending { it.selectedDate }.first()
         
-        // 선택된 음식 ID 리스트에서 첫 번째 음식 가져오기
-        if (recentRecord.selectedFoods.isNotEmpty()) {
-            val firstFoodId = recentRecord.selectedFoods.first()
-            val food = FoodRepository.getFoodById(firstFoodId)
+        // 음식 정보 가져오기
+        val food = FoodRepository.getFoodById(recentFood.foodId)
+        
+        if (food != null) {
+            // Recent Winner 섹션 표시
+            binding.recentWinnerCard.visibility = View.VISIBLE
+            binding.recentWinnerNameTextView.text = food.name
             
-            if (food != null) {
-                // Recent Winner 섹션 표시
-                binding.recentWinnerCard.visibility = View.VISIBLE
-                binding.recentWinnerNameTextView.text = food.name
+            // 캐릭터 이미지 로드 (characterImagePath 사용)
+            if (!food.characterImagePath.isNullOrEmpty()) {
+                // 시도할 경로 리스트
+                val pathsToTry = mutableListOf<String>()
                 
-                // 이미지 로드 (imagePath 사용)
-                if (!food.imagePath.isNullOrEmpty()) {
+                // 1. 원본 경로 (캐릭터 이미지 경로)
+                pathsToTry.add(food.characterImagePath)
+                
+                // 2. 확장자 변경 (.png <-> .jpg)
+                if (food.characterImagePath.endsWith(".png")) {
+                    pathsToTry.add(food.characterImagePath.replace(".png", ".jpg"))
+                } else if (food.characterImagePath.endsWith(".jpg")) {
+                    pathsToTry.add(food.characterImagePath.replace(".jpg", ".png"))
+                }
+                
+                // 3. 음식 이름으로 직접 찾기 (캐릭터 이미지 경로)
+                pathsToTry.add("food_character_images/${food.category}/${food.name}_캐릭터누끼.png")
+                pathsToTry.add("food_character_images/${food.category}/${food.name}_캐릭터누끼.jpg")
+                
+                // 각 경로를 시도
+                var loaded = false
+                for (path in pathsToTry) {
                     try {
-                        val inputStream = assets.open(food.imagePath)
+                        val inputStream = assets.open(path)
                         val bitmap = BitmapFactory.decodeStream(inputStream)
                         inputStream.close()
                         
@@ -103,22 +122,23 @@ class IntroActivity : BaseActivity() {
                                 .error(R.drawable.ic_launcher_background)
                                 .centerCrop()
                                 .into(binding.recentWinnerImageView)
-                        } else {
-                            binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+                            loaded = true
+                            break
                         }
                     } catch (e: Exception) {
-                        e.printStackTrace()
-                        binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+                        // 다음 경로 시도
+                        continue
                     }
-                } else {
+                }
+                
+                if (!loaded) {
                     binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
                 }
             } else {
-                // 음식을 찾을 수 없으면 섹션 숨김
-                binding.recentWinnerCard.visibility = View.GONE
+                binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
             }
         } else {
-            // 선택된 음식이 없으면 섹션 숨김
+            // 음식을 찾을 수 없으면 섹션 숨김
             binding.recentWinnerCard.visibility = View.GONE
         }
     }

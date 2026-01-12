@@ -24,6 +24,7 @@ class PreferenceManager(context: Context) {
     companion object {
         private const val KEY_WIN_RECORDS = "win_records"
         private const val KEY_SELECTED_FOOD_IDS = "selected_food_ids" // 스와이프 게임용
+        private const val KEY_FINAL_FOOD_IDS = "final_food_ids" // 최종 선택된 음식 ID (지도 검색용)
         private const val KEY_MAP_SELECTED_FOOD_IDS = "map_selected_food_ids" // 지도에서 선택한 음식용 (레거시)
         private const val KEY_MAP_SELECTED_FOODS = "map_selected_foods" // 지도에서 선택한 음식 상세 정보
     }
@@ -121,6 +122,42 @@ class PreferenceManager(context: Context) {
             prefs.edit().remove(KEY_WIN_RECORDS).apply()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    /**
+     * 최종 선택된 음식 ID 리스트를 저장하는 함수입니다.
+     * Gson을 사용하여 List<Int>를 JSON 문자열로 변환한 후 SharedPreferences에 저장합니다.
+     * 지도 검색 시 사용할 음식 목록을 저장합니다.
+     *
+     * @param foodIds 저장할 음식 ID 리스트
+     */
+    fun saveFinalFoodIds(foodIds: List<Int>) {
+        try {
+            val json = gson.toJson(foodIds)
+            prefs.edit().putString(KEY_FINAL_FOOD_IDS, json).apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * 저장된 최종 선택된 음식 ID 리스트를 불러오는 함수입니다.
+     * SharedPreferences에서 JSON 문자열을 읽어와 Gson으로 List<Int>로 변환합니다.
+     *
+     * @return 저장된 음식 ID 리스트 (저장된 리스트가 없으면 빈 리스트 반환)
+     */
+    fun getFinalFoodIds(): List<Int> {
+        return try {
+            val json = prefs.getString(KEY_FINAL_FOOD_IDS, null)
+            if (json == null || json.isEmpty()) {
+                return emptyList()
+            }
+            val type = object : TypeToken<List<Int>>() {}.type
+            gson.fromJson<List<Int>>(json, type) ?: emptyList()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 
