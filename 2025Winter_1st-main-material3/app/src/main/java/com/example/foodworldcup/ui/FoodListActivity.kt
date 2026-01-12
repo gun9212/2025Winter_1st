@@ -143,10 +143,13 @@ class FoodListActivity : BaseActivity() {
             binding.categoryRecyclerView.layoutManager = LinearLayoutManager(this)
             binding.categoryRecyclerView.adapter = categoryAdapter
             
-            // RecyclerView가 터치 이벤트를 가로채지 않도록 설정
+            // RecyclerView 성능 최적화 설정
             binding.categoryRecyclerView.isNestedScrollingEnabled = false
             binding.categoryRecyclerView.overScrollMode = View.OVER_SCROLL_NEVER
-            binding.categoryRecyclerView.setHasFixedSize(false)
+            binding.categoryRecyclerView.setHasFixedSize(true) // true로 변경하여 성능 향상
+            binding.categoryRecyclerView.itemAnimator = null // 애니메이션 비활성화로 성능 향상
+            binding.categoryRecyclerView.setItemViewCacheSize(20) // 뷰 캐시 크기 증가
+            binding.categoryRecyclerView.recycledViewPool.setMaxRecycledViews(0, 10) // ViewPool 크기 증가
             
             // RecyclerView의 터치 이벤트를 부모 NestedScrollView로 전달하도록 설정
             binding.categoryRecyclerView.setOnTouchListener { v, event ->
