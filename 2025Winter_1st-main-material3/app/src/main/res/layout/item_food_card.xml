@@ -5,14 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 카드 뷰 -->
+    <!-- 카드 뷰 - 음식 이미지 강조를 위한 여백 증가 -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="16dp"
+        android:layout_margin="20dp"
         app:shapeAppearance="@style/ShapeAppearance.Molip_1st.MediumComponent"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/white">
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/white"
+        app:strokeWidth="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
