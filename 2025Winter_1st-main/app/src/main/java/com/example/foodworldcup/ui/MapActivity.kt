@@ -82,22 +82,32 @@ class MapActivity : BaseActivity() {
         // 하단 네비게이션 바 설정
         setupBottomNavigation(Screen.MAP)
 
-        // Intent에서 음식 이름 리스트 받기
-        foodNames = intent.getStringArrayListExtra("food_names") ?: emptyList()
-
         // 합격된 음식 ID 리스트가 전달된 경우 (ResultActivity에서)
         val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids")
+
         if (passedFoodIds != null && passedFoodIds.isNotEmpty()) {
             // FoodRepository에서 음식 이름 가져오기
             foodNames =
                     passedFoodIds.mapNotNull { id ->
                         com.example.foodworldcup.data.FoodRepository.getFoodById(id)?.name
                     }
-        }
-
-        // 음식 이름이 없으면 기본값 사용
-        if (foodNames.isEmpty()) {
-            foodNames = listOf("치킨", "피자", "삼겹살")
+        } else {
+            // 2. 인텐트 데이터가 없으면 저장된 검색어 불러오기
+            val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
+            if (lastSearchFoodIds.isNotEmpty()) {
+                foodNames =
+                    lastSearchFoodIds.mapNotNull { id ->
+                        com.example.foodworldcup.data.FoodRepository.getFoodById(id)?.name
+                    }
+                Toast.makeText(this, "이전 검색 기록을 불러왔습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                // 3. 저장된 검색어도 없으면 FoodListActivity로 이동 (새 게임 시작)
+                Toast.makeText(this, "이전 검색 기록이 없어 게임을 시작합니다.", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, FoodListActivity::class.java)
+                startActivity(intent)
+                finish()
+                return // MapActivity 종료
+            }
         }
 
         // UI 초기화
