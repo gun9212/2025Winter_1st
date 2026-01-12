@@ -1,9 +1,6 @@
 package com.example.foodworldcup.ui
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
@@ -19,9 +16,9 @@ import com.example.foodworldcup.data.MapSelectedFood
 import com.example.foodworldcup.databinding.ActivityMypageBinding
 import com.example.foodworldcup.databinding.BottomSheetFoodDetailBinding
 import com.example.foodworldcup.ui.adapter.PlateAdapter
+import com.example.foodworldcup.utils.DateFormatter
+import com.example.foodworldcup.utils.KakaoMapHelper
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 /**
  * 마이페이지를 담당하는 Activity입니다.
@@ -57,15 +54,12 @@ class MyPageActivity : BaseActivity() {
         val selectedFoods = preferenceManager.getMapSelectedFoods()
             .sortedByDescending { it.selectedDate }
 
-        // 접시 리스트 생성 (MapSelectedFood 객체 사용)
+        // 접시 리스트 생성 (최소 12개 보장)
         // 선택된 음식이 있으면 해당 객체를, 없으면 null을 넣어서 빈 접시 표시
-        val plateList = mutableListOf<MapSelectedFood?>()
-        
-        // 선택된 음식 추가 (최신순으로 정렬된 상태)
+        val plateList = ArrayList<MapSelectedFood?>(maxOf(selectedFoods.size, 12))
         plateList.addAll(selectedFoods)
         
         // 최소 12개 접시를 보장 (빈 접시는 null로 표시)
-        // 12개 이상이면 그대로 유지 (동적으로 추가됨)
         while (plateList.size < 12) {
             plateList.add(null)
         }
@@ -100,12 +94,9 @@ class MyPageActivity : BaseActivity() {
         // 키보드가 올라올 때 BottomSheetDialog가 조정되도록 설정
         bottomSheetDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
-        // 날짜 포맷터
-        val dateFormat = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREAN)
-
         // 정보 표시
         bottomSheetBinding.foodNameTextView.text = food.name
-        bottomSheetBinding.dateTextView.text = dateFormat.format(selectedFood.getDate())
+        bottomSheetBinding.dateTextView.text = DateFormatter.dateFormatLong.format(selectedFood.getDate())
         bottomSheetBinding.placeNameTextView.text = selectedFood.placeName.ifEmpty { "정보 없음" }
         bottomSheetBinding.placeAddressTextView.text = selectedFood.placeAddress.ifEmpty { "주소 정보 없음" }
         
@@ -163,66 +154,10 @@ class MyPageActivity : BaseActivity() {
 
     /**
      * 카카오맵에서 상세 정보 보기 (리뷰, 사진 등 확인 가능)
-     * MapActivity의 openKakaoMapDetail과 동일한 로직을 사용합니다.
+     * KakaoMapHelper 유틸리티를 사용합니다.
      */
     private fun openKakaoMapDetail(selectedFood: MapSelectedFood) {
-        // 1. placeId가 있으면 카카오맵 앱으로 직접 열기 (가장 정확)
-        if (!selectedFood.placeId.isNullOrBlank()) {
-            try {
-                val kakaoMapUri = "kakaomap://place?id=${selectedFood.placeId}"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
-                
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                    return
-                }
-            } catch (e: Exception) {
-                Log.e("MyPageActivity", "카카오맵 앱 열기 실패: ${e.message}", e)
-            }
-        }
-        
-        // 2. 좌표가 있으면 좌표로 카카오맵 앱 열기
-        if (selectedFood.latitude != null && selectedFood.longitude != null) {
-            try {
-                // 카카오맵 앱으로 좌표 기반 장소 열기
-                val kakaoMapUri = "kakaomap://place?lat=${selectedFood.latitude}&lng=${selectedFood.longitude}"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
-                
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                    return
-                }
-            } catch (e: Exception) {
-                Log.e("MyPageActivity", "카카오맵 앱 좌표 열기 실패: ${e.message}", e)
-            }
-            
-            // 앱이 없으면 검색으로 시도
-            try {
-                val kakaoMapUri = "kakaomap://search?q=${Uri.encode(selectedFood.placeName)}"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
-                
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                    return
-                }
-            } catch (e: Exception) {
-                Log.e("MyPageActivity", "카카오맵 앱 검색 열기 실패: ${e.message}", e)
-            }
-        }
-        
-        // 3. 최종 폴백: 웹 검색
-        if (selectedFood.placeName.isNotEmpty() && selectedFood.placeName != "정보 없음") {
-            try {
-                val webUrl = "https://map.kakao.com/link/search/${Uri.encode(selectedFood.placeName)}"
-                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
-                startActivity(webIntent)
-            } catch (e: Exception) {
-                Log.e("MyPageActivity", "카카오맵 웹 검색 열기 실패: ${e.message}", e)
-                Toast.makeText(this, "카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(this, "식당 정보가 없어 카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
-        }
+        KakaoMapHelper.openKakaoMapDetail(this, selectedFood)
     }
 
     override fun onResume() {

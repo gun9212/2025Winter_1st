@@ -23,6 +23,8 @@ import com.example.foodworldcup.api.*
 import com.example.foodworldcup.ui.adapter.*
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.data.MapSelectedFood
+import com.example.foodworldcup.utils.BitmapUtils
+import com.example.foodworldcup.utils.KakaoMapHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.kakao.vectormap.*
@@ -357,8 +359,8 @@ class MapActivity : BaseActivity() {
                     if (characterBitmap != null) {
                         characterDrawn = true
 
-                        // ⭐ 이미지의 실질적 내용(누끼 부분)의 크기를 구함
-                        val contentBounds = getContentBounds(characterBitmap)
+                               // ⭐ 이미지의 실질적 내용(누끼 부분)의 크기를 구함
+                               val contentBounds = BitmapUtils.getContentBounds(characterBitmap)
                         val contentWidth = contentBounds.width()
                         val contentHeight = contentBounds.height()
 
@@ -453,38 +455,6 @@ class MapActivity : BaseActivity() {
         }
     }
 
-    /** 비트맵에서 투명하지 않은 실질적 영역 구하기 */
-    private fun getContentBounds(bitmap: android.graphics.Bitmap): android.graphics.Rect {
-        val width = bitmap.width
-        val height = bitmap.height
-        val pixels = IntArray(width * height)
-        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-
-        var minX = width
-        var maxX = -1
-        var minY = height
-        var maxY = -1
-
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                // Alpha 값 확인 (MSB 8bit)
-                val alpha = (pixels[y * width + x] shr 24) and 0xFF
-                if (alpha > 50) { // 약간의 투명도는 무시 (노이즈 방지)
-                    if (x < minX) minX = x
-                    if (x > maxX) maxX = x
-                    if (y < minY) minY = y
-                    if (y > maxY) maxY = y
-                }
-            }
-        }
-
-        if (maxX < minX || maxY < minY) {
-            // 내용이 없으면 전체 반환
-            return android.graphics.Rect(0, 0, width, height)
-        }
-
-        return android.graphics.Rect(minX, minY, maxX + 1, maxY + 1)
-    }
 
     /** Assets에서 음식 종류에 맞는 이미지 경로 찾기 */
     private fun findAssetPath(foodType: String): String? {
@@ -1751,76 +1721,31 @@ class MapActivity : BaseActivity() {
 
     /** 카카오맵에서 상세 정보 보기 (리뷰, 사진 등 확인 가능) */
     private fun openKakaoMapDetail(place: Place) {
-        // 1. place.id가 있으면 카카오맵 앱으로 직접 열기 (가장 정확)
-        if (!place.id.isNullOrBlank()) {
-            try {
-                val kakaoMapUri = "kakaomap://place?id=${place.id}"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
-                
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                    return
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MapActivity", "카카오맵 앱 열기 실패: ${e.message}")
-            }
-        }
-        
-        // 2. 좌표가 있으면 좌표로 카카오맵 앱 열기
+        // KakaoMapHelper 유틸리티 사용
         val lat = place.y.toDoubleOrNull()
         val lng = place.x.toDoubleOrNull()
-        if (lat != null && lng != null) {
-            try {
-                // 카카오맵 앱으로 좌표 기반 장소 열기
-                val kakaoMapUri = "kakaomap://place?lat=$lat&lng=$lng"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
-                
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                    return
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MapActivity", "카카오맵 앱 좌표 열기 실패: ${e.message}")
-            }
-            
-            // 앱이 없으면 검색으로 시도
-            try {
-                val kakaoMapUri = "kakaomap://search?q=${Uri.encode(place.place_name)}"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(kakaoMapUri))
-                
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                    return
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MapActivity", "카카오맵 앱 검색 열기 실패: ${e.message}")
-            }
-        }
         
-        // 3. 모든 앱 열기 시도가 실패하면 웹 브라우저로 폴백
+        // place_url이 있으면 먼저 시도
         if (!place.place_url.isNullOrBlank()) {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(place.place_url))
-                startActivity(intent)
-                return
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return
+                }
             } catch (e: Exception) {
                 android.util.Log.e("MapActivity", "카카오맵 웹 URL 열기 실패: ${e.message}")
             }
         }
         
-        // 4. 최종 폴백: 웹 검색
-        if (!place.place_name.isNullOrBlank()) {
-            try {
-                val webUrl = "https://map.kakao.com/link/search/${Uri.encode(place.place_name)}"
-                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
-                startActivity(webIntent)
-            } catch (e: Exception) {
-                android.util.Log.e("MapActivity", "카카오맵 웹 검색 열기 실패: ${e.message}")
-                Toast.makeText(this, "카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(this, "위치 정보가 없어 카카오맵을 열 수 없습니다.", Toast.LENGTH_SHORT).show()
-        }
+        // KakaoMapHelper 사용
+        KakaoMapHelper.openKakaoMapDetail(
+            context = this,
+            placeId = place.id,
+            latitude = lat,
+            longitude = lng,
+            placeName = place.place_name
+        )
     }
 
     /** 길찾기 앱 열기 */
