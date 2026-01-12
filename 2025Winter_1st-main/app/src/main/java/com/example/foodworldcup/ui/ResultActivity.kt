@@ -24,6 +24,8 @@ class ResultActivity : BaseActivity() {
     
     // GameActivity로부터 전달받은 합격된 음식 리스트
     private var passedFoods: List<Food> = emptyList()
+
+    private var passedFoodIds: List<Int> = emptyList()
     
     // 통과한 음식 어댑터
     private lateinit var passedFoodAdapter: PassedFoodAdapter
@@ -37,17 +39,17 @@ class ResultActivity : BaseActivity() {
         setupBottomNavigation(BaseActivity.Screen.ACCEPTED)
 
         // GameActivity로부터 전달받은 합격된 음식 ID 리스트를 가져옵니다.
-        val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
+        passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
         
         // 음식 ID로 FoodRepository에서 음식 리스트를 가져옵니다.
         passedFoods = passedFoodIds.mapNotNull { id ->
             FoodRepository.getFoodById(id)
         }
         
-        // 우승 기록 저장 (통과한 음식이 있을 때만)
-        if (passedFoods.isNotEmpty()) {
-            saveWinRecord(passedFoodIds)
-        }
+//        // 우승 기록 저장 (통과한 음식이 있을 때만)
+//        if (passedFoods.isNotEmpty()) {
+//            saveWinRecord(passedFoodIds)
+//        }
         
         // 화면에 합격된 음식 리스트를 표시합니다.
         displayPassedFoods()
@@ -62,24 +64,16 @@ class ResultActivity : BaseActivity() {
      * 
      * @param passedFoodIds 통과한 음식 ID 리스트
      */
-    private fun saveWinRecord(passedFoodIds: List<Int>) {
+    private fun saveFinalRecord(passedFoodIds: List<Int>) {
         try {
-            // WinRecord 생성
-            val winRecord = WinRecord(
-                id = System.currentTimeMillis(), // 타임스탬프를 ID로 사용 (고유성 보장)
-                selectedFoods = passedFoodIds, // 통과한 음식 ID 리스트
-                winDate = Date(), // 현재 날짜 및 시간
-                memo = "" // 기본 메모는 빈 문자열 (나중에 마이페이지에서 편집 가능)
-            )
             
             // PreferenceManager를 통해 저장
-            preferenceManager.addWinRecord(winRecord)
+            preferenceManager.saveFinalFoodIds(passedFoodIds)
             
             // 저장 완료 로그
-            Log.d("ResultActivity", "우승 기록 저장 완료: ${passedFoodIds.size}개 음식")
+            Log.d("ResultActivity", "최종 선택 기록 저장 완료: ${passedFoodIds.size}개 음식")
         } catch (e: Exception) {
-            // 저장 실패 시 로그 출력
-            Log.e("ResultActivity", "우승 기록 저장 실패", e)
+            Log.e("ResultActivity", "최종 선택 기록 저장 실패", e)
             e.printStackTrace()
             // 사용자에게는 에러를 보여주지 않음 (선택사항: Toast로 알림 가능)
         }
@@ -108,6 +102,8 @@ class ResultActivity : BaseActivity() {
      * 버튼 클릭 이벤트를 설정하는 함수입니다.
      */
     private fun setupButtons() {
+        // 최종선택 기록
+        saveFinalRecord(passedFoodIds)
         // 다시하기 버튼: FoodListActivity로 이동 (게임 재시작)
         binding.restartButton.setOnClickListener {
             val intent = Intent(this, FoodListActivity::class.java)

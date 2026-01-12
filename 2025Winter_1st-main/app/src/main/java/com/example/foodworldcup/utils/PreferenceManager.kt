@@ -21,103 +21,41 @@ class PreferenceManager(context: Context) {
     
     // SharedPreferences에 저장할 키 이름들
     companion object {
-        private const val KEY_WIN_RECORDS = "win_records"
+        private const val KEY_FINAL_FOOD_IDS = "final_food_ids"
         private const val KEY_SELECTED_FOOD_IDS = "selected_food_ids"
     }
-
     /**
-     * 우승 기록을 저장하는 함수입니다.
-     * Gson을 사용하여 WinRecord 객체 리스트를 JSON 문자열로 변환한 후 SharedPreferences에 저장합니다.
+     * 최종 선택된 음식 ID 리스트를 저장하는 함수입니다.
+     * Gson을 사용하여 List<Int>를 JSON 문자열로 변환한 후 SharedPreferences에 저장합니다.
      *
-     * @param records 저장할 우승 기록 리스트
+     * @param foodIds 저장할 음식 ID 리스트
      */
-    fun saveWinRecords(records: List<WinRecord>) {
+    fun saveFinalFoodIds(foodIds: List<Int>) {
         try {
-            // WinRecord를 직렬화 가능한 형태로 변환 (Date를 Long으로 변환)
-            val recordsJson = records.map { record ->
-                mapOf(
-                    "id" to record.id,
-                    "selectedFoods" to record.selectedFoods,
-                    "winDate" to record.winDate.time, // Date를 Long 타임스탬프로 변환
-                    "memo" to record.memo
-                )
-            }
-            val json = gson.toJson(recordsJson)
-            prefs.edit().putString(KEY_WIN_RECORDS, json).apply()
+            val json = gson.toJson(foodIds)
+            prefs.edit().putString(KEY_FINAL_FOOD_IDS, json).apply()
         } catch (e: Exception) {
-            // 에러 발생 시 로그 출력 (필요시 Log 사용)
             e.printStackTrace()
         }
     }
 
     /**
-     * 저장된 우승 기록을 불러오는 함수입니다.
-     * SharedPreferences에서 JSON 문자열을 읽어와 Gson으로 WinRecord 리스트로 변환합니다.
+     * 저장된 최종 선택된 음식 ID 리스트를 불러오는 함수입니다.
+     * SharedPreferences에서 JSON 문자열을 읽어와 Gson으로 List<Int>로 변환합니다.
      *
-     * @return 저장된 우승 기록 리스트 (저장된 기록이 없으면 빈 리스트 반환)
+     * @return 저장된 음식 ID 리스트 (저장된 리스트가 없으면 빈 리스트 반환)
      */
-    fun getWinRecords(): List<WinRecord> {
+    fun getFinalFoodIds(): List<Int> {
         return try {
-            val json = prefs.getString(KEY_WIN_RECORDS, null)
+            val json = prefs.getString(KEY_FINAL_FOOD_IDS, null)
             if (json == null || json.isEmpty()) {
                 return emptyList()
             }
-            
-            // JSON을 Map 리스트로 파싱
-            val type = object : TypeToken<List<Map<String, Any>>>() {}.type
-            val recordsJson: List<Map<String, Any>> = gson.fromJson(json, type) ?: return emptyList()
-            
-            // Map을 WinRecord로 변환 (Long 타임스탬프를 Date로 변환)
-            recordsJson.mapNotNull { recordMap ->
-                try {
-                    WinRecord(
-                        id = (recordMap["id"] as? Double)?.toLong() ?: (recordMap["id"] as? Long) ?: 0L,
-                        selectedFoods = (recordMap["selectedFoods"] as? List<*>)?.mapNotNull { 
-                            when (it) {
-                                is Double -> it.toInt()
-                                is Int -> it
-                                else -> null
-                            }
-                        } ?: emptyList(),
-                        winDate = Date((recordMap["winDate"] as? Double)?.toLong() ?: (recordMap["winDate"] as? Long) ?: 0L),
-                        memo = (recordMap["memo"] as? String) ?: ""
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
+            val type = object : TypeToken<List<Int>>() {}.type
+            gson.fromJson<List<Int>>(json, type) ?: emptyList()
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()
-        }
-    }
-
-    /**
-     * 새로운 우승 기록을 추가하는 함수입니다.
-     * 기존 기록을 불러온 후, 새로운 기록을 추가하고 다시 저장합니다.
-     *
-     * @param record 추가할 우승 기록
-     */
-    fun addWinRecord(record: WinRecord) {
-        try {
-            val existingRecords = getWinRecords().toMutableList()
-            existingRecords.add(record)
-            saveWinRecords(existingRecords)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * 모든 우승 기록을 삭제하는 함수입니다.
-     * SharedPreferences에서 KEY_WIN_RECORDS 키를 삭제합니다.
-     */
-    fun clearWinRecords() {
-        try {
-            prefs.edit().remove(KEY_WIN_RECORDS).apply()
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 

@@ -56,7 +56,7 @@ class IntroActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         // 인트로 화면이 다시 보일 때 최근 우승 기록을 불러와서 표시합니다.
-        loadRecentWinner()
+//        loadRecentWinner()
     }
 
     override fun onPause() {
@@ -67,59 +67,59 @@ class IntroActivity : BaseActivity() {
      * PreferenceManager에서 최근 우승 기록을 불러와서 Recent Winner 섹션에 표시하는 함수입니다.
      * 기록이 없으면 Recent Winner 섹션을 숨깁니다.
      */
-    private fun loadRecentWinner() {
-        val winRecords = preferenceManager.getWinRecords()
-        
-        if (winRecords.isEmpty()) {
-            // 기록이 없으면 Recent Winner 섹션 숨김
-            binding.recentWinnerCard.visibility = View.GONE
-            return
-        }
-        
-        // 가장 최근 기록 가져오기 (날짜 기준 내림차순 정렬)
-        val recentRecord = winRecords.sortedByDescending { it.winDate }.first()
-        
-        // 선택된 음식 ID 리스트에서 첫 번째 음식 가져오기
-        if (recentRecord.selectedFoods.isNotEmpty()) {
-            val firstFoodId = recentRecord.selectedFoods.first()
-            val food = FoodRepository.getFoodById(firstFoodId)
-            
-            if (food != null) {
-                // Recent Winner 섹션 표시
-                binding.recentWinnerCard.visibility = View.VISIBLE
-                binding.recentWinnerNameTextView.text = food.name
-                
-                // 이미지 로드 (imagePath 사용)
-                if (!food.imagePath.isNullOrEmpty()) {
-                    try {
-                        val inputStream = assets.open(food.imagePath)
-                        val bitmap = BitmapFactory.decodeStream(inputStream)
-                        inputStream.close()
-                        
-                        if (bitmap != null) {
-                            Glide.with(this)
-                                .load(bitmap)
-                                .placeholder(R.drawable.ic_launcher_background)
-                                .error(R.drawable.ic_launcher_background)
-                                .centerCrop()
-                                .into(binding.recentWinnerImageView)
-                        } else {
-                            binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
-                    }
-                } else {
-                    binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
-                }
-            } else {
-                // 음식을 찾을 수 없으면 섹션 숨김
-                binding.recentWinnerCard.visibility = View.GONE
-            }
-        } else {
-            // 선택된 음식이 없으면 섹션 숨김
-            binding.recentWinnerCard.visibility = View.GONE
-        }
-    }
+//    private fun loadRecentWinner() {
+//        val winRecords = preferenceManager.getWinRecords()
+//
+//        if (winRecords.isEmpty()) {
+//            // 기록이 없으면 Recent Winner 섹션 숨김
+//            binding.recentWinnerCard.visibility = View.GONE
+//            return
+//        }
+//
+//        // 가장 최근 기록 가져오기 (날짜 기준 내림차순 정렬)
+//        val recentRecord = winRecords.sortedByDescending { it.winDate }.first()
+//
+//        // 선택된 음식 ID 리스트에서 첫 번째 음식 가져오기
+//        if (recentRecord.selectedFoods.isNotEmpty()) {
+//            val firstFoodId = recentRecord.selectedFoods.first()
+//            val food = FoodRepository.getFoodById(firstFoodId)
+//
+//            if (food != null) {
+//                // Recent Winner 섹션 표시
+//                binding.recentWinnerCard.visibility = View.VISIBLE
+//                binding.recentWinnerNameTextView.text = food.name
+//
+//                // 이미지 로드 (imagePath 사용)
+//                if (!food.imagePath.isNullOrEmpty()) {
+//                    try {
+//                        val inputStream = assets.open(food.imagePath)
+//                        val bitmap = BitmapFactory.decodeStream(inputStream)
+//                        inputStream.close()
+//
+//                        if (bitmap != null) {
+//                            Glide.with(this)
+//                                .load(bitmap)
+//                                .placeholder(R.drawable.ic_launcher_background)
+//                                .error(R.drawable.ic_launcher_background)
+//                                .centerCrop()
+//                                .into(binding.recentWinnerImageView)
+//                        } else {
+//                            binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+//                        }
+//                    } catch (e: Exception) {
+//                        e.printStackTrace()
+//                        binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+//                    }
+//                } else {
+//                    binding.recentWinnerImageView.setImageResource(R.drawable.ic_launcher_background)
+//                }
+//            } else {
+//                // 음식을 찾을 수 없으면 섹션 숨김
+//                binding.recentWinnerCard.visibility = View.GONE
+//            }
+//        } else {
+//            // 선택된 음식이 없으면 섹션 숨김
+//            binding.recentWinnerCard.visibility = View.GONE
+//        }
+//    }
 }
