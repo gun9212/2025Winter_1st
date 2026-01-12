@@ -5,6 +5,7 @@ import java.util.Date
 /**
  * 지도에서 선택한 음식 정보를 담는 데이터 클래스입니다.
  * 
+ * @property id 고유 ID (각 선택마다 고유한 값)
  * @property foodId 선택한 음식의 ID
  * @property selectedDate 선택한 날짜
  * @property placeName 음식점 이름
@@ -12,6 +13,7 @@ import java.util.Date
  * @property memo 사용자가 작성한 메모
  */
 data class MapSelectedFood(
+    val id: Long, // 고유 ID (각 선택마다 고유한 값)
     val foodId: Int,
     val selectedDate: Long, // Date를 Long 타임스탬프로 저장
     val placeName: String,

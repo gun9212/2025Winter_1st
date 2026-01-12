@@ -2,15 +2,12 @@ package com.example.foodworldcup.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
-import com.example.foodworldcup.data.WinRecord
 import com.example.foodworldcup.databinding.ActivityResultBinding
 import com.example.foodworldcup.ui.adapter.PassedFoodAdapter
-import java.util.Date
 
 /**
  * 합격된 음식들을 나열하는 Activity입니다.
@@ -44,10 +41,8 @@ class ResultActivity : BaseActivity() {
             FoodRepository.getFoodById(id)
         }
         
-        // 우승 기록 저장 (통과한 음식이 있을 때만)
+        // 지도 검색을 위해 최종 선택된 음식 ID 저장 (통과한 음식이 있을 때만)
         if (passedFoods.isNotEmpty()) {
-            saveWinRecord(passedFoodIds)
-            // 지도 검색을 위해 최종 선택된 음식 ID 저장
             preferenceManager.saveFinalFoodIds(passedFoodIds)
         }
         
@@ -56,35 +51,6 @@ class ResultActivity : BaseActivity() {
         
         // 버튼 클릭 이벤트 설정
         setupButtons()
-    }
-
-    /**
-     * 우승 기록을 저장하는 함수입니다.
-     * 통과한 음식 리스트를 WinRecord로 변환하여 PreferenceManager에 저장합니다.
-     * 
-     * @param passedFoodIds 통과한 음식 ID 리스트
-     */
-    private fun saveWinRecord(passedFoodIds: List<Int>) {
-        try {
-            // WinRecord 생성
-            val winRecord = WinRecord(
-                id = System.currentTimeMillis(), // 타임스탬프를 ID로 사용 (고유성 보장)
-                selectedFoods = passedFoodIds, // 통과한 음식 ID 리스트
-                winDate = Date(), // 현재 날짜 및 시간
-                memo = "" // 기본 메모는 빈 문자열 (나중에 마이페이지에서 편집 가능)
-            )
-            
-            // PreferenceManager를 통해 저장
-            preferenceManager.addWinRecord(winRecord)
-            
-            // 저장 완료 로그
-            Log.d("ResultActivity", "우승 기록 저장 완료: ${passedFoodIds.size}개 음식")
-        } catch (e: Exception) {
-            // 저장 실패 시 로그 출력
-            Log.e("ResultActivity", "우승 기록 저장 실패", e)
-            e.printStackTrace()
-            // 사용자에게는 에러를 보여주지 않음 (선택사항: Toast로 알림 가능)
-        }
     }
 
     /**

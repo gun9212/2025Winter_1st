@@ -114,6 +114,7 @@
         android:inputType="textMultiLine"
         android:maxLines="5"
         android:scrollbars="vertical"
+        android:focusableInTouchMode="false"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/memoLabelTextView"
         app:layout_constraintStart_toStartOf="parent"

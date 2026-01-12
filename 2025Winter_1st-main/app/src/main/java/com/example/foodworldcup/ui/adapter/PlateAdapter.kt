@@ -16,14 +16,15 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.foodworldcup.R
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.data.MapSelectedFood
 
 /**
  * 접시와 음식을 표시하는 RecyclerView 어댑터입니다.
  * 마이페이지에서 사용되며, 접시 배경 위에 선택된 음식 이미지를 오버레이합니다.
  */
 class PlateAdapter(
-    private val foodIds: List<Int?>, // null이면 빈 접시, Int면 해당 음식 ID
-    private val onItemClick: ((Int) -> Unit)? = null // 클릭 리스너 (foodId 전달)
+    private val selectedFoods: List<MapSelectedFood?>, // null이면 빈 접시, MapSelectedFood면 해당 음식 정보
+    private val onItemClick: ((Long) -> Unit)? = null // 클릭 리스너 (MapSelectedFood의 id 전달)
 ) : RecyclerView.Adapter<PlateAdapter.PlateViewHolder>() {
 
     class PlateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -38,21 +39,21 @@ class PlateAdapter(
     }
 
     override fun onBindViewHolder(holder: PlateViewHolder, position: Int) {
-        val foodId = foodIds[position]
+        val selectedFood = selectedFoods[position]
 
         // 접시 이미지 로드 (assets에서)
         loadPlateImage(holder)
 
         // 음식이 있으면 표시, 없으면 숨김
-        if (foodId != null) {
-            val food = FoodRepository.getFoodById(foodId)
+        if (selectedFood != null) {
+            val food = FoodRepository.getFoodById(selectedFood.foodId)
             if (food != null) {
                 holder.foodImageView.visibility = View.VISIBLE
                 loadFoodImage(holder, food)
                 
-                // 클릭 리스너 설정 (음식이 있을 때만)
+                // 클릭 리스너 설정 (음식이 있을 때만, MapSelectedFood의 id 전달)
                 holder.itemView.setOnClickListener {
-                    onItemClick?.invoke(foodId)
+                    onItemClick?.invoke(selectedFood.id)
                 }
             } else {
                 holder.foodImageView.visibility = View.GONE
@@ -64,7 +65,7 @@ class PlateAdapter(
         }
     }
 
-    override fun getItemCount(): Int = foodIds.size
+    override fun getItemCount(): Int = selectedFoods.size
 
     /**
      * 접시 이미지를 로드하는 함수입니다.
