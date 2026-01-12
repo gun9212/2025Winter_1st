@@ -1026,8 +1026,9 @@ class MapActivity : BaseActivity() {
                     android.util.Log.d("MapActivity", "지번 주소: ${selectedPlace.address_name ?: "없음"}")
                     android.util.Log.d("MapActivity", "최종 주소: $placeAddress")
                     
-                    // MapSelectedFood 객체 생성
+                    // MapSelectedFood 객체 생성 (고유 ID는 타임스탬프 사용)
                     val mapSelectedFood = MapSelectedFood(
+                        id = System.currentTimeMillis(), // 고유 ID (타임스탬프 사용)
                         foodId = food.id,
                         selectedDate = System.currentTimeMillis(),
                         placeName = selectedPlace.place_name.ifEmpty { "가게 정보 없음" },

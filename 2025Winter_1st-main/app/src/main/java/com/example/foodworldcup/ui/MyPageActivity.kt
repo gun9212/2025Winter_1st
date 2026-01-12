@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.foodworldcup.data.FoodRepository
@@ -53,12 +55,12 @@ class MyPageActivity : BaseActivity() {
         val selectedFoods = preferenceManager.getMapSelectedFoods()
             .sortedByDescending { it.selectedDate }
 
-        // 접시 리스트 생성 (foodId만 추출)
-        // 선택된 음식이 있으면 해당 ID를, 없으면 null을 넣어서 빈 접시 표시
-        val plateList = mutableListOf<Int?>()
+        // 접시 리스트 생성 (MapSelectedFood 객체 사용)
+        // 선택된 음식이 있으면 해당 객체를, 없으면 null을 넣어서 빈 접시 표시
+        val plateList = mutableListOf<MapSelectedFood?>()
         
-        // 선택된 음식 ID 추가 (최신순으로 정렬된 상태)
-        plateList.addAll(selectedFoods.map { it.foodId })
+        // 선택된 음식 추가 (최신순으로 정렬된 상태)
+        plateList.addAll(selectedFoods)
         
         // 최소 12개 접시를 보장 (빈 접시는 null로 표시)
         // 12개 이상이면 그대로 유지 (동적으로 추가됨)
@@ -71,9 +73,9 @@ class MyPageActivity : BaseActivity() {
             binding.plateRecyclerView.layoutManager = GridLayoutManager(this, 2)
         }
 
-        // PlateAdapter 생성 및 연결 (클릭 리스너 추가)
-        adapter = PlateAdapter(plateList) { foodId ->
-            showFoodDetailDialog(foodId)
+        // PlateAdapter 생성 및 연결 (클릭 리스너 추가, MapSelectedFood의 id 전달)
+        adapter = PlateAdapter(plateList) { selectedFoodId ->
+            showFoodDetailDialog(selectedFoodId)
         }
         binding.plateRecyclerView.adapter = adapter
     }
@@ -81,11 +83,12 @@ class MyPageActivity : BaseActivity() {
     /**
      * 음식 상세 정보를 표시하는 BottomSheetDialog를 보여주는 함수입니다.
      */
-    private fun showFoodDetailDialog(foodId: Int) {
+    private fun showFoodDetailDialog(selectedFoodId: Long) {
         val selectedFoods = preferenceManager.getMapSelectedFoods()
-        val selectedFood = selectedFoods.find { it.foodId == foodId } ?: return
+        // 고유 ID로 정확한 항목 찾기
+        val selectedFood = selectedFoods.find { it.id == selectedFoodId } ?: return
         
-        val food = FoodRepository.getFoodById(foodId) ?: return
+        val food = FoodRepository.getFoodById(selectedFood.foodId) ?: return
 
         // BottomSheetDialog 생성
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -104,11 +107,23 @@ class MyPageActivity : BaseActivity() {
         bottomSheetBinding.placeNameTextView.text = selectedFood.placeName.ifEmpty { "정보 없음" }
         bottomSheetBinding.placeAddressTextView.text = selectedFood.placeAddress.ifEmpty { "주소 정보 없음" }
         bottomSheetBinding.memoEditText.setText(selectedFood.memo)
+        
+        // EditText가 자동으로 포커스를 받지 않도록 설정
+        bottomSheetBinding.memoEditText.clearFocus()
+        
+        // 메모 EditText 클릭 시에만 키보드 표시
+        bottomSheetBinding.memoEditText.setOnClickListener {
+            bottomSheetBinding.memoEditText.isFocusableInTouchMode = true
+            bottomSheetBinding.memoEditText.requestFocus()
+            // 키보드 표시
+            val imm = ContextCompat.getSystemService(this, InputMethodManager::class.java)
+            imm?.showSoftInput(bottomSheetBinding.memoEditText, InputMethodManager.SHOW_IMPLICIT)
+        }
 
         // 저장 버튼 클릭
         bottomSheetBinding.saveButton.setOnClickListener {
             val memo = bottomSheetBinding.memoEditText.text.toString()
-            preferenceManager.updateMapSelectedFoodMemo(foodId, memo)
+            preferenceManager.updateMapSelectedFoodMemo(selectedFoodId, memo)
             Toast.makeText(this, "메모가 저장되었습니다.", Toast.LENGTH_SHORT).show()
             bottomSheetDialog.dismiss()
             setupRecyclerView() // 리스트 새로고침
@@ -120,7 +135,7 @@ class MyPageActivity : BaseActivity() {
                 .setTitle("삭제 확인")
                 .setMessage("정말 이 기록을 삭제하시겠습니까?")
                 .setPositiveButton("삭제") { _, _ ->
-                    preferenceManager.removeMapSelectedFood(foodId)
+                    preferenceManager.removeMapSelectedFood(selectedFoodId)
                     Toast.makeText(this, "기록이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                     bottomSheetDialog.dismiss()
                     setupRecyclerView() // 리스트 새로고침 (삭제 후 다음 음식이 자동으로 채워짐)

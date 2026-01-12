@@ -2,11 +2,9 @@ package com.example.foodworldcup.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.foodworldcup.data.WinRecord
 import com.example.foodworldcup.data.MapSelectedFood
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.util.Date
 
 /**
  * SharedPreferences를 쉽게 사용하기 위한 헬퍼(Helper) 클래스입니다.
@@ -22,107 +20,10 @@ class PreferenceManager(context: Context) {
     
     // SharedPreferences에 저장할 키 이름들
     companion object {
-        private const val KEY_WIN_RECORDS = "win_records"
         private const val KEY_SELECTED_FOOD_IDS = "selected_food_ids" // 스와이프 게임용
         private const val KEY_FINAL_FOOD_IDS = "final_food_ids" // 최종 선택된 음식 ID (지도 검색용)
         private const val KEY_MAP_SELECTED_FOOD_IDS = "map_selected_food_ids" // 지도에서 선택한 음식용 (레거시)
         private const val KEY_MAP_SELECTED_FOODS = "map_selected_foods" // 지도에서 선택한 음식 상세 정보
-    }
-
-    /**
-     * 우승 기록을 저장하는 함수입니다.
-     * Gson을 사용하여 WinRecord 객체 리스트를 JSON 문자열로 변환한 후 SharedPreferences에 저장합니다.
-     *
-     * @param records 저장할 우승 기록 리스트
-     */
-    fun saveWinRecords(records: List<WinRecord>) {
-        try {
-            // WinRecord를 직렬화 가능한 형태로 변환 (Date를 Long으로 변환)
-            val recordsJson = records.map { record ->
-                mapOf(
-                    "id" to record.id,
-                    "selectedFoods" to record.selectedFoods,
-                    "winDate" to record.winDate.time, // Date를 Long 타임스탬프로 변환
-                    "memo" to record.memo
-                )
-            }
-            val json = gson.toJson(recordsJson)
-            prefs.edit().putString(KEY_WIN_RECORDS, json).apply()
-        } catch (e: Exception) {
-            // 에러 발생 시 로그 출력 (필요시 Log 사용)
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * 저장된 우승 기록을 불러오는 함수입니다.
-     * SharedPreferences에서 JSON 문자열을 읽어와 Gson으로 WinRecord 리스트로 변환합니다.
-     *
-     * @return 저장된 우승 기록 리스트 (저장된 기록이 없으면 빈 리스트 반환)
-     */
-    fun getWinRecords(): List<WinRecord> {
-        return try {
-            val json = prefs.getString(KEY_WIN_RECORDS, null)
-            if (json == null || json.isEmpty()) {
-                return emptyList()
-            }
-            
-            // JSON을 Map 리스트로 파싱
-            val type = object : TypeToken<List<Map<String, Any>>>() {}.type
-            val recordsJson: List<Map<String, Any>> = gson.fromJson(json, type) ?: return emptyList()
-            
-            // Map을 WinRecord로 변환 (Long 타임스탬프를 Date로 변환)
-            recordsJson.mapNotNull { recordMap ->
-                try {
-                    WinRecord(
-                        id = (recordMap["id"] as? Double)?.toLong() ?: (recordMap["id"] as? Long) ?: 0L,
-                        selectedFoods = (recordMap["selectedFoods"] as? List<*>)?.mapNotNull { 
-                            when (it) {
-                                is Double -> it.toInt()
-                                is Int -> it
-                                else -> null
-                            }
-                        } ?: emptyList(),
-                        winDate = Date((recordMap["winDate"] as? Double)?.toLong() ?: (recordMap["winDate"] as? Long) ?: 0L),
-                        memo = (recordMap["memo"] as? String) ?: ""
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
-        }
-    }
-
-    /**
-     * 새로운 우승 기록을 추가하는 함수입니다.
-     * 기존 기록을 불러온 후, 새로운 기록을 추가하고 다시 저장합니다.
-     *
-     * @param record 추가할 우승 기록
-     */
-    fun addWinRecord(record: WinRecord) {
-        try {
-            val existingRecords = getWinRecords().toMutableList()
-            existingRecords.add(record)
-            saveWinRecords(existingRecords)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * 모든 우승 기록을 삭제하는 함수입니다.
-     * SharedPreferences에서 KEY_WIN_RECORDS 키를 삭제합니다.
-     */
-    fun clearWinRecords() {
-        try {
-            prefs.edit().remove(KEY_WIN_RECORDS).apply()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     /**
@@ -281,9 +182,10 @@ class PreferenceManager(context: Context) {
                 // 레거시 데이터가 있으면 마이그레이션
                 val legacyIds = getMapSelectedFoodIds()
                 if (legacyIds.isNotEmpty()) {
-                    // 레거시 ID 리스트를 MapSelectedFood로 변환 (기본값 사용)
-                    val migrated = legacyIds.map { foodId ->
+                    // 레거시 ID 리스트를 MapSelectedFood로 변환 (기본값 사용, 고유 ID 추가)
+                    val migrated = legacyIds.mapIndexed { index, foodId ->
                         MapSelectedFood(
+                            id = System.currentTimeMillis() + index, // 고유 ID 생성
                             foodId = foodId,
                             selectedDate = System.currentTimeMillis(),
                             placeName = "",
@@ -296,8 +198,30 @@ class PreferenceManager(context: Context) {
                 }
                 return emptyList()
             }
-            val type = object : TypeToken<List<MapSelectedFood>>() {}.type
-            gson.fromJson<List<MapSelectedFood>>(json, type) ?: emptyList()
+            val type = object : TypeToken<List<Map<String, Any>>>() {}.type
+            val foodsJson: List<Map<String, Any>> = gson.fromJson(json, type) ?: return emptyList()
+            
+            // Map을 MapSelectedFood로 변환 (id가 없는 경우 자동 생성)
+            foodsJson.mapIndexedNotNull { index, foodMap ->
+                try {
+                    // id가 있으면 사용, 없으면 selectedDate를 기반으로 생성
+                    val id = (foodMap["id"] as? Double)?.toLong() 
+                        ?: (foodMap["id"] as? Long)
+                        ?: ((foodMap["selectedDate"] as? Double)?.toLong() ?: (foodMap["selectedDate"] as? Long) ?: System.currentTimeMillis()) + index
+                    
+                    MapSelectedFood(
+                        id = id,
+                        foodId = ((foodMap["foodId"] as? Double)?.toInt() ?: (foodMap["foodId"] as? Int)) ?: 0,
+                        selectedDate = (foodMap["selectedDate"] as? Double)?.toLong() ?: (foodMap["selectedDate"] as? Long) ?: System.currentTimeMillis(),
+                        placeName = (foodMap["placeName"] as? String) ?: "",
+                        placeAddress = (foodMap["placeAddress"] as? String) ?: "",
+                        memo = (foodMap["memo"] as? String) ?: ""
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()
@@ -322,14 +246,14 @@ class PreferenceManager(context: Context) {
 
     /**
      * 지도에서 선택한 음식 상세 정보를 삭제하는 함수입니다.
-     * foodId로 해당 항목을 찾아 삭제합니다.
+     * 고유 ID로 해당 항목을 찾아 삭제합니다.
      *
-     * @param foodId 삭제할 음식 ID
+     * @param id 삭제할 MapSelectedFood의 고유 ID
      */
-    fun removeMapSelectedFood(foodId: Int) {
+    fun removeMapSelectedFood(id: Long) {
         try {
             val existingFoods = getMapSelectedFoods().toMutableList()
-            existingFoods.removeAll { it.foodId == foodId }
+            existingFoods.removeAll { it.id == id }
             saveMapSelectedFoods(existingFoods)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -338,14 +262,15 @@ class PreferenceManager(context: Context) {
 
     /**
      * 지도에서 선택한 음식 상세 정보의 메모를 업데이트하는 함수입니다.
+     * 고유 ID로 해당 항목을 찾아 메모를 업데이트합니다.
      *
-     * @param foodId 업데이트할 음식 ID
+     * @param id 업데이트할 MapSelectedFood의 고유 ID
      * @param memo 새로운 메모 내용
      */
-    fun updateMapSelectedFoodMemo(foodId: Int, memo: String) {
+    fun updateMapSelectedFoodMemo(id: Long, memo: String) {
         try {
             val existingFoods = getMapSelectedFoods().toMutableList()
-            val index = existingFoods.indexOfFirst { it.foodId == foodId }
+            val index = existingFoods.indexOfFirst { it.id == id }
             if (index >= 0) {
                 val food = existingFoods[index]
                 existingFoods[index] = food.copy(memo = memo)
