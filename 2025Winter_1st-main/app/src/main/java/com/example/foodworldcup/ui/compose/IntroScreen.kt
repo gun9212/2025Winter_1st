@@ -62,7 +62,7 @@ fun IntroScreen(
         // 메인 제목과 서브타이틀
         MainTitleSection()
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
         // How it works 섹션
         HowItWorksSection()
@@ -151,7 +151,7 @@ private fun MainTitleSection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp),
+            .padding(top = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -159,7 +159,7 @@ private fun MainTitleSection() {
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 2.dp)
         )
         
         Text(
@@ -181,7 +181,7 @@ private fun HowItWorksSection() {
         Text(
             text = "How it works",
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             color = colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -191,7 +191,7 @@ private fun HowItWorksSection() {
             icon = Icons.AutoMirrored.Filled.List,
             title = "Browse List",
             description = "Explore local favorites",
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         )
         
         // Swipe to Choose 카드
@@ -199,7 +199,7 @@ private fun HowItWorksSection() {
             icon = Icons.Default.Gesture,
             title = "Swipe to Choose",
             description = "Vote on matches",
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         )
         
         // Find Restaurant 카드
@@ -207,7 +207,7 @@ private fun HowItWorksSection() {
             icon = Icons.Default.Place,
             title = "Find Restaurant",
             description = "Get directions",
-            modifier = Modifier.padding(bottom = 0.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         )
     }
 }
@@ -259,21 +259,23 @@ private fun HowItWorksCard(
                 )
             }
             
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             
             // 텍스트
             Column {
                 Text(
                     text = title,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onBackground
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.onBackground,
+                    lineHeight = 12.sp
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                //Spacer(modifier = Modifier.height(1.dp))
                 Text(
                     text = description,
                     fontSize = 14.sp,
-                    color = colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant,
+                    lineHeight = 12.sp
                 )
             }
         }
@@ -367,7 +369,7 @@ private fun YesterdaysWinnerSection(
                     color = colorScheme.primary,
                     letterSpacing = 0.5.sp
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(1.dp))
                 Text(
                     text = foodName,
                     fontSize = 18.sp,
@@ -424,7 +426,7 @@ private fun StartTournamentButton(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Start Tournament",
-                fontSize = 16.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onPrimary
             )

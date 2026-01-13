@@ -362,7 +362,7 @@ private fun ScaledCharacterImage(
         when {
             isLoading -> {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(28.dp),
                     color = colorScheme.primary,
                     strokeWidth = 2.dp
                 )
