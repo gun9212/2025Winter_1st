@@ -29,13 +29,16 @@ class MainActivity : ComponentActivity() {
         val keyHash = Utility.getKeyHash(this)
         Log.d("KakaoKeyHash", "현재 키 해시값: $keyHash")
 
+        // Intent에서 특정 탭으로 이동할지 확인
+        val navigateTo = intent.getStringExtra("navigate_to")
+        
         setContent {
             FoodWorldCupTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()
+                    AppNavigation(initialRoute = navigateTo)
                 }
             }
         }
