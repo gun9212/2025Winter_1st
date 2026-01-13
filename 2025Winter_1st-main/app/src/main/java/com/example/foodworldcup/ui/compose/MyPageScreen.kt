@@ -225,7 +225,7 @@ private fun ProfileHeaderSection(
         modifier = Modifier
             .fillMaxWidth()
             .background(colorScheme.background)
-            .padding(40.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.Start
     ) {
         Text(

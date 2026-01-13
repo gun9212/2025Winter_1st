@@ -137,9 +137,7 @@ fun FoodListScreen(
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onBackground,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 36.dp, bottom = 16.dp)
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
             )
             
             Text(
@@ -403,7 +401,7 @@ private fun StartGameButton(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 24.dp),
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         shape = RoundedCornerShape(28.dp),
         shadowElevation = 4.dp,
         color = colorScheme.surface
@@ -439,7 +437,7 @@ private fun StartGameButton(
                 
                 Text(
                     text = "Start Game ($selectedCount selected)",
-                    fontSize = 20.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.onPrimary
                 )
