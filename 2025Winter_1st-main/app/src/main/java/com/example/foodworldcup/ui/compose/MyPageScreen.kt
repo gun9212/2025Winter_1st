@@ -1,5 +1,6 @@
 package com.example.foodworldcup.ui.compose
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,8 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,10 +27,13 @@ import coil.request.ImageRequest
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.data.MapSelectedFood
+import com.example.foodworldcup.utils.BitmapUtils
 import com.example.foodworldcup.utils.DateFormatter
 import com.example.foodworldcup.utils.ImageLoader
 import com.example.foodworldcup.utils.KakaoMapHelper
 import com.example.foodworldcup.utils.PreferenceManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 
 /**
@@ -267,6 +274,120 @@ private fun ProfileHeaderSection(
 }
 
 /**
+ * 스케일링된 캐릭터 이미지 (BitmapUtils 사용)
+ */
+@Composable
+private fun ScaledCharacterImage(
+    characterImagePath: String,
+    food: Food,
+    targetSizeDp: androidx.compose.ui.unit.Dp,
+    offsetY: androidx.compose.ui.unit.Dp,
+    colorScheme: androidx.compose.material3.ColorScheme
+) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    
+    // 스케일링된 이미지 상태
+    var scaledImageBitmap by remember(characterImagePath) { mutableStateOf<ImageBitmap?>(null) }
+    var isLoading by remember(characterImagePath) { mutableStateOf(true) }
+    var hasError by remember(characterImagePath) { mutableStateOf(false) }
+    
+    // dp를 픽셀로 변환 (코루틴 외부에서)
+    val targetSizePx = with(density) { targetSizeDp.toPx().toInt() }
+    
+    // 이미지 로드 및 스케일링
+    LaunchedEffect(characterImagePath) {
+        isLoading = true
+        hasError = false
+        scaledImageBitmap = null
+        
+        withContext(Dispatchers.IO) {
+            try {
+                // 이미지 경로 찾기
+                val pathsToTry = ImageLoader.getCharacterImagePaths(
+                    characterImagePath,
+                    food.name,
+                    food.category
+                )
+                
+                var originalBitmap: android.graphics.Bitmap? = null
+                for (path in pathsToTry) {
+                    originalBitmap = ImageLoader.loadBitmapFromAssets(context, path)
+                    if (originalBitmap != null) break
+                }
+                
+                if (originalBitmap != null) {
+                    // BitmapUtils를 사용하여 스케일링 (크기 증가 및 중앙 정렬로 상단 잘림 방지)
+                    val scaledBitmap = BitmapUtils.scaleBitmapToFitContent(
+                        originalBitmap = originalBitmap,
+                        targetWidth = targetSizePx,
+                        targetHeight = targetSizePx,
+                        targetAreaRatio = 0.95f, // 접시 크기의 95% 사용 (더 크게)
+                        centerYRatio = 0.5f, // 중앙 정렬 (상단 잘림 방지)
+                        alignBottom = false // 중앙 정렬 사용 (상단 잘림 방지)
+                    )
+                    
+                    if (scaledBitmap != null) {
+                        withContext(Dispatchers.Main) {
+                            scaledImageBitmap = scaledBitmap.asImageBitmap()
+                            isLoading = false
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            hasError = true
+                            isLoading = false
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        hasError = true
+                        isLoading = false
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    hasError = true
+                    isLoading = false
+                }
+            }
+        }
+    }
+    
+    Box(
+        modifier = Modifier
+            .size(targetSizeDp)
+            .offset(x = 0.dp, y = offsetY),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = colorScheme.primary,
+                    strokeWidth = 2.dp
+                )
+            }
+            scaledImageBitmap != null -> {
+                Image(
+                    bitmap = scaledImageBitmap!!,
+                    contentDescription = food.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+            }
+            hasError -> {
+                Icon(
+                    imageVector = Icons.Default.Restaurant,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
  * 음식 접시 아이템
  */
 @Composable
@@ -285,7 +406,7 @@ private fun FoodPlateItem(
     ) {
         // 접시 배경과 캐릭터 이미지
         Box(
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier.size(140.dp),
             contentAlignment = Alignment.Center
         ) {
             // 접시 배경 이미지
@@ -298,31 +419,14 @@ private fun FoodPlateItem(
                 modifier = Modifier.fillMaxSize()
             )
             
-            // 캐릭터 누끼 이미지
+            // 캐릭터 누끼 이미지 (BitmapUtils를 사용하여 일정한 크기로 스케일링)
             if (foodDetail.characterImagePath != null) {
-                SubcomposeAsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data("file:///android_asset/${foodDetail.characterImagePath}")
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = foodDetail.food.name,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(80.dp),
-                    loading = {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = colorScheme.primary,
-                            strokeWidth = 2.dp
-                        )
-                    },
-                    error = {
-                        Icon(
-                            imageVector = Icons.Default.Restaurant,
-                            contentDescription = null,
-                            tint = colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                ScaledCharacterImage(
+                    characterImagePath = foodDetail.characterImagePath,
+                    food = foodDetail.food,
+                    targetSizeDp = 105.dp, // 크기 더 증가 (95.dp -> 105.dp)
+                    offsetY = (-15).dp, // 위치를 더 위로 올림 (-8.dp -> -15.dp)
+                    colorScheme = colorScheme
                 )
             }
         }
@@ -362,7 +466,7 @@ private fun EmptyPlateItem() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier.size(140.dp),
             contentAlignment = Alignment.Center
         ) {
             SubcomposeAsyncImage(
@@ -435,7 +539,7 @@ private fun FoodDetailBottomSheet(
                 color = colorScheme.onSurfaceVariant
             )
             
-            Divider()
+            //Divider()
             
             // 식당 이름 (클릭 가능)
             if (foodDetail.mapSelectedFood.placeName.isNotEmpty() && 

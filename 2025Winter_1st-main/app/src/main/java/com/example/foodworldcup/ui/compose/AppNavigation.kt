@@ -10,8 +10,14 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.runtime.*
+import androidx.compose.foundation.ripple.LocalRippleConfiguration
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -49,16 +55,27 @@ sealed class Screen(val route: String, val title: String) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(initialRoute: String? = null) {
     val context = LocalContext.current
     val navController = rememberNavController()
     val colorScheme = MaterialTheme.colorScheme
+    
+    // initialRoute에 따라 시작 화면 설정
+    val startDestination = when (initialRoute) {
+        "list" -> Screen.List.route
+        "home" -> Screen.Home.route
+        "mypage" -> Screen.MyPage.route
+        else -> Screen.Home.route
+    }
     
     // 최근 우승자 정보 로드
     val recentWinner = remember {
         loadRecentWinner(context)
     }
-
+    
+    // 선택된 음식 리스트 상태 관리 (FoodListScreen에서 SwipeScreen으로 전달)
+    var selectedFoodsForGame by remember { mutableStateOf<List<com.example.foodworldcup.data.Food>?>(null) }
+    
     Scaffold(
         bottomBar = {
             NavigationBar(
@@ -414,7 +431,7 @@ fun AppNavigation() {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(Screen.Home.route) {
@@ -435,15 +452,25 @@ fun AppNavigation() {
             composable(Screen.List.route) {
                 FoodListScreen(
                     onStartGameClick = { selectedFoods ->
-                        // TODO: 게임 화면으로 이동하는 로직 구현
-                        // val intent = Intent(context, GameActivity::class.java)
-                        // context.startActivity(intent)
+                        // 선택된 음식 리스트 저장하고 Swipe 화면으로 이동
+                        if (selectedFoods.isNotEmpty()) {
+                            selectedFoodsForGame = selectedFoods
+                            navController.navigate(Screen.Swipe.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = false // Swipe 화면은 항상 새로운 게임 시작
+                            }
+                        }
                     }
                 )
             }
             
             composable(Screen.Swipe.route) {
-                PlaceholderScreen("Swipe")
+                SwipeScreen(
+                    selectedFoods = selectedFoodsForGame
+                )
             }
             
             composable(Screen.MyPage.route) {
