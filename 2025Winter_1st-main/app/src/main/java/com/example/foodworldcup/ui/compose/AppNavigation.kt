@@ -35,7 +35,6 @@ import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.ui.FoodListActivity
 import com.example.foodworldcup.ui.MyPageActivity
-import com.example.foodworldcup.utils.ImageLoader
 import com.example.foodworldcup.utils.PreferenceManager
 
 /**
@@ -56,7 +55,7 @@ sealed class Screen(val route: String, val title: String) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = null, initialResultFoodIds: List<Int>? = null) {
+fun AppNavigation(initialRoute: String? = null) {
     val context = LocalContext.current
     val navController = rememberNavController()
     val colorScheme = MaterialTheme.colorScheme
@@ -69,61 +68,6 @@ fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = 
         "result" -> Screen.Result.route
         "map" -> Screen.Map.route
         else -> Screen.Home.route
-    }
-    
-    // 최근 우승자 정보 로드
-    val recentWinner = remember {
-        loadRecentWinner(context)
-    }
-    
-    // 선택된 음식 리스트 상태 관리 (FoodListScreen에서 SwipeScreen으로 전달)
-    var selectedFoodsForGame by remember { mutableStateOf<List<com.example.foodworldcup.data.Food>?>(null) }
-    
-    // Map 화면으로 전달할 음식 ID 리스트 상태 관리
-    var mapFoodIds by remember { mutableStateOf<List<Int>?>(initialMapFoodIds) }
-    
-    // Result 화면으로 전달할 음식 리스트 상태 관리
-    var resultFoods by remember {
-        mutableStateOf<List<com.example.foodworldcup.data.Food>?>(
-            if (initialResultFoodIds != null) {
-                initialResultFoodIds.mapNotNull { id ->
-                    FoodRepository.getFoodById(id)
-                }
-            } else null
-        )
-    }
-    
-    // initialRoute가 "result"이고 initialResultFoodIds가 있으면 Result 화면으로 이동
-    LaunchedEffect(initialRoute, initialResultFoodIds) {
-        if (initialRoute == "result" && initialResultFoodIds != null) {
-            val foods = initialResultFoodIds.mapNotNull { id ->
-                FoodRepository.getFoodById(id)
-            }
-            if (foods.isNotEmpty()) {
-                resultFoods = foods
-                navController.navigate(Screen.Result.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = false
-                }
-            }
-        }
-    }
-    
-    // initialRoute가 "map"이고 initialMapFoodIds가 있으면 Map 화면으로 이동
-    LaunchedEffect(initialRoute, initialMapFoodIds) {
-        if (initialRoute == "map" && initialMapFoodIds != null) {
-            mapFoodIds = initialMapFoodIds
-            navController.navigate(Screen.Map.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = false
-            }
-        }
     }
     
     Scaffold(
@@ -459,10 +403,7 @@ fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = 
                     label = { Text("Map") },
                     selected = isMapSelected,
                     onClick = {
-                        // Map 탭 클릭 시에는 저장된 최종 음식 ID 사용
-                        val preferenceManager = PreferenceManager(context)
-                        val savedFoodIds = preferenceManager.getFinalFoodIds()
-                        mapFoodIds = if (savedFoodIds.isNotEmpty()) savedFoodIds else null
+                        // MapScreen에서 PreferenceManager에서 직접 불러오므로 네비게이션만 수행
                         navController.navigate(Screen.Map.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -506,18 +447,16 @@ fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = 
                             launchSingleTop = true
                             restoreState = true
                         }
-                    },
-                    recentWinnerName = recentWinner?.name,
-                    recentWinnerImage = recentWinner?.image
+                    }
                 )
             }
             
             composable(Screen.List.route) {
                 FoodListScreen(
                     onStartGameClick = { selectedFoods ->
-                        // 선택된 음식 리스트 저장하고 Swipe 화면으로 이동
+                        // FoodListScreen에서 이미 PreferenceManager에 저장됨
+                        // 네비게이션만 수행
                         if (selectedFoods.isNotEmpty()) {
-                            selectedFoodsForGame = selectedFoods
                             navController.navigate(Screen.Swipe.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -531,9 +470,7 @@ fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = 
             }
             
             composable(Screen.Swipe.route) {
-                SwipeScreen(
-                    selectedFoods = selectedFoodsForGame
-                )
+                SwipeScreen()
             }
             
             composable(Screen.MyPage.route) {
@@ -541,57 +478,21 @@ fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = 
             }
             
             composable(Screen.Map.route) {
-                MapScreen(passedFoodIds = mapFoodIds)
+                MapScreen()
             }
             
             composable(Screen.Result.route) {
-                val preferenceManager = remember { PreferenceManager(context) }
-                
-                // resultFoods를 mutableStateListOf로 관리
-                val resultFoodsList = remember { mutableStateListOf<Food>() }
-                
-                // initialResultFoodIds가 변경되면 resultFoodsList 업데이트
-                LaunchedEffect(initialResultFoodIds) {
-                    if (initialResultFoodIds != null) {
-                        val foods = initialResultFoodIds.mapNotNull { id ->
-                            FoodRepository.getFoodById(id)
-                        }
-                        resultFoodsList.clear()
-                        resultFoodsList.addAll(foods)
-                    } else {
-                        val currentResultFoods = resultFoods
-                        if (currentResultFoods != null) {
-                            resultFoodsList.clear()
-                            resultFoodsList.addAll(currentResultFoods)
-                        }
-                    }
-                }
-                
-                // resultFoods가 변경되면 resultFoodsList 업데이트
-                LaunchedEffect(resultFoods) {
-                    val currentResultFoods = resultFoods
-                    if (currentResultFoods != null) {
-                        resultFoodsList.clear()
-                        resultFoodsList.addAll(currentResultFoods)
-                    }
-                }
-                
                 ResultScreen(
-                    passedFoods = resultFoodsList,
                     onBackClick = {
                         navController.popBackStack()
                     },
                     onViewOnMapClick = {
-                        if (resultFoodsList.isNotEmpty()) {
-                            val foodIds = resultFoodsList.map { it.id }
-                            mapFoodIds = foodIds
-                            navController.navigate(Screen.Map.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = false
+                        navController.navigate(Screen.Map.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
                             }
+                            launchSingleTop = true
+                            restoreState = false
                         }
                     },
                     onRetryClick = {
@@ -611,81 +512,9 @@ fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = 
                             launchSingleTop = true
                             restoreState = true
                         }
-                    },
-                    onRemoveFood = { food ->
-                        // resultFoodsList에서 제거
-                        resultFoodsList.remove(food)
-                        
-                        // resultFoods도 업데이트
-                        resultFoods = if (resultFoodsList.isNotEmpty()) resultFoodsList.toList() else null
-                        
-                        // PreferenceManager 업데이트
-                        val updatedFoodIds = resultFoodsList.map { it.id }
-                        if (updatedFoodIds.isNotEmpty()) {
-                            preferenceManager.saveFinalFoodIds(updatedFoodIds)
-                        } else {
-                            preferenceManager.saveFinalFoodIds(emptyList())
-                        }
                     }
                 )
             }
         }
     }
 }
-
-/**
- * PreferenceManager에서 최근 선택된 음식을 불러오는 함수입니다.
- * 기록이 없으면 null을 반환합니다.
- */
-private fun loadRecentWinner(context: android.content.Context): RecentWinner? {
-    val preferenceManager = PreferenceManager(context)
-    val mapSelectedFoods = preferenceManager.getMapSelectedFoods()
-    
-    if (mapSelectedFoods.isEmpty()) {
-        return null
-    }
-    
-    // 가장 최근 기록 가져오기 (날짜 기준 내림차순 정렬)
-    val recentFood = mapSelectedFoods.sortedByDescending { it.selectedDate }.first()
-    
-    // 음식 정보 가져오기
-    val food = FoodRepository.getFoodById(recentFood.foodId)
-    
-    return if (food != null) {
-        // 캐릭터 이미지 경로 찾기
-        val characterImagePath = if (!food.characterImagePath.isNullOrEmpty()) {
-            val pathsToTry = ImageLoader.getCharacterImagePaths(
-                food.characterImagePath,
-                food.name,
-                food.category
-            )
-            // 첫 번째로 찾은 유효한 경로 반환
-            pathsToTry.firstOrNull { path ->
-                try {
-                    val stream = context.assets.open(path)
-                    stream.close()
-                    true
-                } catch (e: Exception) {
-                    false
-                }
-            } ?: food.characterImagePath
-        } else {
-            null
-        }
-        
-        RecentWinner(
-            name = food.name,
-            image = characterImagePath
-        )
-    } else {
-        null
-    }
-}
-
-/**
- * 최근 우승자 데이터 클래스
- */
-private data class RecentWinner(
-    val name: String,
-    val image: String?
-)

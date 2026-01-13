@@ -61,14 +61,13 @@ import kotlinx.coroutines.delay
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun MapScreen(
-    passedFoodIds: List<Int>? = null
-) {
+fun MapScreen() {
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val scope = rememberCoroutineScope()
+    val preferenceManager = remember { PreferenceManager(context) }
     
     // 위치 권한 상태
     var hasLocationPermission by remember { mutableStateOf(false) }
@@ -98,22 +97,15 @@ fun MapScreen(
         mutableStateListOf<String>()
     }
     
-    // 초기 데이터 로드
-    LaunchedEffect(passedFoodIds) {
-        val names = if (passedFoodIds != null && passedFoodIds.isNotEmpty()) {
-            passedFoodIds.mapNotNull { id ->
+    // PreferenceManager에서 직접 불러오기
+    LaunchedEffect(Unit) {
+        val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
+        val names = if (lastSearchFoodIds.isNotEmpty()) {
+            lastSearchFoodIds.mapNotNull { id ->
                 FoodRepository.getFoodById(id)?.name
             }
         } else {
-            val preferenceManager = PreferenceManager(context)
-            val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
-            if (lastSearchFoodIds.isNotEmpty()) {
-                lastSearchFoodIds.mapNotNull { id ->
-                    FoodRepository.getFoodById(id)?.name
-                }
-            } else {
-                emptyList()
-            }
+            emptyList()
         }
         foodNames.clear()
         foodNames.addAll(names)

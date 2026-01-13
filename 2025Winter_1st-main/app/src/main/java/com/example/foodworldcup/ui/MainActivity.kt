@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.ui.compose.AppNavigation
 import com.example.foodworldcup.ui.compose.FoodWorldCupTheme
+import com.example.foodworldcup.utils.PreferenceManager
 import com.kakao.sdk.common.util.Utility
 
 /**
@@ -32,12 +33,12 @@ class MainActivity : ComponentActivity() {
         // Intent에서 특정 탭으로 이동할지 확인
         val navigateTo = intent.getStringExtra("navigate_to")
         
-        // Intent에서 전달할 음식 ID 리스트 확인
+        // Intent에서 전달할 음식 ID 리스트 확인 (PreferenceManager에 저장)
         val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids")
-        
-        // navigateTo에 따라 mapFoodIds 또는 resultFoodIds로 분기
-        val mapFoodIds = if (navigateTo == "map") passedFoodIds?.toList() else null
-        val resultFoodIds = if (navigateTo == "result") passedFoodIds?.toList() else null
+        if (passedFoodIds != null && passedFoodIds.isNotEmpty()) {
+            val preferenceManager = PreferenceManager(this)
+            preferenceManager.saveFinalFoodIds(passedFoodIds.toList())
+        }
         
         setContent {
             FoodWorldCupTheme {
@@ -45,11 +46,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(
-                        initialRoute = navigateTo,
-                        initialMapFoodIds = mapFoodIds,
-                        initialResultFoodIds = resultFoodIds
-                    )
+                    AppNavigation(initialRoute = navigateTo)
                 }
             }
         }

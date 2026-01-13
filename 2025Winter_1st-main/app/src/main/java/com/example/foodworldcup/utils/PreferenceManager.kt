@@ -333,4 +333,34 @@ class PreferenceManager(context: Context) {
             e.printStackTrace()
         }
     }
+
+    /**
+     * Result 화면에서 음식을 제거합니다.
+     * final_food_ids에서 해당 음식 ID를 제거하고 저장합니다.
+     *
+     * @param foodId 제거할 음식 ID
+     */
+    fun removeFoodFromFinalFoodIds(foodId: Int) {
+        try {
+            val currentFoodIds = getFinalFoodIds().toMutableList()
+            currentFoodIds.remove(foodId)
+            saveFinalFoodIds(currentFoodIds)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Result 화면에서 음식 리스트를 업데이트합니다.
+     * final_food_ids를 업데이트하고 저장합니다.
+     *
+     * @param foodIds 업데이트할 음식 ID 리스트
+     */
+    fun updateFinalFoodIds(foodIds: List<Int>) {
+        try {
+            saveFinalFoodIds(foodIds)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
