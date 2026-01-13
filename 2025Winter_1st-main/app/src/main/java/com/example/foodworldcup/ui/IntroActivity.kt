@@ -3,31 +3,34 @@ package com.example.foodworldcup.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
+import android.view.View
+import com.example.foodworldcup.R
 import com.example.foodworldcup.data.FoodRepository
-import com.example.foodworldcup.ui.compose.IntroScreen
-import com.example.foodworldcup.ui.compose.BottomNavTab
+import com.example.foodworldcup.databinding.ActivityIntroBinding
 import com.example.foodworldcup.utils.ImageLoader
-import com.example.foodworldcup.utils.PreferenceManager
 import com.kakao.sdk.common.util.Utility
 
 /**
  * 앱의 첫 화면(인트로 화면)을 담당하는 Activity입니다.
- * Jetpack Compose를 사용하여 UI를 구현합니다.
+ * 앱 소개 및 게임 시작 버튼이 있는 화면입니다.
+ * 
+ * 레이아웃 파일: res/layout/activity_intro.xml
  */
-class IntroActivity : ComponentActivity() {
+class IntroActivity : BaseActivity() {
 
-    private val preferenceManager: PreferenceManager by lazy {
-        PreferenceManager(this)
-    }
+    // ViewBinding 변수 선언. lateinit으로 나중에 초기화할 것을 약속합니다.
+    private lateinit var binding: ActivityIntroBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. 뷰 바인딩 객체를 생성합니다.
+        // XML 레이아웃 파일을 메모리에 올리고(inflate) 실제 뷰 객체로 만듭니다.
+        binding = ActivityIntroBinding.inflate(layoutInflater)
+
+        // 2. 생성된 뷰의 최상위(root) 뷰를 화면에 표시합니다.
+        // 기존의 setContentView(R.layout.activity_intro)를 대체합니다.
+        setContentView(binding.root)
 
         // FoodRepository 초기화 (JSON 파일에서 데이터 로드)
         FoodRepository.initialize(this)
@@ -36,41 +39,45 @@ class IntroActivity : ComponentActivity() {
         val keyHash = Utility.getKeyHash(this)
         Log.d("KakaoKeyHash", "현재 키 해시값: $keyHash")
 
-        // 최근 우승자 정보 로드
-        val recentWinner = loadRecentWinner()
+        // 하단 네비게이션 바 설정
+        setupBottomNavigation(BaseActivity.Screen.HOME)
 
-        setContent {
-            MaterialTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    IntroScreen(
-                        onStartTournamentClick = {
-                            val intent = Intent(this, FoodListActivity::class.java)
-                            startActivity(intent)
-                        },
-                        onRecentWinnerClick = {
-                            val intent = Intent(this, MyPageActivity::class.java)
-                            startActivity(intent)
-                        },
-                        recentWinnerName = recentWinner?.name,
-                        recentWinnerImage = recentWinner?.image
-                    )
-                }
-            }
+        // '게임 시작' 버튼 클릭 시 FoodListActivity로 이동
+        binding.startButton.setOnClickListener { 
+            val intent = Intent(this, FoodListActivity::class.java)
+            startActivity(intent)
         }
+        
+        // Recent Winner 카드 클릭 시 마이페이지로 이동
+        binding.recentWinnerCard.setOnClickListener {
+            val intent = Intent(this, MyPageActivity::class.java)
+            startActivity(intent)
+        }
+        
+        // 하단 네비게이션 바는 BaseActivity에서 처리됨
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 인트로 화면이 다시 보일 때 최근 우승 기록을 불러와서 표시합니다.
+        loadRecentWinner()
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
     /**
-     * PreferenceManager에서 최근 선택된 음식을 불러오는 함수입니다.
-     * 기록이 없으면 null을 반환합니다.
+     * PreferenceManager에서 최근 선택된 음식을 불러와서 Recent Winner 섹션에 표시하는 함수입니다.
+     * 기록이 없으면 Recent Winner 섹션을 숨깁니다.
      */
-    private fun loadRecentWinner(): RecentWinner? {
+    private fun loadRecentWinner() {
         val mapSelectedFoods = preferenceManager.getMapSelectedFoods()
         
         if (mapSelectedFoods.isEmpty()) {
-            return null
+            // 기록이 없으면 Recent Winner 섹션 숨김
+            binding.recentWinnerCard.visibility = View.GONE
+            return
         }
         
         // 가장 최근 기록 가져오기 (날짜 기준 내림차순 정렬)
@@ -79,42 +86,23 @@ class IntroActivity : ComponentActivity() {
         // 음식 정보 가져오기
         val food = FoodRepository.getFoodById(recentFood.foodId)
         
-        return if (food != null) {
-            // 캐릭터 이미지 경로 찾기
-            val characterImagePath = if (!food.characterImagePath.isNullOrEmpty()) {
-                val pathsToTry = ImageLoader.getCharacterImagePaths(
-                    food.characterImagePath,
-                    food.name,
-                    food.category
-                )
-                // 첫 번째로 찾은 유효한 경로 반환
-                pathsToTry.firstOrNull { path ->
-                    try {
-                        val stream = assets.open(path)
-                        stream.close()
-                        true
-                    } catch (e: Exception) {
-                        false
-                    }
-                } ?: food.characterImagePath
-            } else {
-                null
-            }
+        if (food != null) {
+            // Recent Winner 섹션 표시
+            binding.recentWinnerCard.visibility = View.VISIBLE
+            binding.recentWinnerNameTextView.text = food.name
             
-            RecentWinner(
-                name = food.name,
-                image = characterImagePath
+            // 캐릭터 이미지 로드 (ImageLoader 유틸리티 사용)
+            ImageLoader.loadCharacterImage(
+                context = this,
+                imageView = binding.recentWinnerImageView,
+                food = food,
+                targetAreaRatio = 0.9f, // ImageView 크기의 90% 사용
+                centerYRatio = 0.5f // 중앙 정렬
             )
         } else {
-            null
+            // 음식을 찾을 수 없으면 섹션 숨김
+            binding.recentWinnerCard.visibility = View.GONE
         }
     }
 
-    /**
-     * 최근 우승자 데이터 클래스
-     */
-    private data class RecentWinner(
-        val name: String,
-        val image: String?
-    )
 }

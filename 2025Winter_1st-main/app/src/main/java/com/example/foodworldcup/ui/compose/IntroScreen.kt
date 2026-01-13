@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.rememberScrollState
@@ -39,50 +40,41 @@ fun IntroScreen(
     recentWinnerName: String? = null,
     recentWinnerImage: String? = null
 ) {
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                selectedTab = BottomNavTab.HOME,
-                onTabSelected = { /* 네비게이션 처리 */ }
+    val colorScheme = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorScheme.background)
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // 메인 제목과 서브타이틀
+        MainTitleSection()
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        // How it works 섹션
+        HowItWorksSection()
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Start Tournament 버튼
+        StartTournamentButton(
+            onClick = onStartTournamentClick
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Recent Winner 섹션
+        if (recentWinnerName != null) {
+            YesterdaysWinnerSection(
+                foodName = recentWinnerName,
+                foodImage = recentWinnerImage,
+                onClick = onRecentWinnerClick
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFF8F8F8))
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // 메인 제목과 서브타이틀
-            MainTitleSection()
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // How it works 섹션
-            HowItWorksSection()
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Start Tournament 버튼
-            StartTournamentButton(
-                onClick = onStartTournamentClick
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Recent Winner 섹션
-            if (recentWinnerName != null) {
-                YesterdaysWinnerSection(
-                    foodName = recentWinnerName,
-                    foodImage = recentWinnerImage,
-                    onClick = onRecentWinnerClick
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -91,6 +83,7 @@ fun IntroScreen(
  */
 @Composable
 private fun TopHeaderSection() {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -105,7 +98,7 @@ private fun TopHeaderSection() {
             Icon(
                 imageVector = Icons.Default.Restaurant,
                 contentDescription = null,
-                tint = Color(0xFFFF7F3E),
+                tint = colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -113,7 +106,7 @@ private fun TopHeaderSection() {
                 text = "Food Tournament",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF333333)
+                color = colorScheme.onBackground
             )
         }
         
@@ -125,13 +118,13 @@ private fun TopHeaderSection() {
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = "Profile",
-                tint = Color(0xFF888888),
+                tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp)
             )
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Settings",
-                tint = Color(0xFF888888),
+                tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -143,6 +136,7 @@ private fun TopHeaderSection() {
  */
 @Composable
 private fun MainTitleSection() {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -153,14 +147,14 @@ private fun MainTitleSection() {
             text = "Food Tournament",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF333333),
+            color = colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         
         Text(
             text = "Pick today's meal in minutes",
             fontSize = 14.sp,
-            color = Color(0xFF888888),
+            color = colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }
@@ -171,12 +165,13 @@ private fun MainTitleSection() {
  */
 @Composable
 private fun HowItWorksSection() {
+    val colorScheme = MaterialTheme.colorScheme
     Column {
         Text(
             text = "How it works",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF333333),
+            color = colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         
@@ -216,6 +211,7 @@ private fun HowItWorksCard(
     description: String,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -225,7 +221,7 @@ private fun HowItWorksCard(
             ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFFFFF)
+            containerColor = colorScheme.surface
         )
     ) {
         Row(
@@ -239,7 +235,7 @@ private fun HowItWorksCard(
                 modifier = Modifier
                     .size(48.dp)
                     .background(
-                        color = Color(0xFFF5F0E8), // 더 연한 아이보리색
+                        color = colorScheme.surfaceVariant,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -247,7 +243,7 @@ private fun HowItWorksCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
-                    tint = Color(0xFFFF7F3E), // 주황색
+                    tint = colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -260,13 +256,13 @@ private fun HowItWorksCard(
                     text = title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                    color = colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = description,
                     fontSize = 14.sp,
-                    color = Color(0xFF888888)
+                    color = colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -283,6 +279,7 @@ private fun YesterdaysWinnerSection(
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val colorScheme = MaterialTheme.colorScheme
     
     Card(
         modifier = Modifier
@@ -293,7 +290,7 @@ private fun YesterdaysWinnerSection(
             ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF8F8F8)
+            containerColor = colorScheme.background
         ),
         onClick = onClick
     ) {
@@ -308,7 +305,7 @@ private fun YesterdaysWinnerSection(
                 modifier = Modifier
                     .size(64.dp)
                     .background(
-                        color = Color(0xFFE0E0E0),
+                        color = colorScheme.outlineVariant,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -327,7 +324,7 @@ private fun YesterdaysWinnerSection(
                             // 로딩 중 표시
                             CircularProgressIndicator(
                                 modifier = Modifier.size(32.dp),
-                                color = Color(0xFFFF7F3E),
+                                color = colorScheme.primary,
                                 strokeWidth = 2.dp
                             )
                         },
@@ -356,7 +353,7 @@ private fun YesterdaysWinnerSection(
                     text = "Recent Winner",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFF7F3E),
+                    color = colorScheme.primary,
                     letterSpacing = 0.5.sp
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -364,7 +361,7 @@ private fun YesterdaysWinnerSection(
                     text = foodName,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                    color = colorScheme.onBackground
                 )
             }
         }
@@ -378,6 +375,7 @@ private fun YesterdaysWinnerSection(
 private fun StartTournamentButton(
     onClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -389,8 +387,8 @@ private fun StartTournamentButton(
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
-                        Color(0xFFFF7F3E), // 오렌지 시작
-                        Color(0xFFFF9F6E)  // 더 밝은 오렌지 끝
+                        colorScheme.primary, // 오렌지 시작
+                        colorScheme.orangeGradientEnd  // 더 밝은 오렌지 끝
                     )
                 ),
                 shape = RoundedCornerShape(28.dp)
@@ -409,7 +407,7 @@ private fun StartTournamentButton(
             Icon(
                 imageVector = Icons.Default.PlayArrow,
                 contentDescription = null,
-                tint = Color.White,
+                tint = colorScheme.onPrimary,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -417,7 +415,7 @@ private fun StartTournamentButton(
                 text = "Start Tournament",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = colorScheme.onPrimary
             )
         }
     }
@@ -431,8 +429,9 @@ private fun BottomNavigationBar(
     selectedTab: BottomNavTab,
     onTabSelected: (BottomNavTab) -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     NavigationBar(
-        containerColor = Color(0xFFFFFFFF),
+        containerColor = colorScheme.surface,
         modifier = Modifier.shadow(elevation = 8.dp)
     ) {
         NavigationBarItem(
@@ -443,7 +442,7 @@ private fun BottomNavigationBar(
                         modifier = Modifier
                             .size(40.dp)
                             .background(
-                                color = Color(0xFFFF7F3E), // 기존 주황색
+                                color = colorScheme.primary,
                                 shape = CircleShape
                             ),
                         contentAlignment = Alignment.Center
@@ -451,7 +450,7 @@ private fun BottomNavigationBar(
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = "Home",
-                            tint = Color.White,
+                            tint = colorScheme.onPrimary,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -467,12 +466,11 @@ private fun BottomNavigationBar(
             selected = selectedTab == BottomNavTab.HOME,
             onClick = { onTabSelected(BottomNavTab.HOME) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFFFF7F3E), // 기존 주황색
-                selectedTextColor = Color(0xFFFF7F3E),
-                selectedContainerColor = Color.Transparent, // 선택된 항목 배경 제거
-                unselectedIconColor = Color(0xFF888888),
-                unselectedTextColor = Color(0xFF888888),
-                indicatorColor = Color.Transparent // 인디케이터 배경 제거
+                selectedIconColor = colorScheme.primary,
+                selectedTextColor = colorScheme.primary,
+                indicatorColor = Color.Transparent, // 인디케이터 배경 제거
+                unselectedIconColor = colorScheme.onSurfaceVariant,
+                unselectedTextColor = colorScheme.onSurfaceVariant
             )
         )
         
@@ -488,12 +486,11 @@ private fun BottomNavigationBar(
             selected = selectedTab == BottomNavTab.LIST,
             onClick = { onTabSelected(BottomNavTab.LIST) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFFFF7F3E), // 기존 주황색
-                selectedTextColor = Color(0xFFFF7F3E),
-                selectedContainerColor = Color.Transparent, // 선택된 항목 배경 제거
-                unselectedIconColor = Color(0xFF888888),
-                unselectedTextColor = Color(0xFF888888),
-                indicatorColor = Color.Transparent // 인디케이터 배경 제거
+                selectedIconColor = colorScheme.primary,
+                selectedTextColor = colorScheme.primary,
+                indicatorColor = Color.Transparent, // 인디케이터 배경 제거
+                unselectedIconColor = colorScheme.onSurfaceVariant,
+                unselectedTextColor = colorScheme.onSurfaceVariant
             )
         )
         
@@ -509,12 +506,11 @@ private fun BottomNavigationBar(
             selected = selectedTab == BottomNavTab.SWIPE,
             onClick = { onTabSelected(BottomNavTab.SWIPE) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFFFF7F3E), // 기존 주황색
-                selectedTextColor = Color(0xFFFF7F3E),
-                selectedContainerColor = Color.Transparent, // 선택된 항목 배경 제거
-                unselectedIconColor = Color(0xFF888888),
-                unselectedTextColor = Color(0xFF888888),
-                indicatorColor = Color.Transparent // 인디케이터 배경 제거
+                selectedIconColor = colorScheme.primary,
+                selectedTextColor = colorScheme.primary,
+                indicatorColor = Color.Transparent, // 인디케이터 배경 제거
+                unselectedIconColor = colorScheme.onSurfaceVariant,
+                unselectedTextColor = colorScheme.onSurfaceVariant
             )
         )
         
@@ -530,12 +526,11 @@ private fun BottomNavigationBar(
             selected = selectedTab == BottomNavTab.MYPAGE,
             onClick = { onTabSelected(BottomNavTab.MYPAGE) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFFFF7F3E), // 기존 주황색
-                selectedTextColor = Color(0xFFFF7F3E),
-                selectedContainerColor = Color.Transparent, // 선택된 항목 배경 제거
-                unselectedIconColor = Color(0xFF888888),
-                unselectedTextColor = Color(0xFF888888),
-                indicatorColor = Color.Transparent // 인디케이터 배경 제거
+                selectedIconColor = colorScheme.primary,
+                selectedTextColor = colorScheme.primary,
+                indicatorColor = Color.Transparent, // 인디케이터 배경 제거
+                unselectedIconColor = colorScheme.onSurfaceVariant,
+                unselectedTextColor = colorScheme.onSurfaceVariant
             )
         )
         
@@ -551,12 +546,11 @@ private fun BottomNavigationBar(
             selected = selectedTab == BottomNavTab.MAP,
             onClick = { onTabSelected(BottomNavTab.MAP) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFFFF7F3E), // 기존 주황색
-                selectedTextColor = Color(0xFFFF7F3E),
-                selectedContainerColor = Color.Transparent, // 선택된 항목 배경 제거
-                unselectedIconColor = Color(0xFF888888),
-                unselectedTextColor = Color(0xFF888888),
-                indicatorColor = Color.Transparent // 인디케이터 배경 제거
+                selectedIconColor = colorScheme.primary,
+                selectedTextColor = colorScheme.primary,
+                indicatorColor = Color.Transparent, // 인디케이터 배경 제거
+                unselectedIconColor = colorScheme.onSurfaceVariant,
+                unselectedTextColor = colorScheme.onSurfaceVariant
             )
         )
     }
