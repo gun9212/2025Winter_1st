@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 // local.properties에서 Kakao API Key 읽기
@@ -48,10 +49,15 @@ android {
         jvmTarget = "11"
     }
     
-    // ViewBinding 및 BuildConfig 활성화
+    // ViewBinding, BuildConfig, Compose 활성화
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        compose = true
+    }
+    
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
 }
 
@@ -95,6 +101,18 @@ dependencies {
     
     // Google Location Services (현재 위치 가져오기용)
     implementation(libs.google.location)
+    
+    // Jetpack Compose
+    implementation(platform(libs.compose.bom))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.activity.compose)
+    
+    // Coil for Compose (이미지 로딩)
+    implementation("io.coil-kt:coil-compose:2.5.0")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
