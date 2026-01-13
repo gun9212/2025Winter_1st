@@ -13,6 +13,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
+import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.ui.FoodListActivity
 import com.example.foodworldcup.ui.MyPageActivity
@@ -45,6 +47,7 @@ sealed class Screen(val route: String, val title: String) {
     object Swipe : Screen("swipe", "Swipe")
     object MyPage : Screen("mypage", "MyPage")
     object Map : Screen("map", "Map")
+    object Result : Screen("result", "Result")
 }
 
 /**
@@ -53,7 +56,7 @@ sealed class Screen(val route: String, val title: String) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(initialRoute: String? = null) {
+fun AppNavigation(initialRoute: String? = null, initialMapFoodIds: List<Int>? = null, initialResultFoodIds: List<Int>? = null) {
     val context = LocalContext.current
     val navController = rememberNavController()
     val colorScheme = MaterialTheme.colorScheme
@@ -63,6 +66,8 @@ fun AppNavigation(initialRoute: String? = null) {
         "list" -> Screen.List.route
         "home" -> Screen.Home.route
         "mypage" -> Screen.MyPage.route
+        "result" -> Screen.Result.route
+        "map" -> Screen.Map.route
         else -> Screen.Home.route
     }
     
@@ -73,6 +78,53 @@ fun AppNavigation(initialRoute: String? = null) {
     
     // 선택된 음식 리스트 상태 관리 (FoodListScreen에서 SwipeScreen으로 전달)
     var selectedFoodsForGame by remember { mutableStateOf<List<com.example.foodworldcup.data.Food>?>(null) }
+    
+    // Map 화면으로 전달할 음식 ID 리스트 상태 관리
+    var mapFoodIds by remember { mutableStateOf<List<Int>?>(initialMapFoodIds) }
+    
+    // Result 화면으로 전달할 음식 리스트 상태 관리
+    var resultFoods by remember {
+        mutableStateOf<List<com.example.foodworldcup.data.Food>?>(
+            if (initialResultFoodIds != null) {
+                initialResultFoodIds.mapNotNull { id ->
+                    FoodRepository.getFoodById(id)
+                }
+            } else null
+        )
+    }
+    
+    // initialRoute가 "result"이고 initialResultFoodIds가 있으면 Result 화면으로 이동
+    LaunchedEffect(initialRoute, initialResultFoodIds) {
+        if (initialRoute == "result" && initialResultFoodIds != null) {
+            val foods = initialResultFoodIds.mapNotNull { id ->
+                FoodRepository.getFoodById(id)
+            }
+            if (foods.isNotEmpty()) {
+                resultFoods = foods
+                navController.navigate(Screen.Result.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = false
+                }
+            }
+        }
+    }
+    
+    // initialRoute가 "map"이고 initialMapFoodIds가 있으면 Map 화면으로 이동
+    LaunchedEffect(initialRoute, initialMapFoodIds) {
+        if (initialRoute == "map" && initialMapFoodIds != null) {
+            mapFoodIds = initialMapFoodIds
+            navController.navigate(Screen.Map.route) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = false
+            }
+        }
+    }
     
     Scaffold(
         bottomBar = {
@@ -89,6 +141,7 @@ fun AppNavigation(initialRoute: String? = null) {
                 val isSwipeSelected = currentDestination?.hierarchy?.any { it.route == Screen.Swipe.route } == true
                 val isMyPageSelected = currentDestination?.hierarchy?.any { it.route == Screen.MyPage.route } == true
                 val isMapSelected = currentDestination?.hierarchy?.any { it.route == Screen.Map.route } == true
+                val isResultSelected = currentDestination?.hierarchy?.any { it.route == Screen.Result.route } == true
                 
                 // 각 아이콘의 bounce 애니메이션
                 val homeScale by animateFloatAsState(
@@ -406,6 +459,10 @@ fun AppNavigation(initialRoute: String? = null) {
                     label = { Text("Map") },
                     selected = isMapSelected,
                     onClick = {
+                        // Map 탭 클릭 시에는 저장된 최종 음식 ID 사용
+                        val preferenceManager = PreferenceManager(context)
+                        val savedFoodIds = preferenceManager.getFinalFoodIds()
+                        mapFoodIds = if (savedFoodIds.isNotEmpty()) savedFoodIds else null
                         navController.navigate(Screen.Map.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -484,7 +541,93 @@ fun AppNavigation(initialRoute: String? = null) {
             }
             
             composable(Screen.Map.route) {
-                PlaceholderScreen("Map")
+                MapScreen(passedFoodIds = mapFoodIds)
+            }
+            
+            composable(Screen.Result.route) {
+                val preferenceManager = remember { PreferenceManager(context) }
+                
+                // resultFoods를 mutableStateListOf로 관리
+                val resultFoodsList = remember { mutableStateListOf<Food>() }
+                
+                // initialResultFoodIds가 변경되면 resultFoodsList 업데이트
+                LaunchedEffect(initialResultFoodIds) {
+                    if (initialResultFoodIds != null) {
+                        val foods = initialResultFoodIds.mapNotNull { id ->
+                            FoodRepository.getFoodById(id)
+                        }
+                        resultFoodsList.clear()
+                        resultFoodsList.addAll(foods)
+                    } else {
+                        val currentResultFoods = resultFoods
+                        if (currentResultFoods != null) {
+                            resultFoodsList.clear()
+                            resultFoodsList.addAll(currentResultFoods)
+                        }
+                    }
+                }
+                
+                // resultFoods가 변경되면 resultFoodsList 업데이트
+                LaunchedEffect(resultFoods) {
+                    val currentResultFoods = resultFoods
+                    if (currentResultFoods != null) {
+                        resultFoodsList.clear()
+                        resultFoodsList.addAll(currentResultFoods)
+                    }
+                }
+                
+                ResultScreen(
+                    passedFoods = resultFoodsList,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onViewOnMapClick = {
+                        if (resultFoodsList.isNotEmpty()) {
+                            val foodIds = resultFoodsList.map { it.id }
+                            mapFoodIds = foodIds
+                            navController.navigate(Screen.Map.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = false
+                            }
+                        }
+                    },
+                    onRetryClick = {
+                        navController.navigate(Screen.List.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onMyPageClick = {
+                        navController.navigate(Screen.MyPage.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onRemoveFood = { food ->
+                        // resultFoodsList에서 제거
+                        resultFoodsList.remove(food)
+                        
+                        // resultFoods도 업데이트
+                        resultFoods = if (resultFoodsList.isNotEmpty()) resultFoodsList.toList() else null
+                        
+                        // PreferenceManager 업데이트
+                        val updatedFoodIds = resultFoodsList.map { it.id }
+                        if (updatedFoodIds.isNotEmpty()) {
+                            preferenceManager.saveFinalFoodIds(updatedFoodIds)
+                        } else {
+                            preferenceManager.saveFinalFoodIds(emptyList())
+                        }
+                    }
+                )
             }
         }
     }

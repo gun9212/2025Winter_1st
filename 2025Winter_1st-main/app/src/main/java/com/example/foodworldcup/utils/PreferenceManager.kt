@@ -24,6 +24,9 @@ class PreferenceManager(context: Context) {
         private const val KEY_MAP_SELECTED_FOOD_IDS = "map_selected_food_ids" // 지도에서 선택한 음식용 (레거시)
         private const val KEY_MAP_SELECTED_FOODS = "map_selected_foods" // 지도에서 선택한 음식 상세 정보
         private const val KEY_PLACE_MEMOS = "place_memos" // 가게 이름별 메모 (placeName -> memo 매핑)
+        private const val KEY_GAME_REMAINING_FOOD_IDS = "game_remaining_food_ids" // 게임 진행 중 남은 음식 ID 리스트
+        private const val KEY_GAME_PASSED_FOOD_IDS = "game_passed_food_ids" // 게임 진행 중 합격된 음식 ID 리스트
+        private const val KEY_GAME_REJECTED_FOOD_IDS = "game_rejected_food_ids" // 게임 진행 중 탈락된 음식 ID 리스트
     }
 
     /**
@@ -233,6 +236,101 @@ class PreferenceManager(context: Context) {
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    /**
+     * 게임 상태 데이터 클래스
+     */
+    data class GameState(
+        val remainingFoodIds: List<Int>,
+        val passedFoodIds: List<Int>,
+        val rejectedFoodIds: List<Int>
+    )
+
+    /**
+     * 게임 상태를 저장합니다.
+     *
+     * @param remainingFoodIds 남은 음식 ID 리스트
+     * @param passedFoodIds 합격된 음식 ID 리스트
+     * @param rejectedFoodIds 탈락된 음식 ID 리스트
+     */
+    fun saveGameState(
+        remainingFoodIds: List<Int>,
+        passedFoodIds: List<Int>,
+        rejectedFoodIds: List<Int>
+    ) {
+        try {
+            val remainingJson = gson.toJson(remainingFoodIds)
+            val passedJson = gson.toJson(passedFoodIds)
+            val rejectedJson = gson.toJson(rejectedFoodIds)
+            
+            prefs.edit()
+                .putString(KEY_GAME_REMAINING_FOOD_IDS, remainingJson)
+                .putString(KEY_GAME_PASSED_FOOD_IDS, passedJson)
+                .putString(KEY_GAME_REJECTED_FOOD_IDS, rejectedJson)
+                .apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * 저장된 게임 상태를 불러옵니다.
+     *
+     * @return 게임 상태 (저장된 상태가 없으면 null)
+     */
+    fun getGameState(): GameState? {
+        return try {
+            val remainingJson = prefs.getString(KEY_GAME_REMAINING_FOOD_IDS, null)
+            val passedJson = prefs.getString(KEY_GAME_PASSED_FOOD_IDS, null)
+            val rejectedJson = prefs.getString(KEY_GAME_REJECTED_FOOD_IDS, null)
+            
+            if (remainingJson.isNullOrEmpty() && passedJson.isNullOrEmpty() && rejectedJson.isNullOrEmpty()) {
+                return null
+            }
+            
+            val remainingType = object : TypeToken<List<Int>>() {}.type
+            val passedType = object : TypeToken<List<Int>>() {}.type
+            val rejectedType = object : TypeToken<List<Int>>() {}.type
+            
+            val remainingFoodIds = if (remainingJson.isNullOrEmpty()) {
+                emptyList<Int>()
+            } else {
+                gson.fromJson<List<Int>>(remainingJson, remainingType) ?: emptyList()
+            }
+            
+            val passedFoodIds = if (passedJson.isNullOrEmpty()) {
+                emptyList<Int>()
+            } else {
+                gson.fromJson<List<Int>>(passedJson, passedType) ?: emptyList()
+            }
+            
+            val rejectedFoodIds = if (rejectedJson.isNullOrEmpty()) {
+                emptyList<Int>()
+            } else {
+                gson.fromJson<List<Int>>(rejectedJson, rejectedType) ?: emptyList()
+            }
+            
+            GameState(remainingFoodIds, passedFoodIds, rejectedFoodIds)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    /**
+     * 게임 상태를 초기화합니다 (게임 종료 시 호출).
+     */
+    fun clearGameState() {
+        try {
+            prefs.edit()
+                .remove(KEY_GAME_REMAINING_FOOD_IDS)
+                .remove(KEY_GAME_PASSED_FOOD_IDS)
+                .remove(KEY_GAME_REJECTED_FOOD_IDS)
+                .apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

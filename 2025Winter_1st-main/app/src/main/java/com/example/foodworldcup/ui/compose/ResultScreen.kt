@@ -53,9 +53,7 @@ fun ResultScreen(
     onViewOnMapClick: () -> Unit,
     onRetryClick: () -> Unit,
     onMyPageClick: () -> Unit,
-    onRemoveFood: (Food) -> Unit,
-    onNavTabSelected: (ResultNavTab) -> Unit,
-    selectedNavTab: ResultNavTab? = null
+    onRemoveFood: (Food) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     
@@ -84,12 +82,6 @@ fun ResultScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
-            )
-        },
-        bottomBar = {
-            ResultBottomNavigationBar(
-                selectedTab = selectedNavTab,
-                onTabSelected = onNavTabSelected
             )
         }
     ) { paddingValues ->
@@ -295,7 +287,7 @@ private fun FoodGridItem(
                 onClick = onRemoveClick,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
+                    .offset(x = (-4).dp, y = 4.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -327,123 +319,3 @@ private fun FoodGridItem(
     }
 }
 
-/**
- * 결과 화면 하단 네비게이션 바 (기존 AppNavigation과 동일)
- */
-@Composable
-private fun ResultBottomNavigationBar(
-    selectedTab: ResultNavTab?,
-    onTabSelected: (ResultNavTab) -> Unit
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    
-    NavigationBar(
-        containerColor = colorScheme.surface,
-        modifier = Modifier.shadow(elevation = 8.dp)
-    ) {
-        // Home
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Home",
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            label = { Text("Home") },
-            selected = selectedTab == ResultNavTab.HOME,
-            onClick = { onTabSelected(ResultNavTab.HOME) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = colorScheme.primary,
-                selectedTextColor = colorScheme.primary,
-                indicatorColor = Color.Transparent,
-                unselectedIconColor = colorScheme.onSurfaceVariant,
-                unselectedTextColor = colorScheme.onSurfaceVariant
-            )
-        )
-        
-        // List
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.List,
-                    contentDescription = "List",
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            label = { Text("List") },
-            selected = selectedTab == ResultNavTab.LIST,
-            onClick = { onTabSelected(ResultNavTab.LIST) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = colorScheme.primary,
-                selectedTextColor = colorScheme.primary,
-                indicatorColor = Color.Transparent,
-                unselectedIconColor = colorScheme.onSurfaceVariant,
-                unselectedTextColor = colorScheme.onSurfaceVariant
-            )
-        )
-        
-        // Swipe
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Gesture,
-                    contentDescription = "Swipe",
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            label = { Text("Swipe") },
-            selected = selectedTab == ResultNavTab.SWIPE,
-            onClick = { onTabSelected(ResultNavTab.SWIPE) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = colorScheme.primary,
-                selectedTextColor = colorScheme.primary,
-                indicatorColor = Color.Transparent,
-                unselectedIconColor = colorScheme.onSurfaceVariant,
-                unselectedTextColor = colorScheme.onSurfaceVariant
-            )
-        )
-        
-        // MyPage
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "MyPage",
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            label = { Text("MyPage") },
-            selected = selectedTab == ResultNavTab.MYPAGE,
-            onClick = { onTabSelected(ResultNavTab.MYPAGE) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = colorScheme.primary,
-                selectedTextColor = colorScheme.primary,
-                indicatorColor = Color.Transparent,
-                unselectedIconColor = colorScheme.onSurfaceVariant,
-                unselectedTextColor = colorScheme.onSurfaceVariant
-            )
-        )
-        
-        // Map
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Map,
-                    contentDescription = "Map",
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            label = { Text("Map") },
-            selected = selectedTab == ResultNavTab.MAP,
-            onClick = { onTabSelected(ResultNavTab.MAP) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = colorScheme.primary,
-                selectedTextColor = colorScheme.primary,
-                indicatorColor = Color.Transparent,
-                unselectedIconColor = colorScheme.onSurfaceVariant,
-                unselectedTextColor = colorScheme.onSurfaceVariant
-            )
-        )
-    }
-}
