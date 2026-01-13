@@ -58,7 +58,7 @@ class ResultActivity : ComponentActivity() {
         if (passedFoods.isNotEmpty()) {
             preferenceManager.saveFinalFoodIds(passedFoodIds)
         }
-
+        
         setContent {
             FoodWorldCupTheme {
                 Surface(
@@ -84,7 +84,7 @@ private fun AppNavigationWithResult(
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
-    
+
     // MainActivity로 이동하여 AppNavigation의 NavigationBar 사용
     LaunchedEffect(Unit) {
         val intent = Intent(context, MainActivity::class.java)

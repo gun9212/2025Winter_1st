@@ -158,11 +158,11 @@ fun AppNavigation(initialRoute: String? = null) {
                                 )
                             }
                         } else {
-                            Icon(
-                                imageVector = Icons.Default.Home,
-                                contentDescription = "Home",
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home",
+                            modifier = Modifier.size(24.dp)
+                        )
                         }
                     },
                     label = { Text("Home") },
@@ -184,7 +184,7 @@ fun AppNavigation(initialRoute: String? = null) {
                         unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
-
+                
                 NavigationBarItem(
                     icon = {
                         if (isListSelected) {
@@ -207,11 +207,11 @@ fun AppNavigation(initialRoute: String? = null) {
                                 )
                             }
                         } else {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.List,
-                                contentDescription = "List",
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = "List",
+                            modifier = Modifier.size(24.dp)
+                        )
                         }
                     },
                     label = { Text("List") },
@@ -233,7 +233,7 @@ fun AppNavigation(initialRoute: String? = null) {
                         unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
-
+                
                 NavigationBarItem(
                     icon = {
                         if (isSwipeSelected) {
@@ -292,14 +292,14 @@ fun AppNavigation(initialRoute: String? = null) {
                                     )
                                 },
                                 error = {
-                                    Icon(
-                                        imageVector = Icons.Default.Gesture,
-                                        contentDescription = "Swipe",
+                        Icon(
+                            imageVector = Icons.Default.Gesture,
+                            contentDescription = "Swipe",
                                         modifier = Modifier.size(24.dp),
                                         tint = colorScheme.onSurfaceVariant
                                     )
                                 }
-                            )
+                        )
                         }
                     },
                     label = { Text("Swipe") },
@@ -321,7 +321,7 @@ fun AppNavigation(initialRoute: String? = null) {
                         unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
-
+                
                 NavigationBarItem(
                     icon = {
                         if (isMyPageSelected) {
@@ -344,11 +344,11 @@ fun AppNavigation(initialRoute: String? = null) {
                                 )
                             }
                         } else {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "MyPage",
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "MyPage",
+                            modifier = Modifier.size(24.dp)
+                        )
                         }
                     },
                     label = { Text("MyPage") },
@@ -370,7 +370,7 @@ fun AppNavigation(initialRoute: String? = null) {
                         unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
-
+                
                 NavigationBarItem(
                     icon = {
                         if (isMapSelected) {
@@ -393,11 +393,11 @@ fun AppNavigation(initialRoute: String? = null) {
                                 )
                             }
                         } else {
-                            Icon(
-                                imageVector = Icons.Default.Map,
-                                contentDescription = "Map",
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.Default.Map,
+                            contentDescription = "Map",
+                            modifier = Modifier.size(24.dp)
+                        )
                         }
                     },
                     label = { Text("Map") },

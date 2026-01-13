@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
             val preferenceManager = PreferenceManager(this)
             preferenceManager.saveFinalFoodIds(passedFoodIds.toList())
         }
-        
+
         setContent {
             FoodWorldCupTheme {
                 Surface(

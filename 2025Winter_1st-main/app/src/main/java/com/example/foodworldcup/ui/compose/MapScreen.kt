@@ -99,13 +99,13 @@ fun MapScreen() {
     
     // PreferenceManager에서 직접 불러오기
     LaunchedEffect(Unit) {
-        val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
+            val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
         val names = if (lastSearchFoodIds.isNotEmpty()) {
-            lastSearchFoodIds.mapNotNull { id ->
-                FoodRepository.getFoodById(id)?.name
-            }
-        } else {
-            emptyList()
+                lastSearchFoodIds.mapNotNull { id ->
+                    FoodRepository.getFoodById(id)?.name
+                }
+            } else {
+                emptyList()
         }
         foodNames.clear()
         foodNames.addAll(names)
