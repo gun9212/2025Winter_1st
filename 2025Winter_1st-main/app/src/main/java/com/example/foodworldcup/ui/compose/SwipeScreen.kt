@@ -2,7 +2,6 @@ package com.example.foodworldcup.ui.compose
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -35,8 +34,6 @@ import com.example.foodworldcup.game.GameStateManager
 import com.example.foodworldcup.ui.ResultActivity
 import com.example.foodworldcup.utils.PreferenceManager
 import android.content.Intent
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 /**
@@ -396,32 +393,24 @@ private fun SwipeableCard(
                                 offsetX.animateTo(-size.width * 1.5f, spring())
                                 rotation.animateTo(-30f, spring())
                             } else {
-                                // 원래 위치로 복귀 (한 번에 정위치로 이동)
-                                // 즉시 swipeDirection을 null로 설정하여 Like/Nope 표시 제거
+                                // 원래 위치로 복귀
+                                offsetX.animateTo(0f, spring())
+                                offsetY.animateTo(0f, spring())
+                                rotation.animateTo(0f, spring())
                                 swipeDirection = null
-                                val animationSpec = tween<Float>(durationMillis = 300) // 부드럽게 한 번에 이동
-                                awaitAll(
-                                    async { offsetX.animateTo(0f, animationSpec) },
-                                    async { offsetY.animateTo(0f, animationSpec) },
-                                    async { rotation.animateTo(0f, animationSpec) }
-                                )
                             }
                         }
                         isDragging = false
                     }
                 },
                 onDragCancel = {
-                    // 드래그 취소 시 원래 위치로 복귀 (동시에 실행)
+                    // 드래그 취소 시 원래 위치로 복귀
                     if (isDragging && !isSwipedOut) {
-                        // 즉시 swipeDirection을 null로 설정하여 Nope/Like 표시 제거
-                        swipeDirection = null
                         scope.launch {
-                            val animationSpec = tween<Float>(durationMillis = 300) // 부드럽게 한 번에 이동
-                            awaitAll(
-                                async { offsetX.animateTo(0f, animationSpec) },
-                                async { offsetY.animateTo(0f, animationSpec) },
-                                async { rotation.animateTo(0f, animationSpec) }
-                            )
+                            offsetX.animateTo(0f, spring())
+                            offsetY.animateTo(0f, spring())
+                            rotation.animateTo(0f, spring())
+                            swipeDirection = null
                         }
                         isDragging = false
                     }
