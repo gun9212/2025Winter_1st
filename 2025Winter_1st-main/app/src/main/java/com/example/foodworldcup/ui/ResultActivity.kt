@@ -3,35 +3,48 @@ package com.example.foodworldcup.ui
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
-import com.example.foodworldcup.databinding.ActivityResultBinding
-import com.example.foodworldcup.ui.adapter.PassedFoodAdapter
+import com.example.foodworldcup.ui.compose.AppNavigation
+import com.example.foodworldcup.ui.compose.FoodWorldCupTheme
+import com.example.foodworldcup.ui.compose.ResultScreen
+import com.example.foodworldcup.utils.PreferenceManager
 
 /**
  * 합격된 음식들을 나열하는 Activity입니다.
  * 음식 사진과 이름을 나열하고, 다음 화면(지도)으로 넘어가는 버튼을 제공합니다.
- * 
- * 레이아웃 파일: res/layout/activity_result.xml
  */
-class ResultActivity : BaseActivity() {
+class ResultActivity : ComponentActivity() {
 
-    private lateinit var binding: ActivityResultBinding
+    private lateinit var preferenceManager: PreferenceManager
     
     // GameActivity로부터 전달받은 합격된 음식 리스트
     private var passedFoods: List<Food> = emptyList()
-    
-    // 통과한 음식 어댑터
-    private lateinit var passedFoodAdapter: PassedFoodAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityResultBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        // 하단 네비게이션 바 설정
-        setupBottomNavigation(BaseActivity.Screen.ACCEPTED)
+        // PreferenceManager 초기화
+        preferenceManager = PreferenceManager(this)
+
+        // FoodRepository 초기화 (아직 초기화되지 않은 경우)
+        if (FoodRepository.getFoodList().isEmpty()) {
+            FoodRepository.initialize(this)
+        }
 
         // GameActivity로부터 전달받은 합격된 음식 ID 리스트를 가져옵니다.
         val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids") ?: emptyList()
@@ -46,70 +59,40 @@ class ResultActivity : BaseActivity() {
             preferenceManager.saveFinalFoodIds(passedFoodIds)
         }
         
-        // 화면에 합격된 음식 리스트를 표시합니다.
-        displayPassedFoods()
-        
-        // 버튼 클릭 이벤트 설정
-        setupButtons()
-    }
-
-    /**
-     * 화면에 합격된 음식 리스트를 표시하는 함수입니다.
-     */
-    private fun displayPassedFoods() {
-        if (passedFoods.isEmpty()) {
-            // 통과한 음식이 없으면 메시지 표시
-            binding.resultTitleTextView.text = "통과한 음식이 없습니다"
-            return
-        }
-
-        // RecyclerView 어댑터 생성 및 설정 (2열 그리드 레이아웃)
-        passedFoodAdapter = PassedFoodAdapter(passedFoods)
-        binding.passedFoodRecyclerView.layoutManager = GridLayoutManager(this, 2)
-        binding.passedFoodRecyclerView.adapter = passedFoodAdapter
-        
-        // 통과한 음식 개수 표시
-        binding.resultTitleTextView.text = "통과한 음식 (${passedFoods.size}개)"
-    }
-
-    /**
-     * 버튼 클릭 이벤트를 설정하는 함수입니다.
-     */
-    private fun setupButtons() {
-        // 다시하기 버튼: FoodListActivity로 이동 (게임 재시작)
-        binding.restartButton.setOnClickListener {
-            val intent = Intent(this, FoodListActivity::class.java)
-            startActivity(intent)
-            finish() // ResultActivity 종료
-        }
-
-        // 마이페이지 버튼: MyPageActivity로 이동
-        binding.myPageButton.setOnClickListener {
-            val intent = Intent(this, MyPageActivity::class.java)
-            startActivity(intent)
-        }
-
-        // 지도 보기 버튼: MapActivity로 이동 (통과한 음식 전달)
-        binding.nextButton.setOnClickListener {
-            if (passedFoods.isEmpty()) {
-                Toast.makeText(this, "통과한 음식이 없습니다.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        setContent {
+            FoodWorldCupTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    // AppNavigation을 사용하여 Result 화면 표시
+                    AppNavigationWithResult(
+                        initialPassedFoods = passedFoods,
+                        preferenceManager = preferenceManager,
+                        onBackClick = { finish() }
+                    )
+                }
             }
-
-            val intent = Intent(this, MapActivity::class.java)
-            val passedFoodIds = passedFoods.map { it.id }
-            intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
-            startActivity(intent)
         }
     }
+}
 
-    override fun onResume() {
-        super.onResume()
-        // 결과 화면이 다시 보일 때 추가 처리 (필요시)
-    }
+@Composable
+private fun AppNavigationWithResult(
+    initialPassedFoods: List<Food>,
+    preferenceManager: PreferenceManager,
+    onBackClick: () -> Unit
+) {
+    val context = LocalContext.current
 
-    override fun onPause() {
-        super.onPause()
-        // 결과 화면이 가려질 때 추가 처리 (필요시)
+    // MainActivity로 이동하여 AppNavigation의 NavigationBar 사용
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, MainActivity::class.java)
+        intent.putExtra("navigate_to", "result")
+        val foodIds = initialPassedFoods.map { it.id }
+        intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(foodIds))
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+        onBackClick()
     }
 }

@@ -221,11 +221,11 @@ class GameActivity : BaseActivity() {
         when (direction) {
             Direction.Right -> {
                 // 오른쪽 스와이프: Like Overlay 표시
-                cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Right)
+                //cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Right)
             }
             Direction.Left -> {
                 // 왼쪽 스와이프: Nope Overlay 표시
-                cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Left)
+                //cardStackAdapter.setOverlayAlpha(holder, ratio, Direction.Left)
             }
             Direction.Top -> {
                 // 위로 스와이프: 처리하지 않음

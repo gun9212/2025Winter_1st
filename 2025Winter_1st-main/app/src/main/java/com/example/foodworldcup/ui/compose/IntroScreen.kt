@@ -1,0 +1,494 @@
+package com.example.foodworldcup.ui.compose
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.text.style.TextAlign
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.utils.ImageLoader
+import com.example.foodworldcup.utils.PreferenceManager
+
+/**
+ * Intro 화면의 메인 Composable
+ */
+@Composable
+fun IntroScreen(
+    onStartTournamentClick: () -> Unit,
+    onRecentWinnerClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val preferenceManager = remember { PreferenceManager(context) }
+    val colorScheme = MaterialTheme.colorScheme
+    
+    // Recent Winner 데이터 로드
+    val recentWinner = remember {
+        loadRecentWinner(context, preferenceManager)
+    }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorScheme.background)
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // 메인 제목과 서브타이틀
+        MainTitleSection()
+        
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        // How it works 섹션
+        HowItWorksSection()
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Start Tournament 버튼
+        StartTournamentButton(
+            onClick = onStartTournamentClick
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Recent Winner 섹션
+        if (recentWinner != null) {
+            YesterdaysWinnerSection(
+                foodName = recentWinner.name,
+                foodImage = recentWinner.image,
+                onClick = onRecentWinnerClick
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+/**
+ * 상단 헤더: 왼쪽 아이콘+제목, 오른쪽 프로필+설정 아이콘
+ */
+@Composable
+private fun TopHeaderSection() {
+    val colorScheme = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, start = 24.dp, end = 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 왼쪽: 포크/나이프 아이콘 + "Food Tournament"
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Restaurant,
+                contentDescription = null,
+                tint = colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Food Tournament",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.onBackground
+            )
+        }
+        
+        // 오른쪽: 프로필 + 설정 아이콘
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Profile",
+                tint = colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings",
+                tint = colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+/**
+ * 메인 제목 섹션: 큰 제목과 서브타이틀
+ */
+@Composable
+private fun MainTitleSection() {
+    val colorScheme = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Food Tournament",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 2.dp)
+        )
+        
+        Text(
+            text = "Pick today's meal in minutes",
+            fontSize = 14.sp,
+            color = colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+/**
+ * How it works 섹션: 3개의 카드 (세로 배치)
+ */
+@Composable
+private fun HowItWorksSection() {
+    val colorScheme = MaterialTheme.colorScheme
+    Column {
+        Text(
+            text = "How it works",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        
+        // Browse List 카드
+        HowItWorksCard(
+            icon = Icons.AutoMirrored.Filled.List,
+            title = "Browse List",
+            description = "Explore local favorites",
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+        
+        // Swipe to Choose 카드
+        HowItWorksCard(
+            icon = Icons.Default.Gesture,
+            title = "Swipe to Choose",
+            description = "Vote on matches",
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+        
+        // Find Restaurant 카드
+        HowItWorksCard(
+            icon = Icons.Default.Place,
+            title = "Find Restaurant",
+            description = "Get directions",
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+    }
+}
+
+/**
+ * How it works 개별 카드 (가로 배치)
+ */
+@Composable
+private fun HowItWorksCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(12.dp)
+            ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 아이콘 (연한 아이보리 원형 배경)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = colorScheme.surfaceVariant,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // 텍스트
+            Column {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.onBackground,
+                    lineHeight = 12.sp
+                )
+                //Spacer(modifier = Modifier.height(1.dp))
+                Text(
+                    text = description,
+                    fontSize = 14.sp,
+                    color = colorScheme.onSurfaceVariant,
+                    lineHeight = 12.sp
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Recent Winner 섹션
+ */
+@Composable
+private fun YesterdaysWinnerSection(
+    foodName: String,
+    foodImage: String?,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val colorScheme = MaterialTheme.colorScheme
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(12.dp)
+            ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = colorScheme.background
+        ),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 원형 이미지 (캐릭터누끼 이미지)
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .background(
+                        color = colorScheme.outlineVariant,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (foodImage != null) {
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data("file:///android_asset/$foodImage")
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = foodName,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape),
+                        loading = {
+                            // 로딩 중 표시
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(32.dp),
+                                color = colorScheme.primary,
+                                strokeWidth = 2.dp
+                            )
+                        },
+                        error = {
+                            // 이미지 로드 실패 시 이모지 표시
+                            Text(
+                                text = "🍜",
+                                fontSize = 32.sp
+                            )
+                        }
+                    )
+                } else {
+                    // 이미지 경로가 없을 경우 이모지 표시
+                    Text(
+                        text = "🍜",
+                        fontSize = 32.sp
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // 텍스트
+            Column {
+                Text(
+                    text = "Recent Winner",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary,
+                    letterSpacing = 0.5.sp
+                )
+                Spacer(modifier = Modifier.height(1.dp))
+                Text(
+                    text = foodName,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onBackground
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Start Tournament 버튼 (오렌지 그라데이션, 더 둥근 모서리)
+ */
+@Composable
+private fun StartTournamentButton(
+    onClick: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(28.dp)
+            )
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        colorScheme.primary, // 오렌지 시작
+                        colorScheme.orangeGradientEnd  // 더 밝은 오렌지 끝
+                    )
+                ),
+                shape = RoundedCornerShape(28.dp)
+            )
+            .clip(RoundedCornerShape(28.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clickable(onClick = onClick),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = null,
+                tint = colorScheme.onPrimary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Start Tournament",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+/**
+ * PreferenceManager에서 최근 선택된 음식을 불러오는 함수입니다.
+ * 기록이 없으면 null을 반환합니다.
+ */
+private fun loadRecentWinner(
+    context: android.content.Context,
+    preferenceManager: PreferenceManager
+): RecentWinner? {
+    val mapSelectedFoods = preferenceManager.getMapSelectedFoods()
+    
+    if (mapSelectedFoods.isEmpty()) {
+        return null
+    }
+    
+    // 가장 최근 기록 가져오기 (날짜 기준 내림차순 정렬)
+    val recentFood = mapSelectedFoods.sortedByDescending { it.selectedDate }.first()
+    
+    // 음식 정보 가져오기
+    val food = FoodRepository.getFoodById(recentFood.foodId)
+    
+    return if (food != null) {
+        // 캐릭터 이미지 경로 찾기
+        val characterImagePath = if (!food.characterImagePath.isNullOrEmpty()) {
+            val pathsToTry = ImageLoader.getCharacterImagePaths(
+                food.characterImagePath,
+                food.name,
+                food.category
+            )
+            // 첫 번째로 찾은 유효한 경로 반환
+            pathsToTry.firstOrNull { path ->
+                try {
+                    val stream = context.assets.open(path)
+                    stream.close()
+                    true
+                } catch (e: Exception) {
+                    false
+                }
+            } ?: food.characterImagePath
+        } else {
+            null
+        }
+        
+        RecentWinner(
+            name = food.name,
+            image = characterImagePath
+        )
+    } else {
+        null
+    }
+}
+
+/**
+ * 최근 우승자 데이터 클래스
+ */
+private data class RecentWinner(
+    val name: String,
+    val image: String?
+)
