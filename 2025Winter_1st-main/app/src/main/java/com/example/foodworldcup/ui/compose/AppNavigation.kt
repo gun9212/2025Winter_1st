@@ -11,12 +11,14 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.animation.core.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -31,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.ui.FoodListActivity
@@ -135,119 +138,146 @@ fun AppNavigation(initialRoute: String? = null) {
                         // spring 애니메이션이 자동으로 처리
                     }
                 }
-                
-                NavigationBarItem(
-                    icon = {
-                        if (isHomeSelected) {
-                            // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .scale(homeScale)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
+                CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                    NavigationBarItem(
+                        icon = {
+                            if (isHomeSelected) {
+                                // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .scale(homeScale)
+                                        .background(
+                                            color = colorScheme.primary,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Home,
+                                        contentDescription = "Home",
+                                        tint = colorScheme.onPrimary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            } else {
                                 Icon(
                                     imageVector = Icons.Default.Home,
                                     contentDescription = "Home",
-                                    tint = colorScheme.onPrimary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-                        } else {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = "Home",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        }
-                    },
-                    label = { Text("Home") },
-                    selected = isHomeSelected,
-                    onClick = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        },
+                        label = { Text("Home") },
+                        selected = isHomeSelected,
+                        onClick = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorScheme.primary,
-                        selectedTextColor = colorScheme.primary,
-                        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                        unselectedIconColor = colorScheme.onSurfaceVariant,
-                        unselectedTextColor = colorScheme.onSurfaceVariant
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = colorScheme.primary,
+                            selectedTextColor = colorScheme.primary,
+                            indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
+                        )
                     )
-                )
-                
-                NavigationBarItem(
-                    icon = {
-                        if (isListSelected) {
-                            // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .scale(listScale)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
+
+                    NavigationBarItem(
+                        icon = {
+                            if (isListSelected) {
+                                // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .scale(listScale)
+                                        .background(
+                                            color = colorScheme.primary,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.List,
+                                        contentDescription = "List",
+                                        tint = colorScheme.onPrimary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            } else {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.List,
                                     contentDescription = "List",
-                                    tint = colorScheme.onPrimary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-                        } else {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.List,
-                            contentDescription = "List",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        }
-                    },
-                    label = { Text("List") },
-                    selected = isListSelected,
-                    onClick = {
-                        navController.navigate(Screen.List.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        },
+                        label = { Text("List") },
+                        selected = isListSelected,
+                        onClick = {
+                            navController.navigate(Screen.List.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorScheme.primary,
-                        selectedTextColor = colorScheme.primary,
-                        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                        unselectedIconColor = colorScheme.onSurfaceVariant,
-                        unselectedTextColor = colorScheme.onSurfaceVariant
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = colorScheme.primary,
+                            selectedTextColor = colorScheme.primary,
+                            indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
+                        )
                     )
-                )
-                
-                NavigationBarItem(
-                    icon = {
-                        if (isSwipeSelected) {
-                            // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .scale(swipeScale)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
+
+                    NavigationBarItem(
+                        icon = {
+                            if (isSwipeSelected) {
+                                // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .scale(swipeScale)
+                                        .background(
+                                            color = colorScheme.primary,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    SubcomposeAsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data("file:///android_asset/marker/swipe_누끼.png")
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = "Swipe",
+                                        modifier = Modifier.size(24.dp),
+                                        colorFilter = ColorFilter.tint(colorScheme.onPrimary),
+                                        loading = {
+                                            Icon(
+                                                imageVector = Icons.Default.Gesture,
+                                                contentDescription = "Swipe",
+                                                modifier = Modifier.size(24.dp),
+                                                tint = colorScheme.onPrimary
+                                            )
+                                        },
+                                        error = {
+                                            Icon(
+                                                imageVector = Icons.Default.Gesture,
+                                                contentDescription = "Swipe",
+                                                modifier = Modifier.size(24.dp),
+                                                tint = colorScheme.onPrimary
+                                            )
+                                        }
+                                    )
+                                }
+                            } else {
                                 SubcomposeAsyncImage(
                                     model = ImageRequest.Builder(context)
                                         .data("file:///android_asset/marker/swipe_누끼.png")
@@ -255,13 +285,13 @@ fun AppNavigation(initialRoute: String? = null) {
                                         .build(),
                                     contentDescription = "Swipe",
                                     modifier = Modifier.size(24.dp),
-                                    colorFilter = ColorFilter.tint(colorScheme.onPrimary),
+                                    colorFilter = ColorFilter.tint(colorScheme.onSurfaceVariant),
                                     loading = {
                                         Icon(
                                             imageVector = Icons.Default.Gesture,
                                             contentDescription = "Swipe",
                                             modifier = Modifier.size(24.dp),
-                                            tint = colorScheme.onPrimary
+                                            tint = colorScheme.onSurfaceVariant
                                         )
                                     },
                                     error = {
@@ -269,157 +299,131 @@ fun AppNavigation(initialRoute: String? = null) {
                                             imageVector = Icons.Default.Gesture,
                                             contentDescription = "Swipe",
                                             modifier = Modifier.size(24.dp),
-                                            tint = colorScheme.onPrimary
+                                            tint = colorScheme.onSurfaceVariant
                                         )
                                     }
                                 )
                             }
-                        } else {
-                            SubcomposeAsyncImage(
-                                model = ImageRequest.Builder(context)
-                                    .data("file:///android_asset/marker/swipe_누끼.png")
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = "Swipe",
-                                modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(colorScheme.onSurfaceVariant),
-                                loading = {
+                        },
+                        label = { Text("Swipe") },
+                        selected = isSwipeSelected,
+                        onClick = {
+                            navController.navigate(Screen.Swipe.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = colorScheme.primary,
+                            selectedTextColor = colorScheme.primary,
+                            indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
+                        )
+                    )
+
+                    NavigationBarItem(
+                        icon = {
+                            if (isMyPageSelected) {
+                                // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .scale(myPageScale)
+                                        .background(
+                                            color = colorScheme.primary,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Icon(
-                                        imageVector = Icons.Default.Gesture,
-                                        contentDescription = "Swipe",
-                                        modifier = Modifier.size(24.dp),
-                                        tint = colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                error = {
-                        Icon(
-                            imageVector = Icons.Default.Gesture,
-                            contentDescription = "Swipe",
-                                        modifier = Modifier.size(24.dp),
-                                        tint = colorScheme.onSurfaceVariant
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "MyPage",
+                                        tint = colorScheme.onPrimary,
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
-                        )
-                        }
-                    },
-                    label = { Text("Swipe") },
-                    selected = isSwipeSelected,
-                    onClick = {
-                        navController.navigate(Screen.Swipe.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorScheme.primary,
-                        selectedTextColor = colorScheme.primary,
-                        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                        unselectedIconColor = colorScheme.onSurfaceVariant,
-                        unselectedTextColor = colorScheme.onSurfaceVariant
-                    )
-                )
-                
-                NavigationBarItem(
-                    icon = {
-                        if (isMyPageSelected) {
-                            // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .scale(myPageScale)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
+                            } else {
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = "MyPage",
-                                    tint = colorScheme.onPrimary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-                        } else {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "MyPage",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        }
-                    },
-                    label = { Text("MyPage") },
-                    selected = isMyPageSelected,
-                    onClick = {
-                        navController.navigate(Screen.MyPage.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        },
+                        label = { Text("MyPage") },
+                        selected = isMyPageSelected,
+                        onClick = {
+                            navController.navigate(Screen.MyPage.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorScheme.primary,
-                        selectedTextColor = colorScheme.primary,
-                        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                        unselectedIconColor = colorScheme.onSurfaceVariant,
-                        unselectedTextColor = colorScheme.onSurfaceVariant
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = colorScheme.primary,
+                            selectedTextColor = colorScheme.primary,
+                            indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
+                        )
                     )
-                )
-                
-                NavigationBarItem(
-                    icon = {
-                        if (isMapSelected) {
-                            // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .scale(mapScale)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
+
+                    NavigationBarItem(
+                        icon = {
+                            if (isMapSelected) {
+                                // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘 + bounce 효과
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .scale(mapScale)
+                                        .background(
+                                            color = colorScheme.primary,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Map,
+                                        contentDescription = "Map",
+                                        tint = colorScheme.onPrimary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            } else {
                                 Icon(
                                     imageVector = Icons.Default.Map,
                                     contentDescription = "Map",
-                                    tint = colorScheme.onPrimary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-                        } else {
-                        Icon(
-                            imageVector = Icons.Default.Map,
-                            contentDescription = "Map",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        }
-                    },
-                    label = { Text("Map") },
-                    selected = isMapSelected,
-                    onClick = {
-                        // MapScreen에서 PreferenceManager에서 직접 불러오므로 네비게이션만 수행
-                        navController.navigate(Screen.Map.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        },
+                        label = { Text("Map") },
+                        selected = isMapSelected,
+                        onClick = {
+                            // MapScreen에서 PreferenceManager에서 직접 불러오므로 네비게이션만 수행
+                            navController.navigate(Screen.Map.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorScheme.primary,
-                        selectedTextColor = colorScheme.primary,
-                        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                        unselectedIconColor = colorScheme.onSurfaceVariant,
-                        unselectedTextColor = colorScheme.onSurfaceVariant
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = colorScheme.primary,
+                            selectedTextColor = colorScheme.primary,
+                            indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
+                        )
                     )
-                )
+                }
             }
         }
     ) { paddingValues ->

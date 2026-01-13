@@ -30,7 +30,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.border
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
@@ -46,6 +48,7 @@ import androidx.core.graphics.createBitmap
 import com.example.foodworldcup.api.Place
 import com.example.foodworldcup.api.MapApiHelper
 import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.data.MapSelectedFood
 import com.example.foodworldcup.utils.BitmapUtils
 import com.example.foodworldcup.utils.KakaoMapHelper
 import com.example.foodworldcup.utils.PreferenceManager
@@ -61,7 +64,9 @@ import kotlinx.coroutines.delay
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun MapScreen() {
+fun MapScreen(
+    onNavigateToMyPage: () -> Unit = {}
+) {
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     val configuration = LocalConfiguration.current
@@ -99,13 +104,13 @@ fun MapScreen() {
     
     // PreferenceManager에서 직접 불러오기
     LaunchedEffect(Unit) {
-            val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
+        val lastSearchFoodIds = preferenceManager.getFinalFoodIds()
         val names = if (lastSearchFoodIds.isNotEmpty()) {
-                lastSearchFoodIds.mapNotNull { id ->
-                    FoodRepository.getFoodById(id)?.name
-                }
-            } else {
-                emptyList()
+            lastSearchFoodIds.mapNotNull { id ->
+                FoodRepository.getFoodById(id)?.name
+            }
+        } else {
+            emptyList()
         }
         foodNames.clear()
         foodNames.addAll(names)
@@ -309,9 +314,12 @@ fun MapScreen() {
     }
     
     // 화면을 반으로 나누기: 위쪽은 지도, 아래쪽은 리스트
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize()
     ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
         // 위쪽 절반: 지도
         Box(
             modifier = Modifier
@@ -430,6 +438,83 @@ fun MapScreen() {
                             color = colorScheme.onSurfaceVariant
                         )
                     }
+                }
+            }
+        }
+    }
+        
+        
+        // 확인 버튼 (독립적으로)
+        if (selectedPlaceIndex >= 0 && selectedPlaceIndex < searchResults.size) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                Button(
+                    onClick = {
+                        // 선택된 Place 가져오기
+                        if (selectedPlaceIndex >= 0 && selectedPlaceIndex < searchResults.size) {
+                            val selectedPlace = searchResults[selectedPlaceIndex]
+                            
+                            // Place의 foodType으로 FoodRepository에서 foodId 찾기
+                            val foodId = selectedPlace.foodType?.let { foodType ->
+                                FoodRepository.getFoodList().find { it.name == foodType }?.id
+                            }
+                            
+                            if (foodId != null) {
+                                // MapSelectedFood 생성
+                                val mapSelectedFood = MapSelectedFood(
+                                    id = System.currentTimeMillis(), // 고유 ID로 현재 시간 사용
+                                    foodId = foodId,
+                                    selectedDate = System.currentTimeMillis(),
+                                    placeName = selectedPlace.place_name ?: "정보 없음",
+                                    placeAddress = selectedPlace.road_address_name ?: selectedPlace.address_name ?: "정보 없음",
+                                    placeId = selectedPlace.id,
+                                    placeUrl = selectedPlace.place_url,
+                                    latitude = selectedPlace.y.toDoubleOrNull(),
+                                    longitude = selectedPlace.x.toDoubleOrNull(),
+                                    memo = ""
+                                )
+                                
+                                // PreferenceManager에 저장
+                                preferenceManager.addMapSelectedFood(mapSelectedFood)
+                                
+                                // MyPageScreen으로 이동
+                                onNavigateToMyPage()
+                            } else {
+                                Toast.makeText(context, "음식 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        
+                        selectedPlaceIndex = -1
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    ),
+                    shape = RoundedCornerShape(30.dp),
+                    modifier = Modifier
+                        .shadow(
+                            elevation = 1.dp,
+                            shape = RoundedCornerShape(30.dp)
+                        )
+                        .background(
+                            color = colorScheme.primary.copy(alpha = 0.85f),
+                            shape = RoundedCornerShape(30.dp)
+                        )
+                        .border(
+                            width = 1.5.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(30.dp)
+                        )
+                ) {
+                    Text(
+                        text = "확인",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp)
+                    )
                 }
             }
         }
@@ -557,10 +642,13 @@ private fun SwipeablePlaceItem(
         label = "swipeOffset"
     )
     
+    // 전화번호가 있으면 높이를 더 크게 설정
+    val cardHeight = if(!place.phone.isNullOrEmpty()) 150.dp else 120.dp
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(cardHeight)
     ) {
         // 스와이프 배경
         Row(
@@ -638,10 +726,14 @@ private fun SwipeablePlaceItem(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(12.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 4.dp)
+                ) {
                     Text(
                         text = place.place_name,
                         fontSize = 18.sp,
@@ -658,24 +750,28 @@ private fun SwipeablePlaceItem(
                         )
                     }
                     
-                    Row(
-                        modifier = Modifier.padding(top = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = place.road_address_name ?: place.address_name ?: "주소 정보 없음",
-                            fontSize = 12.sp,
-                            color = colorScheme.onSurfaceVariant
-                        )
+                    val address = place.road_address_name ?: place.address_name
+                    if (!address.isNullOrEmpty()) {
+                        Row(
+                            modifier = Modifier.padding(top = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = colorScheme.onSurface,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = address,
+                                fontSize = 12.sp,
+                                color = colorScheme.onSurface
+                            )
+                        }
                     }
                     
+                    // 전화번호 표시 (주소 밑에)
                     if (!place.phone.isNullOrEmpty()) {
                         Row(
                             modifier = Modifier.padding(top = 4.dp),
@@ -708,19 +804,6 @@ private fun SwipeablePlaceItem(
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary
                         )
-                    }
-                    
-                    if (place.category_group_code == "FD6") {
-                        Surface(
-                            color = colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = "영업중",
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
                     }
                 }
             }

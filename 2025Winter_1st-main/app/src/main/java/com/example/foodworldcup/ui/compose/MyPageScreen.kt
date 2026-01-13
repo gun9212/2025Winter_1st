@@ -324,7 +324,7 @@ private fun ScaledCharacterImage(
                         targetHeight = targetSizePx,
                         targetAreaRatio = 0.95f, // 접시 크기의 95% 사용 (더 크게)
                         centerYRatio = 0.5f, // 중앙 정렬 (상단 잘림 방지)
-                        alignBottom = false // 중앙 정렬 사용 (상단 잘림 방지)
+                        alignBottom = true // 밑단 정렬 사용 (상단 잘림 방지)
                     )
                     
                     if (scaledBitmap != null) {
@@ -425,13 +425,13 @@ private fun FoodPlateItem(
                     characterImagePath = foodDetail.characterImagePath,
                     food = foodDetail.food,
                     targetSizeDp = 105.dp, // 크기 더 증가 (95.dp -> 105.dp)
-                    offsetY = (-15).dp, // 위치를 더 위로 올림 (-8.dp -> -15.dp)
+                    offsetY = (10).dp, // 위치를 더 위로 올림 (-8.dp -> -15.dp)
                     colorScheme = colorScheme
                 )
             }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         // 음식 이름
         Text(
