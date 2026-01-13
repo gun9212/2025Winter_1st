@@ -32,13 +32,24 @@ class MainActivity : ComponentActivity() {
         // Intent에서 특정 탭으로 이동할지 확인
         val navigateTo = intent.getStringExtra("navigate_to")
         
+        // Intent에서 전달할 음식 ID 리스트 확인
+        val passedFoodIds = intent.getIntegerArrayListExtra("passed_food_ids")
+        
+        // navigateTo에 따라 mapFoodIds 또는 resultFoodIds로 분기
+        val mapFoodIds = if (navigateTo == "map") passedFoodIds?.toList() else null
+        val resultFoodIds = if (navigateTo == "result") passedFoodIds?.toList() else null
+        
         setContent {
             FoodWorldCupTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(initialRoute = navigateTo)
+                    AppNavigation(
+                        initialRoute = navigateTo,
+                        initialMapFoodIds = mapFoodIds,
+                        initialResultFoodIds = resultFoodIds
+                    )
                 }
             }
         }

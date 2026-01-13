@@ -161,4 +161,29 @@ class GameStateManager(initialFoods: List<Food>) {
     fun getTotalCount(): Int {
         return remainingFoods.size + passedFoods.size + rejectedFoods.size
     }
+
+    /**
+     * 저장된 게임 상태로부터 복원합니다.
+     * 
+     * @param remainingFoods 복원할 남은 음식 리스트
+     * @param passedFoods 복원할 합격된 음식 리스트
+     * @param rejectedFoods 복원할 탈락된 음식 리스트
+     */
+    fun restoreState(
+        remainingFoods: List<Food>,
+        passedFoods: List<Food>,
+        rejectedFoods: List<Food>
+    ) {
+        this.remainingFoods.clear()
+        this.remainingFoods.addAll(remainingFoods)
+        
+        this.passedFoods.clear()
+        this.passedFoods.addAll(passedFoods)
+        
+        this.rejectedFoods.clear()
+        this.rejectedFoods.addAll(rejectedFoods)
+        
+        // 히스토리는 복원하지 않음 (복원 시 히스토리는 초기화)
+        this.swipeHistory.clear()
+    }
 }

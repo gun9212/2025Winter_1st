@@ -77,16 +77,23 @@ fun SwipeScreen(
         }
     }
     
-    // GameStateManager 초기화
-    val gameStateManager = remember {
+    // GameStateManager 초기화 (selectedFoods가 변경되면 재초기화)
+    val gameStateManager = remember(selectedFoods) {
         GameStateManager(initialFoods)
     }
     
-    // 남은 음식 리스트 상태
-    var remainingFoods by remember { mutableStateOf(gameStateManager.getRemainingFoods()) }
+    // 남은 음식 리스트 상태 (gameStateManager가 변경되면 업데이트)
+    var remainingFoods by remember(gameStateManager) {
+        mutableStateOf(gameStateManager.getRemainingFoods())
+    }
+    
+    // gameStateManager가 변경될 때 remainingFoods 업데이트
+    LaunchedEffect(gameStateManager) {
+        remainingFoods = gameStateManager.getRemainingFoods()
+    }
     
     // 초기 총 개수
-    val initialTotalCount = remember { initialFoods.size }
+    val initialTotalCount = remember(initialFoods) { initialFoods.size }
     
     // 진행 상황 계산
     val completed = initialTotalCount - remainingFoods.size
@@ -637,7 +644,11 @@ private fun finishGame(
     val intent = Intent(context, ResultActivity::class.java)
     val passedFoodIds = passedFoods.map { it.id }
     intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
+    // MainActivity를 백스택에서 제거하고 ResultActivity 시작
+    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
     context.startActivity(intent)
+    // MainActivity 종료
+    (context as? android.app.Activity)?.finish()
 }
 
 /**
@@ -693,5 +704,9 @@ private fun finishGameWithPassedFoods(
     val intent = Intent(context, ResultActivity::class.java)
     val passedFoodIds = passedFoods.map { it.id }
     intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
+    // MainActivity를 백스택에서 제거하고 ResultActivity 시작
+    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
     context.startActivity(intent)
+    // MainActivity 종료
+    (context as? android.app.Activity)?.finish()
 }
