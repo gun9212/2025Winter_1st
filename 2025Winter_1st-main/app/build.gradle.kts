@@ -114,6 +114,9 @@ dependencies {
     // Coil for Compose (이미지 로딩)
     implementation("io.coil-kt:coil-compose:2.5.0")
     
+    // Navigation Compose
+    implementation(libs.androidx.navigation.compose)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
