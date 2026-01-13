@@ -30,6 +30,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.utils.PreferenceManager
 
 /**
  * 음식 카테고리와 선택된 음식들을 관리하는 데이터 클래스
@@ -50,6 +51,9 @@ fun FoodListScreen(
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     
+    // PreferenceManager 초기화
+    val preferenceManager = remember { PreferenceManager(context) }
+    
     // FoodRepository에서 데이터 가져오기
     val allCategories = remember {
         FoodRepository.getAllCategories().map { categoryName ->
@@ -67,8 +71,34 @@ fun FoodListScreen(
         }
     }
     
-    // 선택된 음식 ID들을 관리하는 상태
-    val selectedFoodIds = remember { mutableStateSetOf<Int>() }
+    // 선택된 음식 ID들을 관리하는 상태 (저장된 선택 불러오기)
+    val selectedFoodIds = remember {
+        mutableStateSetOf<Int>().apply {
+            val savedFoodIds = preferenceManager.getSelectedFoodIds().toMutableSet()
+            
+            // 저장된 선택이 없으면 모든 음식을 기본 선택으로 설정
+            if (savedFoodIds.isEmpty()) {
+                val allFoods = FoodRepository.getFoodList()
+                addAll(allFoods.map { it.id })
+                // 기본 선택을 저장
+                preferenceManager.saveSelectedFoodIds(allFoods.map { it.id })
+            } else {
+                addAll(savedFoodIds)
+            }
+        }
+    }
+    
+    // 선택 저장 함수
+    val saveSelectedFoods: () -> Unit = {
+        preferenceManager.saveSelectedFoodIds(selectedFoodIds.toList())
+    }
+    
+    // 화면이 사라질 때 선택 상태 저장 (이전 코드의 onPause와 동일)
+    DisposableEffect(Unit) {
+        onDispose {
+            preferenceManager.saveSelectedFoodIds(selectedFoodIds.toList())
+        }
+    }
     
     // 카테고리별 펼침 상태 관리 (첫 번째 카테고리는 기본적으로 펼침)
     val expandedCategories = remember {
@@ -145,6 +175,8 @@ fun FoodListScreen(
                                 // 카테고리 전체 해제
                                 selectedFoodIds.removeAll(category.foods.map { it.id })
                             }
+                            // 선택 변경 시 저장
+                            saveSelectedFoods()
                         },
                         onFoodToggle = { foodId, isSelected ->
                             if (isSelected) {
@@ -152,6 +184,8 @@ fun FoodListScreen(
                             } else {
                                 selectedFoodIds.remove(foodId)
                             }
+                            // 선택 변경 시 저장
+                            saveSelectedFoods()
                         }
                     )
                 }
