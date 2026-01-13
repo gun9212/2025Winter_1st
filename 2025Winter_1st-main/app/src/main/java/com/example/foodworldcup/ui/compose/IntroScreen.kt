@@ -29,6 +29,11 @@ import coil.request.ImageRequest
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.utils.ImageLoader
+import com.example.foodworldcup.utils.PreferenceManager
 
 /**
  * Intro 화면의 메인 Composable
@@ -36,11 +41,17 @@ import androidx.compose.ui.draw.clip
 @Composable
 fun IntroScreen(
     onStartTournamentClick: () -> Unit,
-    onRecentWinnerClick: () -> Unit,
-    recentWinnerName: String? = null,
-    recentWinnerImage: String? = null
+    onRecentWinnerClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val preferenceManager = remember { PreferenceManager(context) }
     val colorScheme = MaterialTheme.colorScheme
+    
+    // Recent Winner 데이터 로드
+    val recentWinner = remember {
+        loadRecentWinner(context, preferenceManager)
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,10 +77,10 @@ fun IntroScreen(
         Spacer(modifier = Modifier.height(24.dp))
         
         // Recent Winner 섹션
-        if (recentWinnerName != null) {
+        if (recentWinner != null) {
             YesterdaysWinnerSection(
-                foodName = recentWinnerName,
-                foodImage = recentWinnerImage,
+                foodName = recentWinner.name,
+                foodImage = recentWinner.image,
                 onClick = onRecentWinnerClick
             )
         }
@@ -421,4 +432,61 @@ private fun StartTournamentButton(
     }
 }
 
+/**
+ * PreferenceManager에서 최근 선택된 음식을 불러오는 함수입니다.
+ * 기록이 없으면 null을 반환합니다.
+ */
+private fun loadRecentWinner(
+    context: android.content.Context,
+    preferenceManager: PreferenceManager
+): RecentWinner? {
+    val mapSelectedFoods = preferenceManager.getMapSelectedFoods()
+    
+    if (mapSelectedFoods.isEmpty()) {
+        return null
+    }
+    
+    // 가장 최근 기록 가져오기 (날짜 기준 내림차순 정렬)
+    val recentFood = mapSelectedFoods.sortedByDescending { it.selectedDate }.first()
+    
+    // 음식 정보 가져오기
+    val food = FoodRepository.getFoodById(recentFood.foodId)
+    
+    return if (food != null) {
+        // 캐릭터 이미지 경로 찾기
+        val characterImagePath = if (!food.characterImagePath.isNullOrEmpty()) {
+            val pathsToTry = ImageLoader.getCharacterImagePaths(
+                food.characterImagePath,
+                food.name,
+                food.category
+            )
+            // 첫 번째로 찾은 유효한 경로 반환
+            pathsToTry.firstOrNull { path ->
+                try {
+                    val stream = context.assets.open(path)
+                    stream.close()
+                    true
+                } catch (e: Exception) {
+                    false
+                }
+            } ?: food.characterImagePath
+        } else {
+            null
+        }
+        
+        RecentWinner(
+            name = food.name,
+            image = characterImagePath
+        )
+    } else {
+        null
+    }
+}
 
+/**
+ * 최근 우승자 데이터 클래스
+ */
+private data class RecentWinner(
+    val name: String,
+    val image: String?
+)

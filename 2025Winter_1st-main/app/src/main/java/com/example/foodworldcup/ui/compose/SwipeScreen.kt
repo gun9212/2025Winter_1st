@@ -32,6 +32,7 @@ import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.game.GameStateManager
 import com.example.foodworldcup.ui.ResultActivity
+import com.example.foodworldcup.utils.PreferenceManager
 import android.content.Intent
 import kotlinx.coroutines.launch
 
@@ -55,11 +56,10 @@ private enum class SwipeAction {
  * SwipeScreen - 토너먼트 스와이프 화면
  */
 @Composable
-fun SwipeScreen(
-    selectedFoods: List<Food>? = null
-) {
+fun SwipeScreen() {
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
+    val preferenceManager = remember { PreferenceManager(context) }
     
     // FoodRepository 초기화 확인
     LaunchedEffect(Unit) {
@@ -68,17 +68,20 @@ fun SwipeScreen(
         }
     }
     
-    // 음식 리스트 (선택된 음식이 있으면 사용, 없으면 모든 음식 사용)
-    val initialFoods = remember(selectedFoods) {
-        if (selectedFoods != null && selectedFoods.isNotEmpty()) {
-            selectedFoods.shuffled()
+    // PreferenceManager에서 선택된 음식 ID 불러오기
+    val initialFoods = remember {
+        val selectedFoodIds = preferenceManager.getSelectedFoodIds()
+        if (selectedFoodIds.isNotEmpty()) {
+            selectedFoodIds.mapNotNull { id ->
+                FoodRepository.getFoodById(id)
+            }.shuffled()
         } else {
             FoodRepository.getFoodList().shuffled()
         }
     }
     
-    // GameStateManager 초기화 (selectedFoods가 변경되면 재초기화)
-    val gameStateManager = remember(selectedFoods) {
+    // GameStateManager 초기화
+    val gameStateManager = remember {
         GameStateManager(initialFoods)
     }
     

@@ -13,7 +13,9 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.foodworldcup.data.Food
+import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.utils.PreferenceManager
 
 /**
  * 결과 화면의 네비게이션 탭 (기존 AppNavigation과 동일)
@@ -48,24 +52,54 @@ enum class ResultNavTab {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
-    passedFoods: List<Food>,
     onBackClick: () -> Unit,
     onViewOnMapClick: () -> Unit,
     onRetryClick: () -> Unit,
-    onMyPageClick: () -> Unit,
-    onRemoveFood: (Food) -> Unit
+    onMyPageClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val preferenceManager = remember { PreferenceManager(context) }
     val colorScheme = MaterialTheme.colorScheme
+    
+    // resultFoods를 mutableStateListOf로 관리
+    val resultFoodsList = remember { mutableStateListOf<Food>() }
+    
+    // PreferenceManager에서 직접 불러오기
+    LaunchedEffect(Unit) {
+        val savedFoodIds = preferenceManager.getFinalFoodIds()
+        if (savedFoodIds.isNotEmpty()) {
+            val foods = savedFoodIds.mapNotNull { id ->
+                FoodRepository.getFoodById(id)
+            }
+            resultFoodsList.clear()
+            resultFoodsList.addAll(foods)
+        }
+    }
     
     // 삭제 확인 다이얼로그를 위한 state
     var foodToRemove by remember { mutableStateOf<Food?>(null) }
+    
+    // 음식 제거 핸들러
+    val onRemoveFood: (Food) -> Unit = { food ->
+        resultFoodsList.remove(food)
+        preferenceManager.removeFoodFromFinalFoodIds(food.id)
+    }
+    
+    // View on Map 클릭 핸들러
+    val onViewOnMapClickInternal: () -> Unit = {
+        if (resultFoodsList.isNotEmpty()) {
+            val foodIds = resultFoodsList.map { it.id }
+            preferenceManager.saveFinalFoodIds(foodIds)
+            onViewOnMapClick()
+        }
+    }
     
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Accepted Foods (${passedFoods.size})",
+                        text = "Accepted Foods (${resultFoodsList.size})",
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
@@ -101,7 +135,7 @@ fun ResultScreen(
                     .weight(1f)
                     .padding(top = 16.dp)
             ) {
-                items(passedFoods) { food ->
+                items(resultFoodsList) { food ->
                     FoodGridItem(
                         food = food,
                         onRemoveClick = {
@@ -120,7 +154,7 @@ fun ResultScreen(
             ) {
                 // View on Map 버튼
                 Button(
-                    onClick = onViewOnMapClick,
+                    onClick = onViewOnMapClickInternal,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorScheme.primary
