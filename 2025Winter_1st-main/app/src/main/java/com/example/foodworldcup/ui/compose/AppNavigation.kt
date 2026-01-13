@@ -23,7 +23,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.example.foodworldcup.data.FoodRepository
-import com.example.foodworldcup.ui.FoodListActivity
 import com.example.foodworldcup.ui.MyPageActivity
 import com.example.foodworldcup.utils.ImageLoader
 import com.example.foodworldcup.utils.PreferenceManager
@@ -65,31 +64,11 @@ fun AppNavigation() {
                 
                 NavigationBarItem(
                     icon = {
-                        if (currentDestination?.hierarchy?.any { it.route == Screen.Home.route } == true) {
-                            // 선택된 경우: 오렌지 원형 배경에 흰색 아이콘
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Home,
-                                    contentDescription = "Home",
-                                    tint = colorScheme.onPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Home,
-                                contentDescription = "Home",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home",
+                            modifier = Modifier.size(24.dp)
+                        )
                     },
                     label = { Text("Home") },
                     selected = currentDestination?.hierarchy?.any { it.route == Screen.Home.route } == true,
@@ -233,8 +212,14 @@ fun AppNavigation() {
             composable(Screen.Home.route) {
                 IntroScreen(
                     onStartTournamentClick = {
-                        val intent = Intent(context, FoodListActivity::class.java)
-                        context.startActivity(intent)
+                        // List Tab으로 이동
+                        navController.navigate(Screen.List.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     onRecentWinnerClick = {
                         val intent = Intent(context, MyPageActivity::class.java)
@@ -246,7 +231,13 @@ fun AppNavigation() {
             }
             
             composable(Screen.List.route) {
-                PlaceholderScreen("List")
+                FoodListScreen(
+                    onStartGameClick = { selectedFoods ->
+                        // TODO: 게임 화면으로 이동하는 로직 구현
+                        // val intent = Intent(context, GameActivity::class.java)
+                        // context.startActivity(intent)
+                    }
+                )
             }
             
             composable(Screen.Swipe.route) {
@@ -254,7 +245,7 @@ fun AppNavigation() {
             }
             
             composable(Screen.MyPage.route) {
-                PlaceholderScreen("MyPage")
+                MyPageScreen()
             }
             
             composable(Screen.Map.route) {
