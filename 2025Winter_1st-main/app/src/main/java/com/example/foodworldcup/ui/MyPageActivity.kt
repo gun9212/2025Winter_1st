@@ -15,8 +15,7 @@ import com.example.foodworldcup.ui.adapter.PlateAdapter
 import com.example.foodworldcup.utils.DateFormatter
 import com.example.foodworldcup.utils.KakaoMapHelper
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import android.content.Intent
-import android.net.Uri
+
 /**
  * 마이페이지를 담당하는 Activity입니다. 지도에서 선택한 음식들을 접시 위에 표시합니다.
  *
@@ -145,19 +144,6 @@ class MyPageActivity : BaseActivity() {
 
     /** 카카오맵에서 상세 정보 보기 (리뷰, 사진 등 확인 가능) KakaoMapHelper 유틸리티를 사용합니다. */
     private fun openPlaceDetail(selectedFood: MapSelectedFood) {
-        android.util.Log.d("MyPageActivity", "Selected Food: ${selectedFood.placeId}")
-        if (!selectedFood.placeUrl.isNullOrBlank()) {
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(selectedFood.placeUrl))
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                    return
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MapActivity", "카카오맵 웹 URL 열기 실패: ${e.message}")
-            }
-        }
-
         KakaoMapHelper.openKakaoMapDetail(this, selectedFood)
     }
 
