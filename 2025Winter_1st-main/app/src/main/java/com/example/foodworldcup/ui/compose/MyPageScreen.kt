@@ -468,24 +468,25 @@ private fun FoodPlateItem(
             }
         }
         
-        Spacer(modifier = Modifier.height(4.dp))
         
         // 음식 이름
         Text(
             text = foodDetail.food.name,
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = colorScheme.onBackground,
-            maxLines = 1
+            maxLines = 1,
+            modifier = Modifier.offset(y = (-20).dp)
         )
         
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(-8.dp))
         
         // 날짜
         Text(
             text = DateFormatter.dateFormatShort.format(Date(foodDetail.mapSelectedFood.selectedDate)),
             fontSize = 12.sp,
-            color = colorScheme.onSurfaceVariant
+            color = colorScheme.onSurfaceVariant,
+            modifier = Modifier.offset(y = (-12).dp)
         )
     }
 }
