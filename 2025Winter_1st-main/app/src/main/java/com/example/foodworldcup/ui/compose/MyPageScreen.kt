@@ -56,6 +56,10 @@ fun MyPageScreen() {
     var selectedFoodDetail by remember { mutableStateOf<FoodDetailItem?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
     
+    // 삭제 확인 다이얼로그 상태
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var foodToDelete by remember { mutableStateOf<FoodDetailItem?>(null) }
+    
     // 초기 데이터 로드
     LaunchedEffect(Unit) {
         val foods = preferenceManager.getMapSelectedFoods()
@@ -138,11 +142,9 @@ fun MyPageScreen() {
             foodDetail = selectedFoodDetail!!,
             preferenceManager = preferenceManager,
             onDismiss = { showBottomSheet = false },
-            onDelete = { deletedId ->
-                preferenceManager.removeMapSelectedFood(deletedId)
-                mapSelectedFoods.removeAll { it.id == deletedId }
-                selectedFoodDetails.remove(deletedId)
-                showBottomSheet = false
+            onDelete = { foodDetail ->
+                foodToDelete = foodDetail
+                showDeleteDialog = true
             },
             onMemoUpdate = { updatedId ->
                 // 메모 업데이트 후 리스트 새로고침
@@ -181,6 +183,27 @@ fun MyPageScreen() {
                         }
                     }
                 }
+            }
+        )
+    }
+    
+    // 삭제 확인 다이얼로그
+    if (showDeleteDialog && foodToDelete != null) {
+        DeleteConfirmDialog(
+            showDialog = showDeleteDialog,
+            foodName = foodToDelete!!.food.name,
+            onConfirm = {
+                val deletedId = foodToDelete!!.mapSelectedFood.id
+                preferenceManager.removeMapSelectedFood(deletedId)
+                mapSelectedFoods.removeAll { it.id == deletedId }
+                selectedFoodDetails.remove(deletedId)
+                showBottomSheet = false
+                showDeleteDialog = false
+                foodToDelete = null
+            },
+            onDismiss = {
+                showDeleteDialog = false
+                foodToDelete = null
             }
         )
     }
@@ -504,7 +527,7 @@ private fun FoodDetailBottomSheet(
     foodDetail: FoodDetailItem,
     preferenceManager: PreferenceManager,
     onDismiss: () -> Unit,
-    onDelete: (Long) -> Unit,
+    onDelete: (FoodDetailItem) -> Unit,
     onMemoUpdate: (Long) -> Unit
 ) {
     val context = LocalContext.current
@@ -635,7 +658,7 @@ private fun FoodDetailBottomSheet(
                 // 삭제 버튼
                 OutlinedButton(
                     onClick = {
-                        onDelete(foodDetail.mapSelectedFood.id)
+                        onDelete(foodDetail)
                     },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -663,6 +686,8 @@ private fun FoodDetailBottomSheet(
                         // 토스트 메시지 표시
                         Toast.makeText(context, "저장되었습니다.", Toast.LENGTH_SHORT).show()
                         onMemoUpdate(foodDetail.mapSelectedFood.id)
+                        // BottomSheet 닫기
+                        onDismiss()
                     },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
@@ -681,5 +706,50 @@ private fun FoodDetailBottomSheet(
             
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+
+/**
+ * 삭제 확인 다이얼로그
+ */
+@Composable
+private fun DeleteConfirmDialog(
+    showDialog: Boolean,
+    foodName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text("음식 삭제")
+            },
+            text = {
+                Text("'${foodName}'을(를) 정말 삭제하시겠습니까?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onConfirm,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = colorScheme.onPrimary
+                    )
+                ) {
+                    Text("삭제")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = colorScheme.onPrimary
+                    )
+                ) {
+                    Text("취소")
+                }
+            }
+        )
     }
 }
