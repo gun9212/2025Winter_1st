@@ -44,6 +44,7 @@ import com.example.foodworldcup.utils.BitmapUtils
 import com.example.foodworldcup.utils.ImageLoader
 import com.example.foodworldcup.utils.PreferenceManager
 import com.example.foodworldcup.R
+import com.example.foodworldcup.ui.compose.AppColors
 
 /**
  * Intro 화면의 메인 Composable
@@ -141,17 +142,19 @@ private fun MainTitleSection() {
     val colorScheme = MaterialTheme.colorScheme
     val context = LocalContext.current
     
-    // 이미지 크기 설정 (더 크게)
-    val imageSizeDp = 200.dp
+    // 이미지 크기 설정 (작게 조정)
+    val imageSizeDp = 120.dp
     
-    // 메추리_누끼.png 이미지 로드
+    // 메추리_누끼.png 이미지 로드 (메추리_누끼2.png가 없으므로 기존 파일 사용)
     val characterBitmap = remember {
         try {
             val assetStream = context.assets.open("메추리_누끼.png")
             val bitmap = BitmapFactory.decodeStream(assetStream)
             assetStream.close()
+            android.util.Log.d("IntroScreen", "메추리_누끼.png 로드 성공")
             bitmap
         } catch (e: Exception) {
+            android.util.Log.e("IntroScreen", "이미지 로드 실패: 메추리_누끼.png - ${e.message}")
             null
         }
     }
@@ -172,7 +175,7 @@ private fun MainTitleSection() {
                 contentDescription = "메추리 캐릭터",
                 modifier = Modifier
                     .size(imageSizeDp)
-                    .offset(x = (-16).dp)
+                    .offset(x = (-6).dp)
                     .padding(end = 8.dp)
             )
         } else {
@@ -195,30 +198,34 @@ private fun MainTitleSection() {
         
         // 오른쪽: 텍스트
         Column(
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .weight(1f)
         ) {
             // 첫 번째 줄: "메추리알!"
             Text(
                 text = "메추리알!",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = AppColors.DarkBrown
+                color = AppColors.DarkBrown,
+                lineHeight = 52.sp
             )
             
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             
             // 두 번째 줄: "메뉴는 추려서 우리가 알려줄게!" (하이라이트 적용)
             Text(
                 text = buildAnnotatedString {
-                    val fullText = "메뉴는 추려서 우리가 알려줄게!"
+                    val fullText = "메뉴는 추려서\n우리가 알려줄게!"
                     // 하이라이트할 글자의 인덱스 (0부터 시작)
-                    val highlightIndices = setOf(0, 2, 4, 9, 12) // "메", "추", "리", "가", "알"
+                    val highlightIndices = setOf(0, 4, 9, 12) // "메", "추", "리", "가", "알"
                     
                     fullText.forEachIndexed { index, char ->
                         if (highlightIndices.contains(index)) {
                             withStyle(
                                 style = SpanStyle(
-                                    color = AppColors.LightBrown
+                                    color = colorScheme.onPrimary,
+                                    fontSize = 26.sp
                                 )
                             ) {
                                 append(char)
@@ -229,7 +236,9 @@ private fun MainTitleSection() {
                     }
                 },
                 fontSize = 18.sp,
-                color = Color.Black
+                color = colorScheme.primary,
+                lineHeight = 28.sp,
+                softWrap = false
             )
         }
     }
