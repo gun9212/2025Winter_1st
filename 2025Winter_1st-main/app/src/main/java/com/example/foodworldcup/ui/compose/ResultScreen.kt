@@ -102,7 +102,7 @@ fun ResultScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Accepted Foods (${resultFoodsList.size})",
+                        text = "추린 메뉴들 (${resultFoodsList.size})",
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
@@ -123,7 +123,7 @@ fun ResultScreen(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = "뒤로가기",
                             tint = Color.Black
                         )
                     }
@@ -184,8 +184,8 @@ fun ResultScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "View on Map",
-                        color = Color.White,
+                        text = "지도에서 식당 확인하기",
+                        color = colorScheme.onPrimary,
                         fontWeight = FontWeight.Medium
                     )
                 }
