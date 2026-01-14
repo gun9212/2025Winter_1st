@@ -4,8 +4,8 @@
 .gradle/
 build/
 app/build/
-*.apk
 *.aab
+*.ap_
 *.dex
 *.class
 bin/
