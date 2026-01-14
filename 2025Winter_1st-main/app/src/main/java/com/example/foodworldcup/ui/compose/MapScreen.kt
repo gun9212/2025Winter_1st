@@ -349,7 +349,7 @@ fun MapScreen(
                     .align(Alignment.BottomEnd)
                     .padding(32.dp),
                 containerColor = colorScheme.surface,
-                contentColor = colorScheme.primary
+                contentColor = colorScheme.onPrimary
             ) {
                 Icon(
                     imageVector = Icons.Default.MyLocation,
@@ -690,9 +690,9 @@ private fun PlaceHeader(foodType: String) {
             // 텍스트
             Text(
                 text = foodType,
-                fontSize = 16.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = colorScheme.primary
+                color = colorScheme.onPrimary
             )
         }
     }
@@ -723,45 +723,56 @@ private fun SwipeablePlaceItem(
             .height(cardHeight)
     ) {
         // 스와이프 배경
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(12.dp))
         ) {
-            // 왼쪽 배경 (길찾기)
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .background(colorScheme.secondary)
-                    .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Navigation,
-                    contentDescription = "길찾기",
-                    tint = Color.White,
+            // 왼쪽 배경 (길찾기) - 왼쪽 스와이프 시만 표시
+            if (offsetXAnimated >= 0f) {
+                Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .padding(start = 16.dp)
-                )
+                        .fillMaxSize()
+                        .background(colorScheme.secondary)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Row(
+                        modifier = Modifier.padding(start = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Navigation,
+                            contentDescription = "길찾기",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Text(
+                            text = "길찾기",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
             
-            // 오른쪽 배경 (상세정보)
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .background(colorScheme.primary)
-                    .clip(RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Text(
-                    text = "상세정보",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(end = 16.dp)
-                )
+            // 오른쪽 배경 (상세정보) - 오른쪽 스와이프 시만 표시
+            if (offsetXAnimated <= 0f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(colorScheme.primary)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(
+                        text = "상세정보",
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
             }
         }
         
