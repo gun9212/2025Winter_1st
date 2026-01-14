@@ -482,7 +482,17 @@ fun AppNavigation(initialRoute: String? = null) {
             }
             
             composable(Screen.Map.route) {
-                MapScreen()
+                MapScreen(
+                    onNavigateToMyPage = {
+                        navController.navigate(Screen.MyPage.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             
             composable(Screen.Result.route) {
