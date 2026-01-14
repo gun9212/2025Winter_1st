@@ -1,5 +1,6 @@
 package com.example.foodworldcup.ui.compose
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -287,16 +288,20 @@ private fun ScaledCharacterImage(
     val context = LocalContext.current
     val density = LocalDensity.current
     
+    // Box 높이 = targetSizeDp + 상단 여유 공간 (포케 상단 잘림 방지)
+    val boxHeightDp = targetSizeDp + 30.dp
+    
     // 스케일링된 이미지 상태
-    var scaledImageBitmap by remember(characterImagePath) { mutableStateOf<ImageBitmap?>(null) }
-    var isLoading by remember(characterImagePath) { mutableStateOf(true) }
-    var hasError by remember(characterImagePath) { mutableStateOf(false) }
+    var scaledImageBitmap by remember(characterImagePath, targetSizeDp) { mutableStateOf<ImageBitmap?>(null) }
+    var isLoading by remember(characterImagePath, targetSizeDp) { mutableStateOf(true) }
+    var hasError by remember(characterImagePath, targetSizeDp) { mutableStateOf(false) }
     
     // dp를 픽셀로 변환 (코루틴 외부에서)
     val targetSizePx = with(density) { targetSizeDp.toPx().toInt() }
+    val boxHeightPx = with(density) { boxHeightDp.toPx().toInt() }
     
     // 이미지 로드 및 스케일링
-    LaunchedEffect(characterImagePath) {
+    LaunchedEffect(characterImagePath, targetSizePx, boxHeightPx) {
         isLoading = true
         hasError = false
         scaledImageBitmap = null
@@ -317,14 +322,15 @@ private fun ScaledCharacterImage(
                 }
                 
                 if (originalBitmap != null) {
-                    // BitmapUtils를 사용하여 스케일링 (크기 증가 및 중앙 정렬로 상단 잘림 방지)
+                    // BitmapUtils를 사용하여 스케일링 (하단 정렬, 상단 여유 확보)
+                    // Box 높이(boxHeightPx)에 맞춰서 스케일링하여 상단 여유 공간 활용
                     val scaledBitmap = BitmapUtils.scaleBitmapToFitContent(
                         originalBitmap = originalBitmap,
                         targetWidth = targetSizePx,
-                        targetHeight = targetSizePx,
-                        targetAreaRatio = 0.95f, // 접시 크기의 95% 사용 (더 크게)
-                        centerYRatio = 0.5f, // 중앙 정렬 (상단 잘림 방지)
-                        alignBottom = true // 밑단 정렬 사용 (상단 잘림 방지)
+                        targetHeight = boxHeightPx, // Box 높이에 맞춰서 스케일링
+                        targetAreaRatio = 0.75f,
+                        centerYRatio = 0.68f,
+                        alignBottom = true
                     )
                     
                     if (scaledBitmap != null) {
@@ -355,7 +361,8 @@ private fun ScaledCharacterImage(
     
     Box(
         modifier = Modifier
-            .size(targetSizeDp)
+            .width(targetSizeDp)
+            .height(boxHeightDp) // 상단 여유 공간 포함 (targetSizeDp + 30.dp)
             .offset(x = 0.dp, y = offsetY),
         contentAlignment = Alignment.Center
     ) {
@@ -390,6 +397,7 @@ private fun ScaledCharacterImage(
 /**
  * 음식 접시 아이템
  */
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 private fun FoodPlateItem(
     foodDetail: FoodDetailItem,
@@ -404,11 +412,15 @@ private fun FoodPlateItem(
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 접시 배경과 캐릭터 이미지
-        Box(
-            modifier = Modifier.size(140.dp),
+        // 접시 배경과 캐릭터 이미지 (동적 크기)
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f), // 1:1 정사각형 비율
             contentAlignment = Alignment.Center
         ) {
+            val plateSize = maxWidth // 접시 크기 (동적)
+            
             // 접시 배경 이미지
             SubcomposeAsyncImage(
                 model = ImageRequest.Builder(context)
@@ -419,13 +431,13 @@ private fun FoodPlateItem(
                 modifier = Modifier.fillMaxSize()
             )
             
-            // 캐릭터 누끼 이미지 (BitmapUtils를 사용하여 일정한 크기로 스케일링)
+            // 캐릭터 누끼 이미지 (접시 크기의 75%)
             if (foodDetail.characterImagePath != null) {
                 ScaledCharacterImage(
                     characterImagePath = foodDetail.characterImagePath,
                     food = foodDetail.food,
-                    targetSizeDp = 105.dp, // 크기 더 증가 (95.dp -> 105.dp)
-                    offsetY = (10).dp, // 위치를 더 위로 올림 (-8.dp -> -15.dp)
+                    targetSizeDp = plateSize * 0.75f, // 접시 크기의 75%
+                    offsetY = (-15).dp, // 하단 정렬을 위한 오프셋
                     colorScheme = colorScheme
                 )
             }
