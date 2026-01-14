@@ -41,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
 import android.net.Uri
 import android.content.Intent
 import androidx.core.content.ContextCompat
@@ -317,14 +319,15 @@ fun MapScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        Column(
+        Box(
             modifier = Modifier.fillMaxSize()
         ) {
         // 위쪽 절반: 지도
         Box(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
+                .fillMaxHeight(0.56f)
+                .align(Alignment.TopCenter)
         ) {
             AndroidView(
                 factory = { ctx ->
@@ -344,7 +347,7 @@ fun MapScreen(
                 onClick = { moveToMyLocation() },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(16.dp),
+                    .padding(32.dp),
                 containerColor = colorScheme.surface,
                 contentColor = colorScheme.primary
             ) {
@@ -377,9 +380,16 @@ fun MapScreen(
         // 아래쪽 절반: 리스트
         Box(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
-                .background(colorScheme.surface)
+                .fillMaxHeight(0.47f)
+                .align(Alignment.BottomCenter)
+                .shadow(
+                    elevation = 3.dp,
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                )
+                .background(color = colorScheme.surface,
+                            shape=RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+
         ) {
             if (searchResults.isNotEmpty()) {
                 PlaceListContent(
@@ -405,14 +415,6 @@ fun MapScreen(
                     },
                     listState = listState,
                     onSwipeLeft = { place ->
-                        // 왼쪽 스와이프: 길찾기
-                        val lat = place.y.toDoubleOrNull()
-                        val lng = place.x.toDoubleOrNull()
-                        if (lat != null && lng != null) {
-                            openNavigation(context, lat, lng, place.place_name)
-                        }
-                    },
-                    onSwipeRight = { place ->
                         // 오른쪽 스와이프: 상세정보
                         val lat = place.y.toDoubleOrNull()
                         val lng = place.x.toDoubleOrNull()
@@ -423,7 +425,16 @@ fun MapScreen(
                             longitude = lng,
                             placeName = place.place_name
                         )
+                    },
+                    onSwipeRight = { place ->
+                        // 왼쪽 스와이프: 길찾기
+                        val lat = place.y.toDoubleOrNull()
+                        val lng = place.x.toDoubleOrNull()
+                        if (lat != null && lng != null) {
+                            openNavigation(context, lat, lng, place.place_name)
+                        }
                     }
+                    
                 )
             } else {
                 Box(
@@ -534,7 +545,6 @@ private fun PlaceListContent(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val density = LocalDensity.current
-    var lastFoodType by remember { mutableStateOf<String?>(null) }
     
     // 실제 item index를 계산하는 함수
     fun calculateItemIndex(placeIndex: Int): Int {
@@ -569,10 +579,15 @@ private fun PlaceListContent(
                 val stickyHeaderHeightDp = 52.dp
                 val stickyHeaderHeightPx = with(density) { stickyHeaderHeightDp.toPx().toInt() }
                 
-                listState.animateScrollToItem(
-                    index = itemIndex,
-                    scrollOffset = -stickyHeaderHeightPx
-                )
+                // 음식이 한 개일 때는 스크롤하지 않음 (sticky header가 이미 보이므로)
+                val shouldScroll = places.size > 1
+                android.util.Log.d("오류 확인", "shouldScroll: $shouldScroll")
+                if (shouldScroll) {
+                    listState.animateScrollToItem(
+                        index = itemIndex,
+                        scrollOffset = -stickyHeaderHeightPx
+                    )
+                }
             }
         }
     }
@@ -580,13 +595,16 @@ private fun PlaceListContent(
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+        contentPadding = PaddingValues(top = 0.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // lastFoodType을 로컬 변수로 관리하여 매번 초기화
+        var currentLastFoodType: String? = null
+        
         places.forEachIndexed { index, place ->
             // 음식 종류 헤더 (sticky header)
-            if (place.foodType != lastFoodType) {
-                lastFoodType = place.foodType
+            if (place.foodType != currentLastFoodType) {
+                currentLastFoodType = place.foodType
                 stickyHeader {
                     PlaceHeader(foodType = place.foodType ?: "기타")
                 }
@@ -594,13 +612,15 @@ private fun PlaceListContent(
             
             // Place 아이템
             item {
-                SwipeablePlaceItem(
-                    place = place,
-                    isSelected = index == selectedIndex,
-                    onClick = { onPlaceClick(place, index) },
-                    onSwipeLeft = { onSwipeLeft(place) },
-                    onSwipeRight = { onSwipeRight(place) }
-                )
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    SwipeablePlaceItem(
+                        place = place,
+                        isSelected = index == selectedIndex,
+                        onClick = { onPlaceClick(place, index) },
+                        onSwipeLeft = { onSwipeLeft(place) },
+                        onSwipeRight = { onSwipeRight(place) }
+                    )
+                }
             }
         }
     }
@@ -608,21 +628,73 @@ private fun PlaceListContent(
 
 @Composable
 private fun PlaceHeader(foodType: String) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
     val colorScheme = MaterialTheme.colorScheme
+    
+    // 목표 크기 (32.dp)
+    val targetSizeDp = 32.dp
+    val targetSizePx = with(density) { targetSizeDp.toPx().toInt() }
+    
+    // 캐릭터 이미지 로드 및 스케일링
+    val scaledCharacterBitmap = remember(foodType, targetSizePx) {
+        val assetPath = findAssetPath(context, foodType)
+        if (assetPath != null) {
+            try {
+                val assetStream = context.assets.open(assetPath)
+                val originalBitmap = BitmapFactory.decodeStream(assetStream)
+                assetStream.close()
+                
+                if (originalBitmap != null) {
+                    // BitmapUtils를 사용하여 크기 통일
+                    BitmapUtils.scaleBitmapToFitContent(
+                        originalBitmap = originalBitmap,
+                        targetWidth = targetSizePx,
+                        targetHeight = targetSizePx,
+                        targetAreaRatio = 0.9f,
+                        centerYRatio = 0.5f,
+                        alignBottom = false
+                    )
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
     
     Surface(
         color = colorScheme.surface,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape=RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
-        Text(
-            text = foodType,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 4.dp)
-        )
+                .padding(vertical = 16.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 캐릭터 이미지
+            if (scaledCharacterBitmap != null) {
+                Image(
+                    bitmap = scaledCharacterBitmap.asImageBitmap(),
+                    contentDescription = foodType,
+                    modifier = Modifier.size(targetSizeDp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            
+            // 텍스트
+            Text(
+                text = foodType,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary
+            )
+        }
     }
 }
 
@@ -698,6 +770,10 @@ private fun SwipeablePlaceItem(
             modifier = Modifier
                 .fillMaxSize()
                 .offset(x = offsetXAnimated.dp)
+                .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(12.dp)
+                )
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onDragEnd = {
@@ -716,8 +792,8 @@ private fun SwipeablePlaceItem(
                     ) { _, dragAmount ->
                         offsetX = (offsetX + dragAmount * 0.5f).coerceIn(-400f, 400f)
                     }
-                }
-                .clickable { onClick() },
+                },
+            onClick = onClick,
             colors = CardDefaults.cardColors(
                 containerColor = if (isSelected) colorScheme.surface else colorScheme.surfaceVariant
             ),
@@ -742,8 +818,9 @@ private fun SwipeablePlaceItem(
                     )
                     
                     if (!place.category_name.isNullOrEmpty()) {
+                        val categoryText = place.category_name.removePrefix("음식점 >")
                         Text(
-                            text = place.category_name,
+                            text = categoryText,
                             fontSize = 14.sp,
                             color = colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp)
@@ -1325,7 +1402,7 @@ private fun searchRestaurants(
     
     // 각 음식별로 검색
     foodNames.forEach { foodName ->
-        val searchQuery = "$foodName 음식점"
+        val searchQuery = "$foodName"
         mapApiHelper.searchPlaces(
             query = searchQuery,
             foodType = foodName,
@@ -1345,6 +1422,7 @@ private fun searchRestaurants(
                     )
                     
                     // 중복 방지: 이미 같은 id가 있는지 확인
+                    android.util.Log.d("오류 확인", "place: ${place.place_name}")
                     if (place.id != null && !searchResults.any { it.id == place.id }) {
                         searchResults.add(place)
                     } else if (place.id == null &&
