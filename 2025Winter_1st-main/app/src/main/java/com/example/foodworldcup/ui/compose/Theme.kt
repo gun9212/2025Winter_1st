@@ -17,7 +17,7 @@ import com.example.foodworldcup.R
  * ColorScheme 확장 속성 - 추가 색상에 접근하기 위한 헬퍼
  */
 val ColorScheme.orangeGradientEnd: Color
-    get() = AppColors.OrangeGradientEnd
+    get() = AppColors.LightBrown
 
 /**
  * 카페24 써라운드 체 폰트 패밀리
@@ -54,10 +54,10 @@ private val AppTypography = Typography(
  * Light Color Scheme - 앱의 기본 테마
  */
 private val LightColorScheme = lightColorScheme(
-    primary = AppColors.PrimaryOrange,
-    onPrimary = AppColors.White,
-    primaryContainer = AppColors.PrimaryOrange.copy(alpha = 0.2f),
-    onPrimaryContainer = AppColors.PrimaryOrange,
+    primary = AppColors.LightBrown,
+    onPrimary = AppColors.DarkBrown,
+    primaryContainer = AppColors.LightBrown.copy(alpha = 0.2f),
+    onPrimaryContainer = AppColors.LightBrown,
     
     secondary = AppColors.Gray,
     onSecondary = AppColors.White,
@@ -85,10 +85,10 @@ private val LightColorScheme = lightColorScheme(
     
     inverseSurface = AppColors.TextBlack,
     inverseOnSurface = AppColors.White,
-    inversePrimary = AppColors.PrimaryOrange.copy(alpha = 0.8f),
+    inversePrimary = AppColors.LightBrown.copy(alpha = 0.8f),
     
     scrim = Color.Black,
-    surfaceTint = AppColors.PrimaryOrange
+    surfaceTint = AppColors.LightBrown
 )
 
 /**
