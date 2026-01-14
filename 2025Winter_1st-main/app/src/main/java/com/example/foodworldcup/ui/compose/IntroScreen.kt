@@ -176,7 +176,7 @@ private fun MainTitleSection() {
                 modifier = Modifier
                     .size(imageSizeDp)
                     .offset(x = (-6).dp)
-                    .padding(end = 8.dp)
+                    .padding(end = 18.dp)
             )
         } else {
             // 이미지 로드 실패 시 플레이스홀더
@@ -263,7 +263,7 @@ private fun HowItWorksSection() {
         HowItWorksCard(
             icon = Icons.AutoMirrored.Filled.List,
             title = "추릴 메뉴를 골라주세요!",
-            description = "아래 메뉴 추리기 버튼을 눌러\n후보군을 추려주세요",
+            description = "아래 추릴 메뉴 고르기 버튼을 눌러\n후보군을 추려주세요",
             modifier = Modifier.padding(bottom = 10.dp)
         )
         
@@ -341,7 +341,7 @@ private fun HowItWorksCard(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = colorScheme.onBackground,
-                    lineHeight = 12.sp
+                    lineHeight = 16.sp
                 )
                 //Spacer(modifier = Modifier.height(1.dp))
                 Text(
@@ -514,7 +514,7 @@ private fun StartTournamentButton(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "메뉴 추리기!",
+                text = "추릴 메뉴 고르기!",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onPrimary

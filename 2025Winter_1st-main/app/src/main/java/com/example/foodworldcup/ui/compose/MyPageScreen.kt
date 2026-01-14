@@ -254,7 +254,7 @@ private fun ProfileHeaderSection(
                     text = "$totalCount 개 음식들이 \n명예의 전당에 올랐어요!",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = colorScheme.primary,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
@@ -263,14 +263,14 @@ private fun ProfileHeaderSection(
             Text(
                 text = "•",
                 fontSize = 14.sp,
-                color = colorScheme.onSurfaceVariant
+                color = colorScheme.primary
             )
             
             // 마지막 플레이 시간
             Text(
                 text = lastPlayedText,
                 fontSize = 14.sp,
-                color = colorScheme.onSurfaceVariant
+                color = colorScheme.primary
             )
         }
     }
