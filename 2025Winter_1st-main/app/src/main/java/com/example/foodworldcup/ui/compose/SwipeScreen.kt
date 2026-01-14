@@ -3,6 +3,7 @@ package com.example.foodworldcup.ui.compose
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -75,7 +76,14 @@ fun SwipeScreen() {
     val initialFoods = remember {
         val selectedFoodIds = preferenceManager.getSelectedFoodIds()
         if (selectedFoodIds.isNotEmpty()) {
-            selectedFoodIds.mapNotNull { id ->
+            // 17개 이상이면 16개만 랜덤으로 선택
+            val foodIdsToUse = if (selectedFoodIds.size >= 17) {
+                selectedFoodIds.shuffled().take(16)
+            } else {
+                selectedFoodIds
+            }
+            // Food 객체로 변환 후 섞기
+            foodIdsToUse.mapNotNull { id ->
                 FoodRepository.getFoodById(id)
             }.shuffled()
         } else {
@@ -346,9 +354,13 @@ private fun SwipeableCard(
                     isSwipedOut = true
                     // 즉시 콜백 호출하여 다음 카드 활성화
                     onSwipeLeft()
-                    // 애니메이션은 백그라운드에서 계속 진행
-                    offsetX.animateTo(-screenWidth * 1.5f, spring())
-                    rotation.animateTo(-30f, spring())
+                    // 애니메이션은 백그라운드에서 계속 진행 (느린 속도로)
+                    val slowSpring = spring<Float>(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                    offsetX.animateTo(-screenWidth * 1.5f, slowSpring)
+                    rotation.animateTo(-30f, slowSpring)
                 }
                 SwipeAction.Like -> {
                     // 오른쪽으로 스와이프
@@ -356,9 +368,13 @@ private fun SwipeableCard(
                     isSwipedOut = true
                     // 즉시 콜백 호출하여 다음 카드 활성화
                     onSwipeRight()
-                    // 애니메이션은 백그라운드에서 계속 진행
-                    offsetX.animateTo(screenWidth * 1.5f, spring())
-                    rotation.animateTo(30f, spring())
+                    // 애니메이션은 백그라운드에서 계속 진행 (느린 속도로)
+                    val slowSpring = spring<Float>(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                    offsetX.animateTo(screenWidth * 1.5f, slowSpring)
+                    rotation.animateTo(30f, slowSpring)
                 }
             }
         }
@@ -383,23 +399,31 @@ private fun SwipeableCard(
                                 isSwipedOut = true
                                 // 즉시 콜백 호출하여 다음 카드 활성화
                                 onSwipeRight()
-                                // 애니메이션은 백그라운드에서 계속 진행
-                                offsetX.animateTo(size.width * 1.5f, spring())
-                                rotation.animateTo(30f, spring())
+                                // 애니메이션은 백그라운드에서 계속 진행 (느린 속도로)
+                                val slowSpring = spring<Float>(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                                offsetX.animateTo(size.width * 1.5f, slowSpring)
+                                rotation.animateTo(30f, slowSpring)
                             } else if (offsetX.value < -threshold) {
                                 // 왼쪽으로 충분히 스와이프 - Pass
                                 swipeDirection = SwipeDirection.Pass
                                 isSwipedOut = true
                                 // 즉시 콜백 호출하여 다음 카드 활성화
                                 onSwipeLeft()
-                                // 애니메이션은 백그라운드에서 계속 진행
-                                offsetX.animateTo(-size.width * 1.5f, spring())
-                                rotation.animateTo(-30f, spring())
+                                // 애니메이션은 백그라운드에서 계속 진행 (느린 속도로)
+                                val slowSpring = spring<Float>(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                                offsetX.animateTo(-size.width * 1.5f, slowSpring)
+                                rotation.animateTo(-30f, slowSpring)
                             } else {
                                 // 원래 위치로 복귀 (한 번에 정위치로 이동)
                                 // 즉시 swipeDirection을 null로 설정하여 Like/Nope 표시 제거
                                 swipeDirection = null
-                                val animationSpec = tween<Float>(durationMillis = 300) // 부드럽게 한 번에 이동
+                                val animationSpec = tween<Float>(durationMillis = 400) // 부드럽게 한 번에 이동 (느리게)
                                 awaitAll(
                                     async { offsetX.animateTo(0f, animationSpec) },
                                     async { offsetY.animateTo(0f, animationSpec) },
@@ -416,7 +440,7 @@ private fun SwipeableCard(
                         // 즉시 swipeDirection을 null로 설정하여 Nope/Like 표시 제거
                         swipeDirection = null
                         scope.launch {
-                            val animationSpec = tween<Float>(durationMillis = 300) // 부드럽게 한 번에 이동
+                            val animationSpec = tween<Float>(durationMillis = 400) // 부드럽게 한 번에 이동 (느리게)
                             awaitAll(
                                 async { offsetX.animateTo(0f, animationSpec) },
                                 async { offsetY.animateTo(0f, animationSpec) },
@@ -430,8 +454,10 @@ private fun SwipeableCard(
                 if (!isSwipedOut) {
                     change.consume()
                     scope.launch {
-                        offsetX.snapTo(offsetX.value + dragAmount.x)
-                        offsetY.snapTo(offsetY.value + dragAmount.y)
+                        // 드래그 감도 조절 (0.8 = 80% 속도로 느리게)
+                        val dragSensitivity = 0.6f
+                        offsetX.snapTo(offsetX.value + dragAmount.x * dragSensitivity)
+                        offsetY.snapTo(offsetY.value + dragAmount.y * dragSensitivity)
                         
                         // 회전 계산 (드래그 거리에 비례, GameActivity의 setMaxDegree(20.0f) 참고)
                         val rotationAmount = offsetX.value / size.width * 20f
