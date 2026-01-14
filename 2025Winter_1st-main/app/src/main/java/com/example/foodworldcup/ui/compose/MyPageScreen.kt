@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +34,7 @@ import com.example.foodworldcup.utils.DateFormatter
 import com.example.foodworldcup.utils.ImageLoader
 import com.example.foodworldcup.utils.KakaoMapHelper
 import com.example.foodworldcup.utils.PreferenceManager
+import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -507,6 +509,7 @@ private fun FoodDetailBottomSheet(
 ) {
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
+    val keyboardController = LocalSoftwareKeyboardController.current
     
     // 메모 상태 (가게별 메모 가져오기)
     val initialMemo = remember(foodDetail.mapSelectedFood.placeName) {
@@ -655,6 +658,10 @@ private fun FoodDetailBottomSheet(
                             foodDetail.mapSelectedFood.id,
                             memoText
                         )
+                        // 키보드 숨기기
+                        keyboardController?.hide()
+                        // 토스트 메시지 표시
+                        Toast.makeText(context, "저장되었습니다.", Toast.LENGTH_SHORT).show()
                         onMemoUpdate(foodDetail.mapSelectedFood.id)
                     },
                     modifier = Modifier.weight(1f),

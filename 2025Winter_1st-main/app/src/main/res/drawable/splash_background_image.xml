@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 전체 화면 배경 이미지 -->
+    <item>
+        <bitmap
+            android:src="@drawable/splash_fullscreen"
+            android:gravity="fill" />
+    </item>
+</layer-list>

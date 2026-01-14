@@ -26,4 +26,7 @@
     <!-- 버튼 색상 -->
     <color name="like_button_color">#4CAF50</color>
     <color name="nope_button_color">#F44336</color>
+    
+    <!-- Splash Screen 색상 -->
+    <color name="splash_background">#FFF5F0E8</color>
 </resources>

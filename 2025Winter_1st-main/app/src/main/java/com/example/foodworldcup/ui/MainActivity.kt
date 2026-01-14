@@ -7,12 +7,19 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.ui.compose.AppNavigation
 import com.example.foodworldcup.ui.compose.FoodWorldCupTheme
+import com.example.foodworldcup.ui.compose.SplashScreen
 import com.example.foodworldcup.utils.PreferenceManager
 import com.kakao.sdk.common.util.Utility
+import kotlinx.coroutines.delay
 
 /**
  * 앱의 메인 Activity입니다.
@@ -42,11 +49,23 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             FoodWorldCupTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigation(initialRoute = navigateTo)
+                // 스플래시 스크린 표시 상태
+                var showSplash by remember { mutableStateOf(true) }
+                
+                LaunchedEffect(Unit) {
+                    delay(1500) // 1.5초 대기
+                    showSplash = false
+                }
+                
+                if (showSplash) {
+                    SplashScreen()
+                } else {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavigation(initialRoute = navigateTo)
+                    }
                 }
             }
         }

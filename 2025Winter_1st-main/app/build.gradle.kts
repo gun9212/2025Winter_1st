@@ -73,6 +73,8 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     
     implementation(libs.androidx.core.ktx)
+    // Splash Screen API
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)

@@ -23,7 +23,8 @@
         <!-- 메인 화면 (앱 시작 화면) -->
         <activity
             android:name="com.example.foodworldcup.ui.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Molip_1st">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

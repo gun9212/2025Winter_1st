@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">음식 메뉴 월드컵</string>
+    <string name="app_name">메추리알</string>
     
     <!-- Intro 화면 -->
     <string name="app_title">Food Tournament</string>
