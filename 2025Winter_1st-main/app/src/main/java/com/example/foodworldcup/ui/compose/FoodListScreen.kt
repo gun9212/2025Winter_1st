@@ -283,7 +283,10 @@ private fun CategoryCard(
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
-                Column {
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     category.foods.forEach { food ->
                         FoodItem(
                             food = food,
@@ -314,6 +317,11 @@ private fun FoodItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(
+                color = colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onToggle(!isSelected) }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
