@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
@@ -270,6 +271,7 @@ private fun HowItWorksSection() {
         // Swipe to Choose 카드
         HowItWorksCard(
             icon = Icons.Default.Gesture,
+            imagePath = "marker/swipe_누끼.png",
             title = "합격과 불합격을 골라주세요!",
             description = "합격은 오른쪽, 불합격은 왼쪽으로\n밀어주세요",
             modifier = Modifier.padding(bottom = 10.dp)
@@ -277,7 +279,7 @@ private fun HowItWorksSection() {
         
         // Find Restaurant 카드
         HowItWorksCard(
-            icon = Icons.Default.Place,
+            icon = Icons.Default.Map,
             title = "추린 음식을 하는 식당을\n찾아보세요!",
             description = "지도에서 만나보실 수 있어요.",
             modifier = Modifier.padding(bottom = 10.dp)
@@ -291,11 +293,31 @@ private fun HowItWorksSection() {
 @Composable
 private fun HowItWorksCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    imagePath: String? = null,
     title: String,
     description: String,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val context = LocalContext.current
+    
+    // 이미지 로드 (imagePath가 있는 경우)
+    val imageBitmap = remember(imagePath) {
+        if (imagePath != null) {
+            try {
+                val assetStream = context.assets.open(imagePath)
+                val bitmap = BitmapFactory.decodeStream(assetStream)
+                assetStream.close()
+                bitmap
+            } catch (e: Exception) {
+                android.util.Log.e("IntroScreen", "이미지 로드 실패: $imagePath - ${e.message}")
+                null
+            }
+        } else {
+            null
+        }
+    }
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -314,7 +336,7 @@ private fun HowItWorksCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 아이콘 (연한 아이보리 원형 배경)
+            // 아이콘 또는 이미지 (연한 아이보리 원형 배경)
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -324,12 +346,23 @@ private fun HowItWorksCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
+                if (imageBitmap != null) {
+                    // 이미지가 있으면 이미지 표시
+                    Image(
+                        bitmap = imageBitmap.asImageBitmap(),
+                        contentDescription = title,
+                        modifier = Modifier.size(24.dp),
+                        colorFilter = ColorFilter.tint(colorScheme.onPrimary)
+                    )
+                } else {
+                    // 이미지가 없으면 아이콘 표시
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title,
+                        tint = colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.width(8.dp))
