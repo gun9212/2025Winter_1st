@@ -33,6 +33,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
@@ -430,7 +433,19 @@ fun AppNavigation(initialRoute: String? = null) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+            enterTransition = {
+                fadeIn(animationSpec = tween(300)) // 들어올 때 0.3초간 페이드 인
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(0)) // 나갈 때 0.3초간 페이드 아웃
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300)) // 뒤로가기로 들어올 때 페이드 인
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(0)) // 뒤로가기로 나갈 때 페이드 아웃
+            }
         ) {
             composable(Screen.Home.route) {
                 IntroScreen(
