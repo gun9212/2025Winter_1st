@@ -179,7 +179,7 @@ fun ResultScreen(
                     Icon(
                         imageVector = Icons.Default.Map,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))

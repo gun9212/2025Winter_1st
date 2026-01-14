@@ -511,7 +511,7 @@ fun MapScreen(
                             shape = RoundedCornerShape(30.dp)
                         )
                         .background(
-                            color = colorScheme.primary.copy(alpha = 0.85f),
+                            color = colorScheme.onPrimary.copy(alpha = 0.85f),
                             shape = RoundedCornerShape(30.dp)
                         )
                         .border(
@@ -576,7 +576,7 @@ private fun PlaceListContent(
             val itemIndex = calculateItemIndex(selectedIndex)
             if (itemIndex >= 0) {
                 // sticky header 높이: 텍스트(16.sp ≈ 20dp) + 상하 패딩(16.dp * 2 = 32.dp) ≈ 52.dp
-                val stickyHeaderHeightDp = 52.dp
+                val stickyHeaderHeightDp = 70.dp
                 val stickyHeaderHeightPx = with(density) { stickyHeaderHeightDp.toPx().toInt() }
                 
                 // 음식이 한 개일 때는 스크롤하지 않음 (sticky header가 이미 보이므로)
@@ -671,28 +671,37 @@ private fun PlaceHeader(foodType: String) {
         modifier = Modifier.fillMaxWidth(),
         shape=RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 캐릭터 이미지
-            if (scaledCharacterBitmap != null) {
-                Image(
-                    bitmap = scaledCharacterBitmap.asImageBitmap(),
-                    contentDescription = foodType,
-                    modifier = Modifier.size(targetSizeDp)
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 캐릭터 이미지
+                if (scaledCharacterBitmap != null) {
+                    Image(
+                        bitmap = scaledCharacterBitmap.asImageBitmap(),
+                        contentDescription = foodType,
+                        modifier = Modifier.size(targetSizeDp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                
+                // 텍스트
+                Text(
+                    text = foodType,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onPrimary
                 )
-                Spacer(modifier = Modifier.width(8.dp))
             }
             
-            // 텍스트
-            Text(
-                text = foodType,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onPrimary
+            // 경계선
+            Divider(
+                color = colorScheme.outlineVariant,
+                thickness = 1.dp,
+                modifier = Modifier.padding(horizontal = 0.dp)
             )
         }
     }
