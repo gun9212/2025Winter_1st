@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 생성한 PNG 아이콘 사용 (전체 그림이 보이도록 inset 적용) -->
+    <!-- 메추리_누끼.png 이미지 사용 (작게 조정하여 캐릭터 전체가 보이도록) -->
     <item>
         <inset
-            android:drawable="@drawable/ic_launcher_icon"
+            android:drawable="@drawable/app_icon_512"
             android:insetLeft="3dp"
-            android:insetTop="11dp"
+            android:insetTop="20dp"
             android:insetRight="3dp"
-            android:insetBottom="0dp" />
+            android:insetBottom="20dp" />
     </item>
 </layer-list>

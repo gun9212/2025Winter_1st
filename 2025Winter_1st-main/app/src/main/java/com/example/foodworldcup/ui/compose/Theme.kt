@@ -3,16 +3,52 @@ package com.example.foodworldcup.ui.compose
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import com.example.foodworldcup.R
 
 /**
  * ColorScheme 확장 속성 - 추가 색상에 접근하기 위한 헬퍼
  */
 val ColorScheme.orangeGradientEnd: Color
     get() = AppColors.OrangeGradientEnd
+
+/**
+ * 카페24 써라운드 체 폰트 패밀리
+ */
+val Cafe24SurroundFontFamily = FontFamily(
+    Font(R.font.cafe24_surround, FontWeight.Normal)
+)
+
+/**
+ * 커스텀 Typography - 카페24 써라운드 체 적용
+ * Material3의 기본 Typography를 기반으로 폰트만 변경
+ */
+private val defaultTypography = Typography()
+
+private val AppTypography = Typography(
+    displayLarge = defaultTypography.displayLarge.copy(fontFamily = Cafe24SurroundFontFamily),
+    displayMedium = defaultTypography.displayMedium.copy(fontFamily = Cafe24SurroundFontFamily),
+    displaySmall = defaultTypography.displaySmall.copy(fontFamily = Cafe24SurroundFontFamily),
+    headlineLarge = defaultTypography.headlineLarge.copy(fontFamily = Cafe24SurroundFontFamily),
+    headlineMedium = defaultTypography.headlineMedium.copy(fontFamily = Cafe24SurroundFontFamily),
+    headlineSmall = defaultTypography.headlineSmall.copy(fontFamily = Cafe24SurroundFontFamily),
+    titleLarge = defaultTypography.titleLarge.copy(fontFamily = Cafe24SurroundFontFamily),
+    titleMedium = defaultTypography.titleMedium.copy(fontFamily = Cafe24SurroundFontFamily),
+    titleSmall = defaultTypography.titleSmall.copy(fontFamily = Cafe24SurroundFontFamily),
+    bodyLarge = defaultTypography.bodyLarge.copy(fontFamily = Cafe24SurroundFontFamily),
+    bodyMedium = defaultTypography.bodyMedium.copy(fontFamily = Cafe24SurroundFontFamily),
+    bodySmall = defaultTypography.bodySmall.copy(fontFamily = Cafe24SurroundFontFamily),
+    labelLarge = defaultTypography.labelLarge.copy(fontFamily = Cafe24SurroundFontFamily),
+    labelMedium = defaultTypography.labelMedium.copy(fontFamily = Cafe24SurroundFontFamily),
+    labelSmall = defaultTypography.labelSmall.copy(fontFamily = Cafe24SurroundFontFamily)
+)
 
 /**
  * Light Color Scheme - 앱의 기본 테마
@@ -115,7 +151,7 @@ fun FoodWorldCupTheme(
     
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = MaterialTheme.typography,
+        typography = AppTypography,
         content = content
     )
 }
