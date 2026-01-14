@@ -43,6 +43,7 @@ import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.utils.BitmapUtils
 import com.example.foodworldcup.utils.ImageLoader
 import com.example.foodworldcup.utils.PreferenceManager
+import com.example.foodworldcup.R
 
 /**
  * Intro 화면의 메인 Composable
@@ -156,8 +157,6 @@ private fun MainTitleSection() {
     }
     
     // 색상 정의
-    val darkBrown = Color(0xFF5D4037) // 진한 갈색
-    val lightBrown = Color(0xFFD7CCC8) // 밝은 갈색/베이지
     
     Row(
         modifier = Modifier
@@ -202,7 +201,7 @@ private fun MainTitleSection() {
                 text = "메추리알!",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = darkBrown
+                color = AppColors.DarkBrown
             )
             
             Spacer(modifier = Modifier.height(6.dp))
@@ -218,7 +217,7 @@ private fun MainTitleSection() {
                         if (highlightIndices.contains(index)) {
                             withStyle(
                                 style = SpanStyle(
-                                    color = lightBrown
+                                    color = AppColors.LightBrown
                                 )
                             ) {
                                 append(char)

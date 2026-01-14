@@ -30,4 +30,8 @@ object AppColors {
     
     // Light Gray - 카드 배경 등에 사용
     val LightGray = Color(0xFFE0E0E0)
+
+    val DarkBrown = Color(0xFF5D4037) // 진한 갈색
+
+    val LightBrown = Color(0xFFD7CCC8) // 밝은 갈색/베이지
 }
