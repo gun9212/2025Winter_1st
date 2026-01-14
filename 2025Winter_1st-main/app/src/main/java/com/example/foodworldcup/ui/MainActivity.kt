@@ -30,6 +30,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Activity가 처음 생성되는 경우에만 스플래시 표시
+        val isFirstLaunch = savedInstanceState == null
+
         // FoodRepository 초기화 (JSON 파일에서 데이터 로드)
         FoodRepository.initialize(this)
 
@@ -49,12 +52,17 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             FoodWorldCupTheme {
-                // 스플래시 스크린 표시 상태
-                var showSplash by remember { mutableStateOf(true) }
+                // Activity가 처음 생성될 때만 스플래시 표시
+                var showSplash by remember { mutableStateOf(isFirstLaunch) }
                 
                 LaunchedEffect(Unit) {
-                    delay(1500) // 1.5초 대기
-                    showSplash = false
+                    if (isFirstLaunch) {
+                        delay(1500) // 1.5초 대기
+                        showSplash = false
+                    } else {
+                        // 재생성된 경우 즉시 스플래시 숨김
+                        showSplash = false
+                    }
                 }
                 
                 if (showSplash) {

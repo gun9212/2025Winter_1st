@@ -29,10 +29,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.ui.compose.Screen
 import com.example.foodworldcup.utils.PreferenceManager
 
 /**
@@ -52,6 +54,7 @@ enum class ResultNavTab {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
+    navController: NavController? = null,
     onBackClick: () -> Unit,
     onViewOnMapClick: () -> Unit,
     onRetryClick: () -> Unit,
@@ -105,7 +108,19 @@ fun ResultScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = {
+                        // navController가 있으면 직접 사용, 없으면 콜백 사용
+                        if (navController != null) {
+                            if (!navController.popBackStack()) {
+                                // popBackStack이 실패하면 Swipe 화면으로 navigate
+                                navController.navigate(Screen.Swipe.route) {
+                                    launchSingleTop = true
+                                }
+                            }
+                        } else {
+                            onBackClick()
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",

@@ -28,7 +28,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
+import com.example.foodworldcup.ui.compose.Screen
 import coil.request.ImageRequest
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
@@ -60,7 +62,9 @@ private enum class SwipeAction {
  * SwipeScreen - 토너먼트 스와이프 화면
  */
 @Composable
-fun SwipeScreen() {
+fun SwipeScreen(
+    navController: NavController? = null
+) {
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     val preferenceManager = remember { PreferenceManager(context) }
@@ -181,7 +185,7 @@ fun SwipeScreen() {
                                         
                                         // 게임 종료 확인
                                         if (gameStateManager.isGameFinished()) {
-                                            finishGame(context, gameStateManager)
+                                            finishGame(context, gameStateManager, navController, preferenceManager)
                                         }
                                     }
                                 },
@@ -198,7 +202,7 @@ fun SwipeScreen() {
                                         
                                         // 게임 종료 확인
                                         if (gameStateManager.isGameFinished()) {
-                                            finishGame(context, gameStateManager)
+                                            finishGame(context, gameStateManager, navController, preferenceManager)
                                         }
                                     }
                                 }
@@ -251,7 +255,7 @@ fun SwipeScreen() {
             passedFoodCount = gameStateManager.getPassedFoods().size,
             onConfirm = {
                 showSkipDialog = false
-                finishGameWithPassedFoods(context, gameStateManager.getPassedFoods())
+                finishGameWithPassedFoods(context, gameStateManager.getPassedFoods(), navController, preferenceManager)
             },
             onDismiss = {
                 showSkipDialog = false
@@ -667,7 +671,9 @@ private fun ActionButtons(
  */
 private fun finishGame(
     context: android.content.Context,
-    gameStateManager: GameStateManager
+    gameStateManager: GameStateManager,
+    navController: NavController?,
+    preferenceManager: PreferenceManager
 ) {
     val passedFoods = gameStateManager.getPassedFoods()
     
@@ -680,15 +686,23 @@ private fun finishGame(
         return
     }
     
-    // ResultActivity로 이동
-    val intent = Intent(context, ResultActivity::class.java)
-    val passedFoodIds = passedFoods.map { it.id }
-    intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
-    // MainActivity를 백스택에서 제거하고 ResultActivity 시작
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-    context.startActivity(intent)
-    // MainActivity 종료
-    (context as? android.app.Activity)?.finish()
+    // NavController가 있으면 Result 화면으로 직접 이동
+    if (navController != null) {
+        val passedFoodIds = passedFoods.map { it.id }
+        preferenceManager.saveFinalFoodIds(passedFoodIds)
+        navController.navigate(Screen.Result.route) {
+            popUpTo(Screen.Swipe.route) { inclusive = false }
+            launchSingleTop = true
+        }
+    } else {
+        // NavController가 없으면 기존 방식 (ResultActivity로 이동)
+        val intent = Intent(context, ResultActivity::class.java)
+        val passedFoodIds = passedFoods.map { it.id }
+        intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+        (context as? android.app.Activity)?.finish()
+    }
 }
 
 /**
@@ -729,7 +743,9 @@ private fun SkipGameDialog(
  */
 private fun finishGameWithPassedFoods(
     context: android.content.Context,
-    passedFoods: List<Food>
+    passedFoods: List<Food>,
+    navController: NavController?,
+    preferenceManager: PreferenceManager
 ) {
     if (passedFoods.isEmpty()) {
         android.widget.Toast.makeText(
@@ -740,13 +756,21 @@ private fun finishGameWithPassedFoods(
         return
     }
     
-    // ResultActivity로 이동
-    val intent = Intent(context, ResultActivity::class.java)
-    val passedFoodIds = passedFoods.map { it.id }
-    intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
-    // MainActivity를 백스택에서 제거하고 ResultActivity 시작
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-    context.startActivity(intent)
-    // MainActivity 종료
-    (context as? android.app.Activity)?.finish()
+    // NavController가 있으면 Result 화면으로 직접 이동
+    if (navController != null) {
+        val passedFoodIds = passedFoods.map { it.id }
+        preferenceManager.saveFinalFoodIds(passedFoodIds)
+        navController.navigate(Screen.Result.route) {
+            popUpTo(Screen.Swipe.route) { inclusive = false }
+            launchSingleTop = true
+        }
+    } else {
+        // NavController가 없으면 기존 방식 (ResultActivity로 이동)
+        val intent = Intent(context, ResultActivity::class.java)
+        val passedFoodIds = passedFoods.map { it.id }
+        intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+        (context as? android.app.Activity)?.finish()
+    }
 }

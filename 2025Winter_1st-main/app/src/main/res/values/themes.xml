@@ -5,9 +5,14 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.Molip_1st" parent="Base.Theme.Molip_1st" />
+    <style name="Theme.Molip_1st" parent="Base.Theme.Molip_1st">
+        <!-- Android 시스템 스플래시 스크린 비활성화 (투명하게 설정) -->
+        <item name="android:windowSplashScreenBackground">@android:color/transparent</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+    </style>
     
-    <!-- Splash Screen 테마 -->
+    <!-- Splash Screen 테마 (사용하지 않음, 참고용으로 유지) -->
     <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_background_image</item>

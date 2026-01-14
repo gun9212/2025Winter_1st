@@ -474,7 +474,7 @@ fun AppNavigation(initialRoute: String? = null) {
             }
             
             composable(Screen.Swipe.route) {
-                SwipeScreen()
+                SwipeScreen(navController = navController)
             }
             
             composable(Screen.MyPage.route) {
@@ -497,8 +497,18 @@ fun AppNavigation(initialRoute: String? = null) {
             
             composable(Screen.Result.route) {
                 ResultScreen(
+                    navController = navController,
                     onBackClick = {
-                        navController.popBackStack()
+                        // Swipe 화면으로 돌아가기 (popBackStack이 안 되면 navigate)
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Swipe.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     },
                     onViewOnMapClick = {
                         navController.navigate(Screen.Map.route) {
