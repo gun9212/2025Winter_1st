@@ -214,12 +214,12 @@ private fun ProfileHeaderSection(
             val diff = now - lastPlayedTime
             val hours = diff / (1000 * 60 * 60)
             if (hours < 1) {
-                "Last played just now"
+                "방금 메뉴를 추렸어요."
             } else if (hours < 24) {
-                "Last played ${hours}h ago"
+                "메뉴를 추린지 ${hours}시간 지났어요."
             } else {
                 val days = hours / 24
-                "Last played ${days}d ago"
+                "메뉴를 추린지 ${days}일 지났어요."
             }
         }
     }
@@ -232,10 +232,10 @@ private fun ProfileHeaderSection(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "Accepted Food History",
+            text = "명예의 전당",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = colorScheme.onBackground
+            color = colorScheme.onPrimary
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -251,7 +251,7 @@ private fun ProfileHeaderSection(
                 modifier = Modifier.padding(0.dp)
             ) {
                 Text(
-                    text = "$totalCount Dishes Collected",
+                    text = "$totalCount 개 음식들이 \n명예의 전당에 올랐어요!",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = colorScheme.primary,

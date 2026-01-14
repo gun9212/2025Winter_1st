@@ -279,7 +279,7 @@ private fun HowItWorksSection() {
         HowItWorksCard(
             icon = Icons.Default.Place,
             title = "추린 음식을 하는 식당을\n찾아보세요!",
-            description = "지도에서 만나보실 수 있어요!",
+            description = "지도에서 만나보실 수 있어요.",
             modifier = Modifier.padding(bottom = 10.dp)
         )
     }

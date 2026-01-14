@@ -133,17 +133,17 @@ fun FoodListScreen(
         ) {
             // 헤더
             Text(
-                text = "Select Dishes",
+                text = "추릴 메뉴를 골라주세요!",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = colorScheme.onBackground,
+                color = colorScheme.onPrimary,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
             )
             
             Text(
-                text = "Choose candidates for your bracket",
+                text = "고민 되는 메뉴들을 골라주세요.",
                 fontSize = 14.sp,
-                color = colorScheme.onSurfaceVariant,
+                color = colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
             )
             
@@ -444,7 +444,7 @@ private fun StartGameButton(
                 Spacer(modifier = Modifier.width(8.dp))
                 
                 Text(
-                    text = "Start Game ($selectedCount selected)",
+                    text = "메뉴 추리기! ($selectedCount 개 골랐어요)",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.onPrimary

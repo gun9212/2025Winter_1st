@@ -282,9 +282,9 @@ private fun TournamentHeader(
     ) {
         Column {
             Text(
-                text = "TOURNAMENT",
+                text = "메뉴 추리기",
                 fontSize = 12.sp,
-                color = colorScheme.primary,
+                color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Medium
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -307,7 +307,7 @@ private fun TournamentHeader(
         }
         
         TextButton(onClick = onSkipClick) {
-            Text("Skip", color = colorScheme.primary)
+            Text("Skip", color = colorScheme.onPrimary)
         }
     }
 }
@@ -715,6 +715,8 @@ private fun SkipGameDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     if (showDialog) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -725,12 +727,18 @@ private fun SkipGameDialog(
                 Text("현재까지 합격된 ${passedFoodCount}개의 음식만 가지고 진행하시겠습니까?")
             },
             confirmButton = {
-                TextButton(onClick = onConfirm) {
+                TextButton(onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = colorScheme.onPrimary
+                    )) {
                     Text("스킵")
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss) {
+                TextButton(onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = colorScheme.onPrimary
+                        )) {
                     Text("취소")
                 }
             }
