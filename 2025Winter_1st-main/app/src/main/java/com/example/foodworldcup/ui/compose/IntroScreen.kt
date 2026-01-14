@@ -27,11 +27,16 @@ import androidx.compose.ui.text.style.TextAlign
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
 import com.example.foodworldcup.data.FoodRepository
+import com.example.foodworldcup.utils.BitmapUtils
 import com.example.foodworldcup.utils.ImageLoader
 import com.example.foodworldcup.utils.PreferenceManager
 
@@ -292,7 +297,41 @@ private fun YesterdaysWinnerSection(
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
     val colorScheme = MaterialTheme.colorScheme
+    
+    // 목표 크기 (64.dp)
+    val targetSizeDp = 64.dp
+    val targetSizePx = with(density) { targetSizeDp.toPx().toInt() }
+    
+    // 캐릭터 이미지 로드 및 스케일링
+    val scaledCharacterBitmap = remember(foodImage, targetSizePx) {
+        if (foodImage != null) {
+            try {
+                val assetStream = context.assets.open(foodImage)
+                val originalBitmap = BitmapFactory.decodeStream(assetStream)
+                assetStream.close()
+                
+                if (originalBitmap != null) {
+                    // BitmapUtils를 사용하여 크기 통일
+                    BitmapUtils.scaleBitmapToFitContent(
+                        originalBitmap = originalBitmap,
+                        targetWidth = targetSizePx,
+                        targetHeight = targetSizePx,
+                        targetAreaRatio = 0.75f,
+                        centerYRatio = 0.5f,
+                        alignBottom = false
+                    )
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
     
     Card(
         modifier = Modifier
@@ -316,41 +355,23 @@ private fun YesterdaysWinnerSection(
             // 원형 이미지 (캐릭터누끼 이미지)
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(targetSizeDp)
                     .background(
                         color = colorScheme.outlineVariant,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (foodImage != null) {
-                    SubcomposeAsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data("file:///android_asset/$foodImage")
-                            .crossfade(true)
-                            .build(),
+                if (scaledCharacterBitmap != null) {
+                    Image(
+                        bitmap = scaledCharacterBitmap.asImageBitmap(),
                         contentDescription = foodName,
                         modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape),
-                        loading = {
-                            // 로딩 중 표시
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(32.dp),
-                                color = colorScheme.primary,
-                                strokeWidth = 2.dp
-                            )
-                        },
-                        error = {
-                            // 이미지 로드 실패 시 이모지 표시
-                            Text(
-                                text = "🍜",
-                                fontSize = 32.sp
-                            )
-                        }
+                            .size(targetSizeDp)
+                            .clip(CircleShape)
                     )
                 } else {
-                    // 이미지 경로가 없을 경우 이모지 표시
+                    // 이미지 로드 실패 시 이모지 표시
                     Text(
                         text = "🍜",
                         fontSize = 32.sp
