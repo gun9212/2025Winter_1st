@@ -24,6 +24,10 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import androidx.compose.ui.platform.LocalContext
@@ -119,29 +123,10 @@ private fun TopHeaderSection() {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Food Tournament",
+                text = "메추리알",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onBackground
-            )
-        }
-        
-        // 오른쪽: 프로필 + 설정 아이콘
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile",
-                tint = colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = "Settings",
-                tint = colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -153,26 +138,100 @@ private fun TopHeaderSection() {
 @Composable
 private fun MainTitleSection() {
     val colorScheme = MaterialTheme.colorScheme
-    Column(
+    val context = LocalContext.current
+    
+    // 이미지 크기 설정 (더 크게)
+    val imageSizeDp = 200.dp
+    
+    // 메추리_누끼.png 이미지 로드
+    val characterBitmap = remember {
+        try {
+            val assetStream = context.assets.open("메추리_누끼.png")
+            val bitmap = BitmapFactory.decodeStream(assetStream)
+            assetStream.close()
+            bitmap
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    // 색상 정의
+    val darkBrown = Color(0xFF5D4037) // 진한 갈색
+    val lightBrown = Color(0xFFD7CCC8) // 밝은 갈색/베이지
+    
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = 40.dp, start = 0.dp, end = 24.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "Food Tournament",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 2.dp)
-        )
+        // 왼쪽: 메추리 캐릭터 이미지
+        if (characterBitmap != null) {
+            Image(
+                bitmap = characterBitmap.asImageBitmap(),
+                contentDescription = "메추리 캐릭터",
+                modifier = Modifier
+                    .size(imageSizeDp)
+                    .padding(end = 16.dp)
+            )
+        } else {
+            // 이미지 로드 실패 시 플레이스홀더
+            Box(
+                modifier = Modifier
+                    .size(imageSizeDp)
+                    .background(
+                        color = colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "🐣",
+                    fontSize = 40.sp
+                )
+            }
+        }
         
-        Text(
-            text = "Pick today's meal in minutes",
-            fontSize = 14.sp,
-            color = colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        // 오른쪽: 텍스트
+        Column(
+            modifier = Modifier.padding(start = 16.dp)
+        ) {
+            // 첫 번째 줄: "메추리알!"
+            Text(
+                text = "메추리알!",
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                color = darkBrown
+            )
+            
+            Spacer(modifier = Modifier.height(6.dp))
+            
+            // 두 번째 줄: "메뉴는 추려서 우리가 알려줄게!" (하이라이트 적용)
+            Text(
+                text = buildAnnotatedString {
+                    val fullText = "메뉴는 추려서 우리가 알려줄게!"
+                    // 하이라이트할 글자의 인덱스 (0부터 시작)
+                    val highlightIndices = setOf(0, 2, 4, 9, 12) // "메", "추", "리", "가", "알"
+                    
+                    fullText.forEachIndexed { index, char ->
+                        if (highlightIndices.contains(index)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = lightBrown
+                                )
+                            ) {
+                                append(char)
+                            }
+                        } else {
+                            append(char)
+                        }
+                    }
+                },
+                fontSize = 18.sp,
+                color = Color.Black
+            )
+        }
     }
 }
 
@@ -184,7 +243,7 @@ private fun HowItWorksSection() {
     val colorScheme = MaterialTheme.colorScheme
     Column {
         Text(
-            text = "How it works",
+            text = "어떻게 하나요?",
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
             color = colorScheme.onBackground,
@@ -194,24 +253,24 @@ private fun HowItWorksSection() {
         // Browse List 카드
         HowItWorksCard(
             icon = Icons.AutoMirrored.Filled.List,
-            title = "Browse List",
-            description = "Explore local favorites",
+            title = "추릴 메뉴를 골라주세요!",
+            description = "아래 메뉴 추리기 버튼을 눌러\n후보군을 추려주세요",
             modifier = Modifier.padding(bottom = 10.dp)
         )
         
         // Swipe to Choose 카드
         HowItWorksCard(
             icon = Icons.Default.Gesture,
-            title = "Swipe to Choose",
-            description = "Vote on matches",
+            title = "합격과 불합격을 골라주세요!",
+            description = "합격은 오른쪽, 불합격은 왼쪽으로\n밀어주세요",
             modifier = Modifier.padding(bottom = 10.dp)
         )
         
         // Find Restaurant 카드
         HowItWorksCard(
             icon = Icons.Default.Place,
-            title = "Find Restaurant",
-            description = "Get directions",
+            title = "추린 음식을 하는 식당을 찾아보세요!",
+            description = "지도에서 만나보실 수 있어요!",
             modifier = Modifier.padding(bottom = 10.dp)
         )
     }
@@ -270,7 +329,7 @@ private fun HowItWorksCard(
             Column {
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = colorScheme.onBackground,
                     lineHeight = 12.sp
@@ -278,7 +337,7 @@ private fun HowItWorksCard(
                 //Spacer(modifier = Modifier.height(1.dp))
                 Text(
                     text = description,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     color = colorScheme.onSurfaceVariant,
                     lineHeight = 12.sp
                 )
@@ -446,7 +505,7 @@ private fun StartTournamentButton(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Start Tournament",
+                text = "메뉴 추리기!",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onPrimary
