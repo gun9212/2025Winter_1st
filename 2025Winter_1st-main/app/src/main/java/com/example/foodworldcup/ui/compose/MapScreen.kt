@@ -1402,7 +1402,7 @@ private fun searchRestaurants(
     
     // 각 음식별로 검색
     foodNames.forEach { foodName ->
-        val searchQuery = "$foodName 음식점"
+        val searchQuery = "$foodName"
         mapApiHelper.searchPlaces(
             query = searchQuery,
             foodType = foodName,
@@ -1422,6 +1422,7 @@ private fun searchRestaurants(
                     )
                     
                     // 중복 방지: 이미 같은 id가 있는지 확인
+                    android.util.Log.d("오류 확인", "place: ${place.place_name}")
                     if (place.id != null && !searchResults.any { it.id == place.id }) {
                         searchResults.add(place)
                     } else if (place.id == null &&

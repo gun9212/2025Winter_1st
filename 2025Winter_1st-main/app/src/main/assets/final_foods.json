@@ -378,7 +378,7 @@
   },
   {
     "id": "양식_04",
-    "name": "햄버거",
+    "name": "버거",
     "cuisine": "양식",
     "attributes": {
       "spicy": false,
@@ -386,8 +386,8 @@
       "noodles": false,
       "rice": false
     },
-    "img": "./food_images/양식/햄버거.png",
-    "character_img": "./food_character_images/양식/햄버거_캐릭터누끼.png"
+    "img": "./food_images/양식/버거.png",
+    "character_img": "./food_character_images/양식/버거_캐릭터누끼.png"
   },
   {
     "id": "양식_05",
