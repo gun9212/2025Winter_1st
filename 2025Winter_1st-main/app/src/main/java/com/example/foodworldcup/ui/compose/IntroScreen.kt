@@ -176,7 +176,7 @@ private fun MainTitleSection() {
                 contentDescription = "메추리 캐릭터",
                 modifier = Modifier
                     .size(imageSizeDp)
-                    .offset(x = (-6).dp)
+                    .offset(x = (16).dp)
                     .padding(end = 18.dp)
             )
         } else {
@@ -200,7 +200,7 @@ private fun MainTitleSection() {
         // 오른쪽: 텍스트
         Column(
             modifier = Modifier
-                .padding(start = 8.dp)
+                .padding(start = 20.dp)
                 .weight(1f)
         ) {
             // 첫 번째 줄: "메추리알!"
@@ -219,7 +219,7 @@ private fun MainTitleSection() {
                 text = buildAnnotatedString {
                     val fullText = "메뉴는 추려서\n우리가 알려줄게!"
                     // 하이라이트할 글자의 인덱스 (0부터 시작)
-                    val highlightIndices = setOf(0, 4, 9, 12) // "메", "추", "리", "가", "알"
+                    val highlightIndices = setOf(0, 4, 9, 12) // "메", "추", "리", "알"
                     
                     fullText.forEachIndexed { index, char ->
                         if (highlightIndices.contains(index)) {
@@ -237,7 +237,7 @@ private fun MainTitleSection() {
                     }
                 },
                 fontSize = 18.sp,
-                color = colorScheme.primary,
+                color = Color.Gray,
                 lineHeight = 28.sp,
                 softWrap = false
             )
@@ -523,7 +523,7 @@ private fun StartTournamentButton(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
                         colorScheme.primary, // 오렌지 시작
-                        colorScheme.orangeGradientEnd  // 더 밝은 오렌지 끝
+                        colorScheme.primary  // 더 밝은 오렌지 끝
                     )
                 ),
                 shape = RoundedCornerShape(28.dp)
