@@ -173,7 +173,8 @@ private fun MainTitleSection() {
                 contentDescription = "메추리 캐릭터",
                 modifier = Modifier
                     .size(imageSizeDp)
-                    .padding(end = 16.dp)
+                    .offset(x = (-16).dp)
+                    .padding(end = 8.dp)
             )
         } else {
             // 이미지 로드 실패 시 플레이스홀더
@@ -195,7 +196,7 @@ private fun MainTitleSection() {
         
         // 오른쪽: 텍스트
         Column(
-            modifier = Modifier.padding(start = 16.dp)
+            modifier = Modifier.padding(start = 8.dp)
         ) {
             // 첫 번째 줄: "메추리알!"
             Text(
@@ -269,7 +270,7 @@ private fun HowItWorksSection() {
         // Find Restaurant 카드
         HowItWorksCard(
             icon = Icons.Default.Place,
-            title = "추린 음식을 하는 식당을 찾아보세요!",
+            title = "추린 음식을 하는 식당을\n찾아보세요!",
             description = "지도에서 만나보실 수 있어요!",
             modifier = Modifier.padding(bottom = 10.dp)
         )
