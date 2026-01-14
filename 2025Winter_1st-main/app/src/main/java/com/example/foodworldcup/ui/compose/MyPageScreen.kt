@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -474,7 +475,7 @@ private fun FoodPlateItem(
             text = foodDetail.food.name,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = colorScheme.onBackground,
+            color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             modifier = Modifier.offset(y = (-20).dp)
         )
@@ -578,8 +579,6 @@ private fun FoodDetailBottomSheet(
                 color = colorScheme.onSurfaceVariant
             )
             
-            //Divider()
-            
             // 식당 이름 (클릭 가능)
             if (foodDetail.mapSelectedFood.placeName.isNotEmpty() && 
                 foodDetail.mapSelectedFood.placeName != "정보 없음") {
@@ -609,7 +608,7 @@ private fun FoodDetailBottomSheet(
                         }
                     }
                     Icon(
-                        imageVector = Icons.Default.OpenInNew,
+                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                         contentDescription = "카카오맵 열기",
                         tint = colorScheme.primary,
                         modifier = Modifier.size(20.dp)
@@ -623,7 +622,7 @@ private fun FoodDetailBottomSheet(
                 )
             }
             
-            Divider()
+            HorizontalDivider()
             
             // 메모 섹션
             Text(

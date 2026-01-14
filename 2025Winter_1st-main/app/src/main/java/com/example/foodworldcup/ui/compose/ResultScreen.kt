@@ -38,17 +38,6 @@ import com.example.foodworldcup.ui.compose.Screen
 import com.example.foodworldcup.utils.PreferenceManager
 
 /**
- * 결과 화면의 네비게이션 탭 (기존 AppNavigation과 동일)
- */
-enum class ResultNavTab {
-    HOME,
-    LIST,
-    SWIPE,
-    MYPAGE,
-    MAP
-}
-
-/**
  * 결과 화면의 메인 Composable
  */
 @OptIn(ExperimentalMaterial3Api::class)

@@ -211,7 +211,6 @@ private fun CategoryCard(
     // 카테고리 내 모든 음식이 선택되었는지 확인
     val allSelected = category.foods.all { selectedFoodIds.contains(it.id) }
     val someSelected = category.foods.any { selectedFoodIds.contains(it.id) }
-    val indeterminate = someSelected && !allSelected
     
     Card(
         modifier = Modifier.fillMaxWidth(),

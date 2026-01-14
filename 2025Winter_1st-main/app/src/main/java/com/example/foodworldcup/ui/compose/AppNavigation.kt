@@ -39,8 +39,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
-import com.example.foodworldcup.ui.FoodListActivity
-import com.example.foodworldcup.ui.MyPageActivity
 import com.example.foodworldcup.utils.PreferenceManager
 
 /**
@@ -91,7 +89,6 @@ fun AppNavigation(initialRoute: String? = null) {
                 val isSwipeSelected = currentDestination?.hierarchy?.any { it.route == Screen.Swipe.route } == true
                 val isMyPageSelected = currentDestination?.hierarchy?.any { it.route == Screen.MyPage.route } == true
                 val isMapSelected = currentDestination?.hierarchy?.any { it.route == Screen.Map.route } == true
-                val isResultSelected = currentDestination?.hierarchy?.any { it.route == Screen.Result.route } == true
                 
                 // 각 아이콘의 bounce 애니메이션
                 val homeScale by animateFloatAsState(

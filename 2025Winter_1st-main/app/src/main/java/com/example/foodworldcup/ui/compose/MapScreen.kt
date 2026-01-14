@@ -72,7 +72,6 @@ fun MapScreen(
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
     val scope = rememberCoroutineScope()
     val preferenceManager = remember { PreferenceManager(context) }
     
@@ -262,8 +261,8 @@ fun MapScreen(
                     )
                     
                     // 마커 클릭 이벤트 설정
-                    map.setOnLabelClickListener { _, _, label ->
-                        val place = placeMarkers[label]
+                    map.setOnLabelClickListener { _, _, clickedLabel ->
+                        val place = placeMarkers[clickedLabel]
                         if (place != null) {
                             val index = searchResults.indexOfFirst {
                                 (it.id != null && it.id == place.id) ||
@@ -282,7 +281,7 @@ fun MapScreen(
                                     context = context,
                                     normalMarkerStyle = normalMarkerStyle,
                                     selectedMarkerStyle = selectedMarkerStyle,
-                                    onLabelSelected = { label -> selectedLabel = label }
+                                    onLabelSelected = { newLabel -> selectedLabel = newLabel }
                                 )
                                 moveToPlace(map, place)
                             }
@@ -543,7 +542,6 @@ private fun PlaceListContent(
     onSwipeRight: (Place) -> Unit,
     listState: LazyListState
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val density = LocalDensity.current
     
     // 실제 item index를 계산하는 함수
@@ -1054,7 +1052,6 @@ private fun createCombinedMarkerBitmap(
         }
         
         // 음식 캐릭터 이미지 로드 및 그리기
-        var characterDrawn = false
         if (foodType != null) {
             val assetPath = findAssetPath(context, foodType)
             if (assetPath != null) {
@@ -1063,7 +1060,6 @@ private fun createCombinedMarkerBitmap(
                 assetStream.close()
                 
                 if (characterBitmap != null) {
-                    characterDrawn = true
                     val contentBounds = BitmapUtils.getContentBounds(characterBitmap)
                     val contentWidth = contentBounds.width()
                     val contentHeight = contentBounds.height()

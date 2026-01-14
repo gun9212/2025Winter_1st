@@ -102,40 +102,6 @@ fun IntroScreen(
 }
 
 /**
- * 상단 헤더: 왼쪽 아이콘+제목, 오른쪽 프로필+설정 아이콘
- */
-@Composable
-private fun TopHeaderSection() {
-    val colorScheme = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, start = 24.dp, end = 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 왼쪽: 포크/나이프 아이콘 + "Food Tournament"
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Restaurant,
-                contentDescription = null,
-                tint = colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "메추리알",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onBackground
-            )
-        }
-    }
-}
-
-/**
  * 메인 제목 섹션: 큰 제목과 서브타이틀
  */
 @Composable
@@ -176,7 +142,7 @@ private fun MainTitleSection() {
                 contentDescription = "메추리 캐릭터",
                 modifier = Modifier
                     .size(imageSizeDp)
-                    .offset(x = (16).dp)
+                    .offset(x = (12).dp)
                     .padding(end = 18.dp)
             )
         } else {
@@ -200,7 +166,7 @@ private fun MainTitleSection() {
         // 오른쪽: 텍스트
         Column(
             modifier = Modifier
-                .padding(start = 20.dp)
+                .padding(start = 16.dp)
                 .weight(1f)
         ) {
             // 첫 번째 줄: "메추리알!"
@@ -376,7 +342,6 @@ private fun HowItWorksCard(
                     color = colorScheme.onBackground,
                     lineHeight = 16.sp
                 )
-                //Spacer(modifier = Modifier.height(1.dp))
                 Text(
                     text = description,
                     fontSize = 12.sp,

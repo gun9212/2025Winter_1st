@@ -35,7 +35,6 @@ import coil.request.ImageRequest
 import com.example.foodworldcup.data.Food
 import com.example.foodworldcup.data.FoodRepository
 import com.example.foodworldcup.game.GameStateManager
-import com.example.foodworldcup.ui.ResultActivity
 import com.example.foodworldcup.utils.PreferenceManager
 import android.content.Intent
 import kotlinx.coroutines.async
@@ -297,7 +296,7 @@ private fun TournamentHeader(
             Spacer(modifier = Modifier.height(8.dp))
             // 진행 바
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier = Modifier
                     .width(200.dp)
                     .height(4.dp),
@@ -389,7 +388,7 @@ private fun SwipeableCard(
         Modifier.pointerInput(food.id) {
             var isDragging = false
             detectDragGestures(
-                onDragStart = { offset ->
+                onDragStart = {
                     isDragging = true
                 },
                 onDragEnd = {
@@ -694,15 +693,7 @@ private fun finishGame(
             popUpTo(Screen.Swipe.route) { inclusive = false }
             launchSingleTop = true
         }
-    } else {
-        // NavController가 없으면 기존 방식 (ResultActivity로 이동)
-        val intent = Intent(context, ResultActivity::class.java)
-        val passedFoodIds = passedFoods.map { it.id }
-        intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
-        (context as? android.app.Activity)?.finish()
-    }
+    } 
 }
 
 /**
@@ -772,13 +763,5 @@ private fun finishGameWithPassedFoods(
             popUpTo(Screen.Swipe.route) { inclusive = false }
             launchSingleTop = true
         }
-    } else {
-        // NavController가 없으면 기존 방식 (ResultActivity로 이동)
-        val intent = Intent(context, ResultActivity::class.java)
-        val passedFoodIds = passedFoods.map { it.id }
-        intent.putIntegerArrayListExtra("passed_food_ids", ArrayList(passedFoodIds))
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
-        (context as? android.app.Activity)?.finish()
-    }
+    } 
 }
